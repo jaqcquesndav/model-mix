@@ -55,7 +55,7 @@ def collect_persona_pme():
     
     profession = st.selectbox("Profession", ["Artisans", "Commerçants", "Agriculteurs", "Employés", "Indépendants", "Autre"])
     
-    revenu_moyen = st.number_input("Revenu Moyen (€)", min_value=0, step=100, value=1000)
+    revenu_moyen = st.number_input("Revenu Moyen ($)", min_value=0, step=100, value=1000)
     
     # Paramètres Comportementaux
     st.subheader("Paramètres Comportementaux")
@@ -231,7 +231,7 @@ def collect_analyse_marche_pme():
     # Taille du Marché Local
     st.subheader("Taille du Marché Local")
     population = st.number_input("Population Concernée", min_value=0, step=1000, value=100000)
-    pouvoir_achat = st.number_input("Pouvoir d’Achat Moyen (€)", min_value=0, step=100, value=500)
+    pouvoir_achat = st.number_input("Pouvoir d’Achat Moyen ($)", min_value=0, step=100, value=500)
     infrastructures = st.text_area("Infrastructures Disponibles", "Décrivez les infrastructures disponibles...")
     
     # Segments du Marché
@@ -372,7 +372,7 @@ def collect_persona_startup():
     localisation_detail = st.text_input("Localisation Géographique (ex: Paris, France)", "Paris, France")
     education = st.text_input("Niveau d'Éducation", "Ex: Licence, Master")
     profession = st.text_input("Profession", "Ex: Ingénieur, Designer")
-    revenu_moyen = st.number_input("Revenu Moyen (€)", min_value=0, step=100, value=1000)
+    revenu_moyen = st.number_input("Revenu Moyen ($)", min_value=0, step=100, value=1000)
     
     # Paramètres Comportementaux
     st.subheader("Paramètres Comportementaux")
@@ -428,9 +428,9 @@ def collect_analyse_marche_startup():
     st.subheader("Segments du Marché")
     segments_marche = st.text_area("Segments du Marché", "Décrivez les segments du marché...")
     
-    # Valeur Totale du Marché (€)
-    st.subheader("Valeur Totale du Marché (€)")
-    valeur_totale = st.text_area("Valeur Totale du Marché (€)", "Décrivez la valeur totale du marché...")
+    # Valeur Totale du Marché ($)
+    st.subheader("Valeur Totale du Marché ($)")
+    valeur_totale = st.text_area("Valeur Totale du Marché ($)", "Décrivez la valeur totale du marché...")
     
     # Offres Concurrentes
     st.subheader("Offres Concurrentes")
@@ -1720,7 +1720,7 @@ def page_besoins_demarrage():
     
     for besoin in besoins:
         montant = st.number_input(
-            f"{besoin} (€)",
+            f"{besoin} ($)",
             min_value=0.0,
             key=f"besoin_{besoin}",
             value=besoins_demarrage.get(besoin, 0.0)
@@ -1731,7 +1731,7 @@ def page_besoins_demarrage():
     data["total_besoins"] = total_besoins
     
     st.write("---")
-    st.markdown(f"**Total des Besoins de Démarrage :** {total_besoins:.2f} €")
+    st.markdown(f"**Total des Besoins de Démarrage :** {total_besoins:.2f} $")
     
     # Durée d'amortissement
     data["duree_amortissement"] = st.number_input(
@@ -1824,7 +1824,7 @@ def page_financement():
     
     # Apport personnel ou familial
     apport_personnel = st.number_input(
-        "Apport personnel ou familial (€)",
+        "Apport personnel ou familial ($)",
         min_value=0.0,
         key="financement_apport_personnel",
         value=financements_dict.get("Apport personnel ou familial", 4000.00)
@@ -1834,7 +1834,7 @@ def page_financement():
     
     # Apports en nature (en valeur)
     apport_nature = st.number_input(
-        "Apports en nature (en valeur) (€)",
+        "Apports en nature (en valeur) ($)",
         min_value=0.0,
         key="financement_apport_nature",
         value=financements_dict.get("Apports en nature (en valeur)", 1200.00)
@@ -1861,7 +1861,7 @@ def page_financement():
             key=f"pret_{i}_nom"
         )
         pret_montant = st.number_input(
-            f"Montant du {pret_name} (€)",
+            f"Montant du {pret_name} ($)",
             min_value=0.0,
             value=financements_dict.get(f"Prêt {i}", {}).get("montant", 0.0),
             key=f"pret_{i}_montant"
@@ -1901,14 +1901,14 @@ def page_financement():
             
             # Afficher les détails du prêt pour vérification
             st.write(f"**Détails du {pret_name}:**")
-            st.write(f"Mensualité : {pret_info['mensualite']:.2f} €")
-            st.write(f"Total à rembourser : {pret_info['total_a_rembourser']:.2f} €")
-            st.write(f"Principal mensuel : {pret_info['principal_mensuel']:.2f} €")
-            st.write(f"Intérêt mensuel : {pret_info['interet_mensuel']:.2f} €")
-            st.write(f"Intérêts totaux : {pret_info['interets_totaux']:.2f} €")
-            st.write(f"Intérêts Année 1 : {pret_info['interets_annee1']:.2f} €")
-            st.write(f"Intérêts Année 2 : {pret_info['interets_annee2']:.2f} €")
-            st.write(f"Intérêts Année 3 : {pret_info['interets_annee3']:.2f} €")
+            st.write(f"Mensualité : {pret_info['mensualite']:.2f} $")
+            st.write(f"Total à rembourser : {pret_info['total_a_rembourser']:.2f} $")
+            st.write(f"Principal mensuel : {pret_info['principal_mensuel']:.2f} $")
+            st.write(f"Intérêt mensuel : {pret_info['interet_mensuel']:.2f} $")
+            st.write(f"Intérêts totaux : {pret_info['interets_totaux']:.2f} $")
+            st.write(f"Intérêts Année 1 : {pret_info['interets_annee1']:.2f} $")
+            st.write(f"Intérêts Année 2 : {pret_info['interets_annee2']:.2f} $")
+            st.write(f"Intérêts Année 3 : {pret_info['interets_annee3']:.2f} $")
             st.write("---")
     
     st.subheader("Subventions")
@@ -1924,7 +1924,7 @@ def page_financement():
             key=f"subvention_{i}_nom"
         )
         subvention_montant = st.number_input(
-            f"Montant de {subvention_name} (€)",
+            f"Montant de {subvention_name} ($)",
             min_value=0.0,
             value=financements_dict.get(f"Subvention {i}", {}).get("montant", 0.0),
             key=f"subvention_{i}_montant"
@@ -1940,7 +1940,7 @@ def page_financement():
     
     # Autre financement
     autre_financement = st.number_input(
-        "Autre financement (€)",
+        "Autre financement ($)",
         min_value=0.0,
         key="financement_autre",
         value=financements_dict.get("Autre financement", 1000.00)
@@ -1949,14 +1949,14 @@ def page_financement():
     total_financement += autre_financement
     
     st.write("---")
-    st.markdown(f"**Total des Financements :** {total_financement:,.2f} €")
+    st.markdown(f"**Total des Financements :** {total_financement:,.2f} $")
     
     # Validation du total des financements
     besoin_total = data.get("besoins", 0.0)  # Assurez-vous que cette clé existe dans vos données
     if besoin_total > 0 and total_financement != besoin_total:
-        st.error(f"Le total des financements ({total_financement:,.2f} €) ne correspond pas au besoin total ({besoin_total:,.2f} €). Veuillez ajuster les montants.")
+        st.error(f"Le total des financements ({total_financement:,.2f} $) ne correspond pas au besoin total ({besoin_total:,.2f} $). Veuillez ajuster les montants.")
     elif besoin_total > 0:
-        st.success(f"Le total des financements correspond au besoin total ({besoin_total:,.2f} €).")
+        st.success(f"Le total des financements correspond au besoin total ({besoin_total:,.2f} $).")
     
     # Stocker les données dans la session
     data["financements"] = financements_dict
@@ -1991,7 +1991,7 @@ def page_charges_fixes():
         col1, col2, col3 = st.columns(3)
         with col1:
             montant1 = st.number_input(
-                f"{charge} - Année 1 (€)",
+                f"{charge} - Année 1 ($)",
                 min_value=0.0,
                 key=f"charge_{charge}_annee1",
                 value=charges_fixes_dict["annee1"].get(charge, 0.0)
@@ -1999,7 +1999,7 @@ def page_charges_fixes():
             charges_fixes_dict["annee1"][charge] = montant1
         with col2:
             montant2 = st.number_input(
-                f"{charge} - Année 2 (€)",
+                f"{charge} - Année 2 ($)",
                 min_value=0.0,
                 key=f"charge_{charge}_annee2",
                 value=charges_fixes_dict["annee2"].get(charge, 0.0)
@@ -2007,7 +2007,7 @@ def page_charges_fixes():
             charges_fixes_dict["annee2"][charge] = montant2
         with col3:
             montant3 = st.number_input(
-                f"{charge} - Année 3 (€)",
+                f"{charge} - Année 3 ($)",
                 min_value=0.0,
                 key=f"charge_{charge}_annee3",
                 value=charges_fixes_dict["annee3"].get(charge, 0.0)
@@ -2039,7 +2039,7 @@ def page_charges_fixes():
         col1, col2, col3 = st.columns(3)
         with col1:
             montant1 = st.number_input(
-                f"{charge} - Année 1 (€)",
+                f"{charge} - Année 1 ($)",
                 min_value=0.0,
                 key=f"charge_{charge}_supp_annee1",
                 value=charges_fixes_dict["annee1"].get(charge, 0.0)
@@ -2047,7 +2047,7 @@ def page_charges_fixes():
             charges_fixes_dict["annee1"][charge] = montant1
         with col2:
             montant2 = st.number_input(
-                f"{charge} - Année 2 (€)",
+                f"{charge} - Année 2 ($)",
                 min_value=0.0,
                 key=f"charge_{charge}_supp_annee2",
                 value=charges_fixes_dict["annee2"].get(charge, 0.0)
@@ -2055,7 +2055,7 @@ def page_charges_fixes():
             charges_fixes_dict["annee2"][charge] = montant2
         with col3:
             montant3 = st.number_input(
-                f"{charge} - Année 3 (€)",
+                f"{charge} - Année 3 ($)",
                 min_value=0.0,
                 key=f"charge_{charge}_supp_annee3",
                 value=charges_fixes_dict["annee3"].get(charge, 0.0)
@@ -2071,9 +2071,9 @@ def page_charges_fixes():
     data["total_charges_fixes_annee3"] = total_annee3
     
     st.write("---")
-    st.markdown(f"**Total Charges Fixes Année 1 :** {total_annee1:.2f} €")
-    st.markdown(f"**Total Charges Fixes Année 2 :** {total_annee2:.2f} €")
-    st.markdown(f"**Total Charges Fixes Année 3 :** {total_annee3:.2f} €")
+    st.markdown(f"**Total Charges Fixes Année 1 :** {total_annee1:.2f} $")
+    st.markdown(f"**Total Charges Fixes Année 2 :** {total_annee2:.2f} $")
+    st.markdown(f"**Total Charges Fixes Année 3 :** {total_annee3:.2f} $")
     
     st.session_state["data"] = data
 
@@ -2106,7 +2106,7 @@ def page_chiffre_affaires():
                 chiffre_affaires_dict[key_jours] = jours_travailles
             with col2:
                 ca_moyen_jour = st.number_input(
-                    f"{mois_nom} - Chiffre d'affaires moyen / jour (€)",
+                    f"{mois_nom} - Chiffre d'affaires moyen / jour ($)",
                     min_value=0.0,
                     key=key_ca_moyen,
                     value=chiffre_affaires_dict.get(key_ca_moyen, 0.0)
@@ -2121,14 +2121,14 @@ def page_chiffre_affaires():
                 "ca_mensuel": ca_mensuel
             })
             with col3:
-                st.write(f"CA mensuel: {ca_mensuel:.2f} €")
+                st.write(f"CA mensuel: {ca_mensuel:.2f} $")
         
         df_ca = pd.DataFrame(data_ca)
         total_ca_annee1 = df_ca["ca_mensuel"].sum()
         chiffre_affaires_dict[f"total_ca_{nom_vente}_annee1"] = total_ca_annee1
         
         st.write("---")
-        st.markdown(f"**Total Chiffre d'Affaires Année 1 ({nom_vente}) :** {total_ca_annee1:.2f} €")
+        st.markdown(f"**Total Chiffre d'Affaires Année 1 ({nom_vente}) :** {total_ca_annee1:.2f} $")
         
         # Pourcentages d'augmentation
         key_aug_annee2 = f"{nom_vente}_augmentation_annee2"
@@ -2154,8 +2154,8 @@ def page_chiffre_affaires():
         chiffre_affaires_dict[f"total_ca_{nom_vente}_annee2"] = total_ca_annee2
         chiffre_affaires_dict[f"total_ca_{nom_vente}_annee3"] = total_ca_annee3
         
-        st.markdown(f"**Total Chiffre d'Affaires Année 2 ({nom_vente}) :** {total_ca_annee2:.2f} €")
-        st.markdown(f"**Total Chiffre d'Affaires Année 3 ({nom_vente}) :** {total_ca_annee3:.2f} €")
+        st.markdown(f"**Total Chiffre d'Affaires Année 2 ({nom_vente}) :** {total_ca_annee2:.2f} $")
+        st.markdown(f"**Total Chiffre d'Affaires Année 3 ({nom_vente}) :** {total_ca_annee3:.2f} $")
     
     if type_vente in ["Marchandises", "Mixte"]:
         calcul_chiffre_affaires("Marchandises")
@@ -2178,9 +2178,9 @@ def page_chiffre_affaires():
     data["total_chiffre_affaires_annee3"] = total_ca_annee3
     
     st.write("---")
-    st.markdown(f"**Total Chiffre d'Affaires Année 1 (toutes ventes) :** {total_ca_annee1:.2f} €")
-    st.markdown(f"**Total Chiffre d'Affaires Année 2 (toutes ventes) :** {total_ca_annee2:.2f} €")
-    st.markdown(f"**Total Chiffre d'Affaires Année 3 (toutes ventes) :** {total_ca_annee3:.2f} €")
+    st.markdown(f"**Total Chiffre d'Affaires Année 1 (toutes ventes) :** {total_ca_annee1:.2f} $")
+    st.markdown(f"**Total Chiffre d'Affaires Année 2 (toutes ventes) :** {total_ca_annee2:.2f} $")
+    st.markdown(f"**Total Chiffre d'Affaires Année 3 (toutes ventes) :** {total_ca_annee3:.2f} $")
     
     st.session_state["data"] = data
 
@@ -2220,7 +2220,7 @@ def page_charges_variables():
         
         data["total_charges_variables"] = total_charges_variables
         
-        st.write(f"Total des Charges Variables Année 1 : {total_charges_variables:.2f} €")
+        st.write(f"Total des Charges Variables Année 1 : {total_charges_variables:.2f} $")
         
     else:
         st.info("Cette section est uniquement applicable si vous vendez des marchandises ou des services mixtes.")
@@ -2269,7 +2269,7 @@ def page_fonds_roulement():
     st.write("---")
     st.markdown(f"**Durée moyenne des crédits clients :** {duree_credits_clients} jours")
     st.markdown(f"**Durée moyenne des dettes fournisseurs :** {duree_dettes_fournisseurs} jours")
-    st.markdown(f"**Besoin en Fonds de Roulement (BFR) Année 1 :** {bfr:.2f} €")
+    st.markdown(f"**Besoin en Fonds de Roulement (BFR) Année 1 :** {bfr:.2f} $")
     
     st.session_state["data"] = data
 
@@ -2290,7 +2290,7 @@ def page_salaires():
     for annee in range(1, 4):
         key = f"annee{annee}"
         salaires["employes"][key] = st.number_input(
-            f"Salaires Employés Année {annee} (€)",
+            f"Salaires Employés Année {annee} ($)",
             min_value=0.0,
             key=f"salaires_employes_annee_{annee}",
             value=salaires["employes"].get(key, 0.0)
@@ -2300,7 +2300,7 @@ def page_salaires():
     for annee in range(1, 4):
         key = f"annee{annee}"
         salaires["dirigeants"][key] = st.number_input(
-            f"Rémunération Dirigeant Année {annee} (€)",
+            f"Rémunération Dirigeant Année {annee} ($)",
             min_value=0.0,
             key=f"remuneration_dirigeant_annee_{annee}",
             value=salaires["dirigeants"].get(key, 0.0)
@@ -2325,9 +2325,9 @@ def page_salaires():
     data["total_salaires_annee3"] = total_salaires_annee3
     
     st.write("---")
-    st.markdown(f"**Total Salaires et Rémunération Année 1 :** {total_salaires_annee1:.2f} €")
-    st.markdown(f"**Total Salaires et Rémunération Année 2 :** {total_salaires_annee2:.2f} €")
-    st.markdown(f"**Total Salaires et Rémunération Année 3 :** {total_salaires_annee3:.2f} €")
+    st.markdown(f"**Total Salaires et Rémunération Année 1 :** {total_salaires_annee1:.2f} $")
+    st.markdown(f"**Total Salaires et Rémunération Année 2 :** {total_salaires_annee2:.2f} $")
+    st.markdown(f"**Total Salaires et Rémunération Année 3 :** {total_salaires_annee3:.2f} $")
     
     st.session_state["data"] = data
 
@@ -2368,7 +2368,7 @@ def page_rentabilite():
     
     st.write("---")
     st.markdown(f"**Marge Brute :** {marge_brute:.2f} %")
-    st.markdown(f"**Seuil de Rentabilité :** {seuil_rentabilite:.2f} €")
+    st.markdown(f"**Seuil de Rentabilité :** {seuil_rentabilite:.2f} $")
     st.markdown(f"<div style='background-color:{couleur_rentabilite}; color:white; padding:10px; border-radius:5px; text-align:center;'>"
                 f"<strong>{rentabilite}</strong> - {message_rentabilite}</div>", unsafe_allow_html=True)
     
@@ -2383,7 +2383,7 @@ def page_tresorerie():
     
     total_charges_fixes_annee1 = data.get("total_charges_fixes_annee1", 0.0)
     tresorerie_depart = st.number_input(
-        "Montant de la trésorerie initiale (€)",
+        "Montant de la trésorerie initiale ($)",
         min_value=0.0,
         key="tresorerie_depart",
         value=data.get("tresorerie_depart", tresorerie_depart1 )
@@ -2429,8 +2429,8 @@ def page_recapitulatif():
     besoins = data.get("besoins_demarrage", {})
     total_besoins = data.get("total_besoins", 0.0)
     for besoin, montant in besoins.items():
-        st.write(f"{besoin} : {montant:.2f} €")
-    st.write(f"**Total des Besoins de Démarrage : {total_besoins:.2f} €**")
+        st.write(f"{besoin} : {montant:.2f} $")
+    st.write(f"**Total des Besoins de Démarrage : {total_besoins:.2f} $**")
     
     st.title("Récapitulatif des Financements")
     data = st.session_state.get("data", {})
@@ -2440,12 +2440,12 @@ def page_recapitulatif():
     for financement, details in financements_dict.items():
         if isinstance(details, dict):
             montant = details.get("montant", 0.0)
-            st.write(f"{details.get('nom', financement)} : {montant:.2f} €")
+            st.write(f"{details.get('nom', financement)} : {montant:.2f} $")
         else:
             montant = details
-            st.write(f"{financement} : {montant:.2f} €")
+            st.write(f"{financement} : {montant:.2f} $")
     
-    st.markdown(f"**Total des Financements :** {total_financement:.2f} €")
+    st.markdown(f"**Total des Financements :** {total_financement:.2f} $")
     
     st.subheader("4. Charges Fixes sur 3 Années")
     charges_fixes_dict = data.get("charges_fixes", {"annee1": {}, "annee2": {}, "annee3": {}})
@@ -2458,26 +2458,26 @@ def page_recapitulatif():
         montant1 = charges_fixes_dict["annee1"].get(charge, 0.0)
         montant2 = charges_fixes_dict["annee2"].get(charge, 0.0)
         montant3 = charges_fixes_dict["annee3"].get(charge, 0.0)
-        st.write(f"{charge} - Année 1 : {montant1:.2f} €, Année 2 : {montant2:.2f} €, Année 3 : {montant3:.2f} €")
+        st.write(f"{charge} - Année 1 : {montant1:.2f} $, Année 2 : {montant2:.2f} $, Année 3 : {montant3:.2f} $")
     
-    st.write(f"**Total Charges Fixes Année 1 : {total_annee1:.2f} €**")
-    st.write(f"**Total Charges Fixes Année 2 : {total_annee2:.2f} €**")
-    st.write(f"**Total Charges Fixes Année 3 : {total_annee3:.2f} €**")
+    st.write(f"**Total Charges Fixes Année 1 : {total_annee1:.2f} $**")
+    st.write(f"**Total Charges Fixes Année 2 : {total_annee2:.2f} $**")
+    st.write(f"**Total Charges Fixes Année 3 : {total_annee3:.2f} $**")
     
     st.subheader("5. Chiffre d'Affaires Prévisionnel")
     total_ca_annee1 = data.get("total_chiffre_affaires_annee1", 0.0)
     total_ca_annee2 = data.get("total_chiffre_affaires_annee2", 0.0)
     total_ca_annee3 = data.get("total_chiffre_affaires_annee3", 0.0)
     
-    st.write(f"Total Chiffre d'Affaires Année 1 : {total_ca_annee1:.2f} €")
-    st.write(f"Total Chiffre d'Affaires Année 2 : {total_ca_annee2:.2f} €")
-    st.write(f"Total Chiffre d'Affaires Année 3 : {total_ca_annee3:.2f} €")
+    st.write(f"Total Chiffre d'Affaires Année 1 : {total_ca_annee1:.2f} $")
+    st.write(f"Total Chiffre d'Affaires Année 2 : {total_ca_annee2:.2f} $")
+    st.write(f"Total Chiffre d'Affaires Année 3 : {total_ca_annee3:.2f} $")
     
     st.subheader("6. Charges Variables")
     cout_achat_marchandises_pct = data.get("charges_variables", {}).get("cout_achat_marchandises_pct", 0.0)
     total_charges_variables = data.get("total_charges_variables", 0.0)
     st.write(f"Coût d'achat des marchandises (% du CA) : {cout_achat_marchandises_pct:.2f} %")
-    st.write(f"Total Charges Variables Année 1 : {total_charges_variables:.2f} €")
+    st.write(f"Total Charges Variables Année 1 : {total_charges_variables:.2f} $")
     
     st.subheader("7. Fonds de Roulement")
     fonds_roulement = data.get("fonds_roulement", {})
@@ -2486,7 +2486,7 @@ def page_recapitulatif():
     bfr = fonds_roulement.get("bfr", 0.0)
     st.write(f"Durée moyenne des crédits clients : {duree_credits_clients} jours")
     st.write(f"Durée moyenne des dettes fournisseurs : {duree_dettes_fournisseurs} jours")
-    st.write(f"Besoin en Fonds de Roulement (BFR) Année 1 : {bfr:.2f} €")
+    st.write(f"Besoin en Fonds de Roulement (BFR) Année 1 : {bfr:.2f} $")
     
     st.subheader("8. Salaires et Rémunération")
     salaires = data.get("salaires", {})
@@ -2494,21 +2494,21 @@ def page_recapitulatif():
         key = f"annee{annee}"
         salaires_employes = salaires.get("employes", {}).get(key, 0.0)
         remuneration_dirigeants = salaires.get("dirigeants", {}).get(key, 0.0)
-        st.write(f"Année {annee} : Salaires employés : {salaires_employes:.2f} €, Rémunération dirigeants : {remuneration_dirigeants:.2f} €")
-        st.write(f"Total Salaires Année {annee} : {(salaires_employes + remuneration_dirigeants):.2f} €")
+        st.write(f"Année {annee} : Salaires employés : {salaires_employes:.2f} $, Rémunération dirigeants : {remuneration_dirigeants:.2f} $")
+        st.write(f"Total Salaires Année {annee} : {(salaires_employes + remuneration_dirigeants):.2f} $")
     
     st.subheader("9. Rentabilité")
     marge_brute = data.get("marge_brute", 0.0)
     seuil_rentabilite = data.get("seuil_rentabilite", 0.0)
     rentabilite = data.get("rentabilite", "Non rentable")
     st.write(f"Marge Brute : {marge_brute:.2f} %")
-    st.write(f"Seuil de Rentabilité : {seuil_rentabilite:.2f} €")
+    st.write(f"Seuil de Rentabilité : {seuil_rentabilite:.2f} $")
     st.write(f"Rentabilité : {rentabilite}")
     
     st.subheader("10. Trésorerie de Départ")
     tresorerie_depart = data.get("tresorerie_depart", 0.0)
     niveau_tresorerie = data.get("niveau_tresorerie", "Trop faible")
-    st.write(f"Montant de la Trésorerie Initiale : {tresorerie_depart:.2f} €")
+    st.write(f"Montant de la Trésorerie Initiale : {tresorerie_depart:.2f} $")
     st.write(f"Niveau de Trésorerie : {niveau_tresorerie}")
     
     st.session_state["data"] = data
@@ -2563,14 +2563,14 @@ def page_investissements_et_financements():
         "Investissements": "Immobilisations incorporelles",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": f"{total_incorporelles:.2f}"
+        "Montant ($)": f"{total_incorporelles:.2f}"
     })
     for desc, montant in immobilisations_incorporelles.items():
         table_data.append({
             "Investissements": desc,
             "Taux (%)": "",
             "Durée (mois)": "",
-            "Montant (€)": f"{montant:.2f}"
+            "Montant ($)": f"{montant:.2f}"
         })
     
     # Immobilisations Corporelles
@@ -2586,14 +2586,14 @@ def page_investissements_et_financements():
         "Investissements": "Immobilisations corporelles",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": f"{total_corporelles:.2f}"
+        "Montant ($)": f"{total_corporelles:.2f}"
     })
     for desc, montant in immobilisations_corporelles.items():
         table_data.append({
             "Investissements": desc,
             "Taux (%)": "",
             "Durée (mois)": "",
-            "Montant (€)": f"{montant:.2f}"
+            "Montant ($)": f"{montant:.2f}"
         })
     
     # Autres Investissements
@@ -2606,14 +2606,14 @@ def page_investissements_et_financements():
         "Investissements": "Autres investissements",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": f"{total_autres:.2f}"
+        "Montant ($)": f"{total_autres:.2f}"
     })
     for desc, montant in autres_investissements.items():
         table_data.append({
             "Investissements": desc,
             "Taux (%)": "",
             "Durée (mois)": "",
-            "Montant (€)": f"{montant:.2f}"
+            "Montant ($)": f"{montant:.2f}"
         })
     
     # TOTAL BESOINS
@@ -2622,7 +2622,7 @@ def page_investissements_et_financements():
         "Investissements": "TOTAL BESOINS",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": f"{total_besoins:.2f}"
+        "Montant ($)": f"{total_besoins:.2f}"
     })
     
     # Section FINANCEMENT DES INVESTISSEMENTS
@@ -2630,13 +2630,13 @@ def page_investissements_et_financements():
         "Investissements": "FINANCEMENT DES INVESTISSEMENTS",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": ""
+        "Montant ($)": ""
     })
     table_data.append({
-        "Investissements": "Montant € hors taxes",
+        "Investissements": "Montant $ hors taxes",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": ""
+        "Montant ($)": ""
     })
     
     # Apport Personnel
@@ -2650,14 +2650,14 @@ def page_investissements_et_financements():
         "Investissements": "Apport personnel",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": f"{total_apport_personnel:.2f}"
+        "Montant ($)": f"{total_apport_personnel:.2f}"
     })
     for desc, montant in apport_personnel.items():
         table_data.append({
             "Investissements": desc,
             "Taux (%)": "",
             "Durée (mois)": "",
-            "Montant (€)": f"{montant:.2f}"
+            "Montant ($)": f"{montant:.2f}"
         })
     
     # Emprunts Dynamiques
@@ -2682,7 +2682,7 @@ def page_investissements_et_financements():
                 "Investissements": emprunt_nom,
                 "Taux (%)": f"{taux:.2f}%",
                 "Durée (mois)": duree,
-                "Montant (€)": f"{montant:.2f}"
+                "Montant ($)": f"{montant:.2f}"
             })
             total_emprunts += montant
         else:
@@ -2690,7 +2690,7 @@ def page_investissements_et_financements():
                 "Investissements": emprunt_nom,
                 "Taux (%)": "-",
                 "Durée (mois)": "-",
-                "Montant (€)": "0.00"
+                "Montant ($)": "0.00"
             })
 
     # TOTAL EMPRUNTS - placé avant les emprunts individuels
@@ -2698,7 +2698,7 @@ def page_investissements_et_financements():
         "Investissements": "TOTAL EMPRUNTS",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": f"{total_emprunts:.2f}"
+        "Montant ($)": f"{total_emprunts:.2f}"
     })
 
     # Ajouter les emprunts individuels après le total
@@ -2725,7 +2725,7 @@ def page_investissements_et_financements():
                 "Investissements": subvention_nom,
                 "Taux (%)": "",
                 "Durée (mois)": "",
-                "Montant (€)": f"{montant:.2f}"
+                "Montant ($)": f"{montant:.2f}"
             })
             total_subventions += montant
         else:
@@ -2733,7 +2733,7 @@ def page_investissements_et_financements():
                 "Investissements": subvention_nom,
                 "Taux (%)": "",
                 "Durée (mois)": "",
-                "Montant (€)": "0.00"
+                "Montant ($)": "0.00"
             })
     
     # TOTAL SUBVENTIONS - placé avant les subventions individuelles
@@ -2741,7 +2741,7 @@ def page_investissements_et_financements():
         "Investissements": "TOTAL SUBVENTIONS",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": f"{total_subventions:.2f}"
+        "Montant ($)": f"{total_subventions:.2f}"
     })
     
     # Ajouter les subventions individuelles après le total
@@ -2754,7 +2754,7 @@ def page_investissements_et_financements():
         "Investissements": "Autre financement",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": f"{autre_financement:.2f}"
+        "Montant ($)": f"{autre_financement:.2f}"
     })
     
     # TOTAL RESSOURCES
@@ -2763,7 +2763,7 @@ def page_investissements_et_financements():
         "Investissements": "TOTAL RESSOURCES",
         "Taux (%)": "",
         "Durée (mois)": "",
-        "Montant (€)": f"{total_ressources:.2f}"
+        "Montant ($)": f"{total_ressources:.2f}"
     })
     
     # Vérification de l'équilibre
@@ -2772,11 +2772,11 @@ def page_investissements_et_financements():
         equilibrium_type = "success"
     elif total_ressources > total_besoins:
         surplus = total_ressources - total_besoins
-        equilibrium_message = f"Les ressources dépassent les besoins de {surplus:.2f} €."
+        equilibrium_message = f"Les ressources dépassent les besoins de {surplus:.2f} $."
         equilibrium_type = "info"
     else:
         deficit = total_besoins - total_ressources
-        equilibrium_message = f"Il manque {deficit:.2f} € pour couvrir les besoins."
+        equilibrium_message = f"Il manque {deficit:.2f} $ pour couvrir les besoins."
         equilibrium_type = "warning"
     
     if equilibrium_type == "success":
@@ -2789,7 +2789,7 @@ def page_investissements_et_financements():
     st.write("---")
     
     # Créer le DataFrame unique avec les quatre colonnes
-    df_unique = pd.DataFrame(table_data, columns=["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"])
+    df_unique = pd.DataFrame(table_data, columns=["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"])
     
     # Afficher le tableau dans Streamlit
     st.dataframe(df_unique.style.apply(lambda x: ['background-color: #f0f0f0' if pd.isna(v) else '' for v in x], axis=1))
@@ -2843,7 +2843,7 @@ def page_investissements_et_financements():
             doc.add_page_break()
             
             # Créer le DataFrame pour Word
-            df_word = pd.DataFrame(export_data['table_data'], columns=["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"])
+            df_word = pd.DataFrame(export_data['table_data'], columns=["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"])
             
             # Ajouter le tableau au document Word
             table = doc.add_table(rows=1, cols=len(df_word.columns))
@@ -2858,7 +2858,7 @@ def page_investissements_et_financements():
                 for i, item in enumerate(row):
                     row_cells[i].text = str(item)
                     # Mettre en gras les catégories principales et les totaux
-                    if row["Investissements"] in ["INVESTISSEMENTS", "Montant € hors taxes",
+                    if row["Investissements"] in ["INVESTISSEMENTS", "Montant $ hors taxes",
                                                  "Immobilisations incorporelles", "Immobilisations corporelles",
                                                  "Autres investissements", "TOTAL BESOINS",
                                                  "FINANCEMENT DES INVESTISSEMENTS", "Apport personnel",
@@ -3001,12 +3001,12 @@ def page_salaires_charges_sociales():
     df = pd.DataFrame({
         "": ["Rémunération du (des) dirigeants", "% augmentation", "Charges sociales du (des) dirigeant(s)",
              "Salaires des employés", "% augmentation", "Charges sociales employés"],
-        "Année 1": [f"{remuneration_dirigeant[0]:.2f} €", augmentation_dirigeant[0], f"{charges_sociales_dirigeant[0]:.2f} €",
-                    f"{remuneration_employes[0]:.2f} €", augmentation_employes[0], f"{charges_sociales_employes[0]:.2f} €"],
-        "Année 2": [f"{remuneration_dirigeant[1]:.2f} €", augmentation_dirigeant[1], f"{charges_sociales_dirigeant[1]:.2f} €",
-                    f"{remuneration_employes[1]:.2f} €", augmentation_employes[1], f"{charges_sociales_employes[1]:.2f} €"],
-        "Année 3": [f"{remuneration_dirigeant[2]:.2f} €", augmentation_dirigeant[2], f"{charges_sociales_dirigeant[2]:.2f} €",
-                    f"{remuneration_employes[2]:.2f} €", augmentation_employes[2], f"{charges_sociales_employes[2]:.2f} €"]
+        "Année 1": [f"{remuneration_dirigeant[0]:.2f} $", augmentation_dirigeant[0], f"{charges_sociales_dirigeant[0]:.2f} $",
+                    f"{remuneration_employes[0]:.2f} $", augmentation_employes[0], f"{charges_sociales_employes[0]:.2f} $"],
+        "Année 2": [f"{remuneration_dirigeant[1]:.2f} $", augmentation_dirigeant[1], f"{charges_sociales_dirigeant[1]:.2f} $",
+                    f"{remuneration_employes[1]:.2f} $", augmentation_employes[1], f"{charges_sociales_employes[1]:.2f} $"],
+        "Année 3": [f"{remuneration_dirigeant[2]:.2f} $", augmentation_dirigeant[2], f"{charges_sociales_dirigeant[2]:.2f} $",
+                    f"{remuneration_employes[2]:.2f} $", augmentation_employes[2], f"{charges_sociales_employes[2]:.2f} $"]
     })
     
     st.table(df)
@@ -3107,7 +3107,7 @@ def page_salaires_charges_sociales():
         table_word_inv.style = 'Light List Accent 1'
         table_word_inv.alignment = WD_TABLE_ALIGNMENT.CENTER
         hdr_cells_inv = table_word_inv.rows[0].cells
-        headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"]
+        headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"]
         for i, header in enumerate(headers_inv):
             hdr_cells_inv[i].text = header
             # Mettre en gras les en-têtes
@@ -3122,7 +3122,7 @@ def page_salaires_charges_sociales():
             row_cells_inv[0].text = row["Investissements"]
             row_cells_inv[1].text = row["Taux (%)"]
             row_cells_inv[2].text = str(row["Durée (mois)"]) if row["Durée (mois)"] != "-" else "-"
-            row_cells_inv[3].text = row["Montant (€)"]
+            row_cells_inv[3].text = row["Montant ($)"]
             
             # Mise en forme des lignes spécifiques
             if row["Investissements"] in ["INVESTISSEMENTS", "FINANCEMENT DES INVESTISSEMENTS", "TOTAL SUBVENTIONS", "TOTAL EMPRUNTS"]:
@@ -3390,7 +3390,7 @@ def page_detail_amortissements():
         table_word_inv.style = 'Light List Accent 1'
         table_word_inv.alignment = WD_TABLE_ALIGNMENT.CENTER
         hdr_cells_inv = table_word_inv.rows[0].cells
-        headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"]
+        headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"]
         for i, header in enumerate(headers_inv):
             hdr_cells_inv[i].text = header
             # Mettre en gras les en-têtes
@@ -3405,7 +3405,7 @@ def page_detail_amortissements():
             row_cells_inv[0].text = row["Investissements"]
             row_cells_inv[1].text = row["Taux (%)"]
             row_cells_inv[2].text = str(row["Durée (mois)"]) if row["Durée (mois)"] != "-" else "-"
-            row_cells_inv[3].text = row["Montant (€)"]
+            row_cells_inv[3].text = row["Montant ($)"]
             
             # Mise en forme des lignes spécifiques
             if row["Investissements"] in ["INVESTISSEMENTS", "FINANCEMENT DES INVESTISSEMENTS", "TOTAL SUBVENTIONS", "TOTAL EMPRUNTS"]:
@@ -3550,7 +3550,7 @@ def telecharger_document_complet():
     table_inv.style = 'Light List Accent 1'
     table_inv.alignment = WD_TABLE_ALIGNMENT.CENTER
     hdr_cells_inv = table_inv.rows[0].cells
-    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"]
+    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"]
     for i, header in enumerate(headers_inv):
         hdr_cells_inv[i].text = header
         for paragraph in hdr_cells_inv[i].paragraphs:
@@ -3563,7 +3563,7 @@ def telecharger_document_complet():
         row_cells[0].text = row.get("Investissements", "")
         row_cells[1].text = row.get("Taux (%)", "")
         row_cells[2].text = str(row.get("Durée (mois)", "")) if row.get("Durée (mois)", "") != "-" else "-"
-        row_cells[3].text = row.get("Montant (€)", "")
+        row_cells[3].text = row.get("Montant ($)", "")
         
         # Mise en forme des lignes spécifiques
         if row["Investissements"] in ["INVESTISSEMENTS", "FINANCEMENT DES INVESTISSEMENTS", "TOTAL SUBVENTIONS", "TOTAL EMPRUNTS"]:
@@ -3891,38 +3891,38 @@ def page_compte_resultats_previsionnel():
             ""
         ],
         "Année 1": [
-            f"{total_ca[0]:,.2f} €",
-            f"{ca_marchandises[0]:,.2f} €",
-            f"{ca_services[0]:,.2f} €",
+            f"{total_ca[0]:,.2f} $",
+            f"{ca_marchandises[0]:,.2f} $",
+            f"{ca_services[0]:,.2f} $",
             "",
             "",
-            f"{charges_variables[0]:,.2f} €",
+            f"{charges_variables[0]:,.2f} $",
             "",
-            f"{marge_brute[0]:,.2f} €",
+            f"{marge_brute[0]:,.2f} $",
             "",
             ""
         ],
         "Année 2": [
-            f"{total_ca[1]:,.2f} €",
-            f"{ca_marchandises[1]:,.2f} €",
-            f"{ca_services[1]:,.2f} €",
+            f"{total_ca[1]:,.2f} $",
+            f"{ca_marchandises[1]:,.2f} $",
+            f"{ca_services[1]:,.2f} $",
             "",
             "",
-            f"{charges_variables[1]:,.2f} €",
+            f"{charges_variables[1]:,.2f} $",
             "",
-            f"{marge_brute[1]:,.2f} €",
+            f"{marge_brute[1]:,.2f} $",
             "",
             ""
         ],
         "Année 3": [
-            f"{total_ca[2]:,.2f} €",
-            f"{ca_marchandises[2]:,.2f} €",
-            f"{ca_services[2]:,.2f} €",
+            f"{total_ca[2]:,.2f} $",
+            f"{ca_marchandises[2]:,.2f} $",
+            f"{ca_services[2]:,.2f} $",
             "",
             "",
-            f"{charges_variables[2]:,.2f} €",
+            f"{charges_variables[2]:,.2f} $",
             "",
-            f"{marge_brute[2]:,.2f} €",
+            f"{marge_brute[2]:,.2f} $",
             "",
             ""
         ]
@@ -3931,15 +3931,15 @@ def page_compte_resultats_previsionnel():
     # Ajouter les charges détaillées au tableau
     for charge in liste_charges:
         tableau[""].append(charge)
-        tableau["Année 1"].append(f"{charges_detaillees[charge][0]:,.2f} €")
-        tableau["Année 2"].append(f"{charges_detaillees[charge][1]:,.2f} €")
-        tableau["Année 3"].append(f"{charges_detaillees[charge][2]:,.2f} €")
+        tableau["Année 1"].append(f"{charges_detaillees[charge][0]:,.2f} $")
+        tableau["Année 2"].append(f"{charges_detaillees[charge][1]:,.2f} $")
+        tableau["Année 3"].append(f"{charges_detaillees[charge][2]:,.2f} $")
     
     # Ajouter le total des charges externes
     tableau[""].append("Total Charges externes")
-    tableau["Année 1"].append(f"{total_charges_fixes[0]:,.2f} €")
-    tableau["Année 2"].append(f"{total_charges_fixes[1]:,.2f} €")
-    tableau["Année 3"].append(f"{total_charges_fixes[2]:,.2f} €")
+    tableau["Année 1"].append(f"{total_charges_fixes[0]:,.2f} $")
+    tableau["Année 2"].append(f"{total_charges_fixes[1]:,.2f} $")
+    tableau["Année 3"].append(f"{total_charges_fixes[2]:,.2f} $")
     
     # Continuer à remplir le tableau
     additional_rows = {
@@ -3959,9 +3959,9 @@ def page_compte_resultats_previsionnel():
     
     for key, values in additional_rows.items():
         tableau[""].append(key)
-        tableau["Année 1"].append(f"{values[0]:,.2f} €")
-        tableau["Année 2"].append(f"{values[1]:,.2f} €")
-        tableau["Année 3"].append(f"{values[2]:,.2f} €")
+        tableau["Année 1"].append(f"{values[0]:,.2f} $")
+        tableau["Année 2"].append(f"{values[1]:,.2f} $")
+        tableau["Année 3"].append(f"{values[2]:,.2f} $")
     
     # Créer le DataFrame
     df_resultats = pd.DataFrame(tableau)
@@ -4169,9 +4169,9 @@ def page_soldes_intermediaires_de_gestion():
     # Afficher le tableau avec une mise en forme améliorée
     st.dataframe(
         df.style.format({
-            "Année 1": "{:,.2f} €",
-            "Année 2": "{:,.2f} €",
-            "Année 3": "{:,.2f} €",
+            "Année 1": "{:,.2f} $",
+            "Année 2": "{:,.2f} $",
+            "Année 3": "{:,.2f} $",
             "% Année 1": "{:.2f}%",
             "% Année 2": "{:.2f}%",
             "% Année 3": "{:.2f}%"
@@ -4290,7 +4290,7 @@ def page_soldes_intermediaires_de_gestion():
         table_inv.style = 'Light List Accent 1'
         table_inv.alignment = WD_TABLE_ALIGNMENT.CENTER
         hdr_cells_inv = table_inv.rows[0].cells
-        headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"]
+        headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"]
         for i, header in enumerate(headers_inv):
             hdr_cells_inv[i].text = header
             for paragraph in hdr_cells_inv[i].paragraphs:
@@ -4303,7 +4303,7 @@ def page_soldes_intermediaires_de_gestion():
             row_cells[0].text = row.get("Investissements", "")
             row_cells[1].text = row.get("Taux (%)", "")
             row_cells[2].text = str(row.get("Durée (mois)", "")) if row.get("Durée (mois)", "") != "-" else "-"
-            row_cells[3].text = row.get("Montant (€)", "")
+            row_cells[3].text = row.get("Montant ($)", "")
             
             # Mise en forme des lignes spécifiques
             if row["Investissements"] in ["INVESTISSEMENTS", "FINANCEMENT DES INVESTISSEMENTS", "TOTAL SUBVENTIONS", "TOTAL EMPRUNTS"]:
@@ -4429,11 +4429,11 @@ def page_soldes_intermediaires_de_gestion():
         for row in export_data_soldes['table_data']:
             row_cells = table_soldes.add_row().cells
             row_cells[0].text = row.get("Description", "")
-            row_cells[1].text = f"{row.get('Année 1', 0.0):,.2f} €"
+            row_cells[1].text = f"{row.get('Année 1', 0.0):,.2f} $"
             row_cells[2].text = f"{row.get('% Année 1', 0.0):.2f}%"
-            row_cells[3].text = f"{row.get('Année 2', 0.0):,.2f} €"
+            row_cells[3].text = f"{row.get('Année 2', 0.0):,.2f} $"
             row_cells[4].text = f"{row.get('% Année 2', 0.0):.2f}%"
-            row_cells[5].text = f"{row.get('Année 3', 0.0):,.2f} €"
+            row_cells[5].text = f"{row.get('Année 3', 0.0):,.2f} $"
             row_cells[6].text = f"{row.get('% Année 3', 0.0):.2f}%"
             
             # Alignement des cellules de pourcentage
@@ -4508,7 +4508,7 @@ def telecharger_document_complets():
     table_inv.style = 'Light List Accent 1'
     table_inv.alignment = WD_TABLE_ALIGNMENT.CENTER
     hdr_cells_inv = table_inv.rows[0].cells
-    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"]
+    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"]
     for i, header in enumerate(headers_inv):
         hdr_cells_inv[i].text = header
         for paragraph in hdr_cells_inv[i].paragraphs:
@@ -4521,7 +4521,7 @@ def telecharger_document_complets():
         row_cells[0].text = row.get("Investissements", "")
         row_cells[1].text = row.get("Taux (%)", "")
         row_cells[2].text = str(row.get("Durée (mois)", "")) if row.get("Durée (mois)", "") != "-" else "-"
-        row_cells[3].text = row.get("Montant (€)", "")
+        row_cells[3].text = row.get("Montant ($)", "")
         
         # Mise en forme des lignes spécifiques
         if row["Investissements"] in ["INVESTISSEMENTS", "FINANCEMENT DES INVESTISSEMENTS", "TOTAL SUBVENTIONS", "TOTAL EMPRUNTS"]:
@@ -4645,9 +4645,9 @@ def telecharger_document_complets():
     for row in export_data_soldes['table_data']:
         row_cells_soldes = table_soldes.add_row().cells
         row_cells_soldes[0].text = row.get("Description", "")
-        row_cells_soldes[1].text = f"{row.get('Année 1', 0):,.2f} €"
-        row_cells_soldes[2].text = f"{row.get('Année 2', 0):,.2f} €"
-        row_cells_soldes[3].text = f"{row.get('Année 3', 0):,.2f} €"
+        row_cells_soldes[1].text = f"{row.get('Année 1', 0):,.2f} $"
+        row_cells_soldes[2].text = f"{row.get('Année 2', 0):,.2f} $"
+        row_cells_soldes[3].text = f"{row.get('Année 3', 0):,.2f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -4672,9 +4672,9 @@ def telecharger_document_complets():
     for row in export_data_capacite['table_data']:
         row_cells_cap = table_cap.add_row().cells
         row_cells_cap[0].text = row.get("Description", "")
-        row_cells_cap[1].text = f"{row.get('Année 1', 0):,.2f} €"
-        row_cells_cap[2].text = f"{row.get('Année 2', 0):,.2f} €"
-        row_cells_cap[3].text = f"{row.get('Année 3', 0):,.2f} €"
+        row_cells_cap[1].text = f"{row.get('Année 1', 0):,.2f} $"
+        row_cells_cap[2].text = f"{row.get('Année 2', 0):,.2f} $"
+        row_cells_cap[3].text = f"{row.get('Année 3', 0):,.2f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -4699,9 +4699,9 @@ def telecharger_document_complets():
     for row in export_data_seuil['table_data']:
         row_cells_seuil = table_seuil.add_row().cells
         row_cells_seuil[0].text = row.get("Description", "")
-        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} €"
-        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} €"
-        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} €"
+        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} $"
+        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} $"
+        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -4889,7 +4889,7 @@ def page_capacite_autofinancement():
         if x == 0.0:
             return "-"
         else:
-            return f"{x:,.2f} €"
+            return f"{x:,.2f} $"
     
     # Afficher le tableau avec une mise en forme améliorée
     st.dataframe(
@@ -5113,11 +5113,11 @@ def page_seuil_rentabilite_economique():
     
     # Définir le formatage pour chaque colonne
     format_dict = {
-        "Année 1": "{:,.0f} €",
-        "Année 2": "{:,.0f} €",
-        "Année 3": "{:,.0f} €",
+        "Année 1": "{:,.0f} $",
+        "Année 2": "{:,.0f} $",
+        "Année 3": "{:,.0f} $",
         "Taux de marge sur coûts variables": "{:.0f} %",
-        "Point mort en chiffre d'affaires par jour ouvré": "{:.0f} €"
+        "Point mort en chiffre d'affaires par jour ouvré": "{:.0f} $"
     }
     
     # Appliquer le formatage et afficher le tableau
@@ -5212,7 +5212,7 @@ def telecharger_document_complet():
     table_inv.style = 'Light List Accent 1'
     table_inv.alignment = WD_TABLE_ALIGNMENT.CENTER
     hdr_cells_inv = table_inv.rows[0].cells
-    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"]
+    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"]
     for i, header in enumerate(headers_inv):
         hdr_cells_inv[i].text = header
         for paragraph in hdr_cells_inv[i].paragraphs:
@@ -5225,7 +5225,7 @@ def telecharger_document_complet():
         row_cells[0].text = row.get("Investissements", "")
         row_cells[1].text = row.get("Taux (%)", "")
         row_cells[2].text = str(row.get("Durée (mois)", "")) if row.get("Durée (mois)", "") != "-" else "-"
-        row_cells[3].text = row.get("Montant (€)", "")
+        row_cells[3].text = row.get("Montant ($)", "")
         
         # Mise en forme des lignes spécifiques
         if row["Investissements"] in ["INVESTISSEMENTS", "FINANCEMENT DES INVESTISSEMENTS", "TOTAL SUBVENTIONS", "TOTAL EMPRUNTS"]:
@@ -5349,9 +5349,9 @@ def telecharger_document_complet():
     for row in export_data_soldes['table_data']:
         row_cells_soldes = table_soldes.add_row().cells
         row_cells_soldes[0].text = row.get("Description", "")
-        row_cells_soldes[1].text = f"{row.get('Année 1', 0):,.2f} €"
-        row_cells_soldes[2].text = f"{row.get('Année 2', 0):,.2f} €"
-        row_cells_soldes[3].text = f"{row.get('Année 3', 0):,.2f} €"
+        row_cells_soldes[1].text = f"{row.get('Année 1', 0):,.2f} $"
+        row_cells_soldes[2].text = f"{row.get('Année 2', 0):,.2f} $"
+        row_cells_soldes[3].text = f"{row.get('Année 3', 0):,.2f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -5376,9 +5376,9 @@ def telecharger_document_complet():
     for row in export_data_capacite['table_data']:
         row_cells_cap = table_cap.add_row().cells
         row_cells_cap[0].text = row.get("Description", "")
-        row_cells_cap[1].text = f"{row.get('Année 1', 0):,.2f} €"
-        row_cells_cap[2].text = f"{row.get('Année 2', 0):,.2f} €"
-        row_cells_cap[3].text = f"{row.get('Année 3', 0):,.2f} €"
+        row_cells_cap[1].text = f"{row.get('Année 1', 0):,.2f} $"
+        row_cells_cap[2].text = f"{row.get('Année 2', 0):,.2f} $"
+        row_cells_cap[3].text = f"{row.get('Année 3', 0):,.2f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -5403,9 +5403,9 @@ def telecharger_document_complet():
     for row in export_data_seuil['table_data']:
         row_cells_seuil = table_seuil.add_row().cells
         row_cells_seuil[0].text = row.get("Description", "")
-        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} €"
-        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} €"
-        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} €"
+        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} $"
+        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} $"
+        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -5515,15 +5515,15 @@ def page_besoin_fonds_roulement():
     
     # Afficher les résultats intermédiaires
     st.write("### Résultats des Calculs")
-    st.write(f"**Volume crédit client HT Année 1** : {volume_credit_client_ht[0]:.2f} €")
-    st.write(f"**Volume dettes fournisseurs HT Année 1** : {volume_dettes_fournisseurs_ht[0]:.2f} €")
-    st.write(f"**Besoin en fonds de roulement Année 1** : {bfr[0]:.2f} €")
-    st.write(f"**Volume crédit client HT Année 2** : {volume_credit_client_ht[1]:.2f} €")
-    st.write(f"**Volume dettes fournisseurs HT Année 2** : {volume_dettes_fournisseurs_ht[1]:.2f} €")
-    st.write(f"**Besoin en fonds de roulement Année 2** : {bfr[1]:.2f} €")
-    st.write(f"**Volume crédit client HT Année 3** : {volume_credit_client_ht[2]:.2f} €")
-    st.write(f"**Volume dettes fournisseurs HT Année 3** : {volume_dettes_fournisseurs_ht[2]:.2f} €")
-    st.write(f"**Besoin en fonds de roulement Année 3** : {bfr[2]:.2f} €")
+    st.write(f"**Volume crédit client HT Année 1** : {volume_credit_client_ht[0]:.2f} $")
+    st.write(f"**Volume dettes fournisseurs HT Année 1** : {volume_dettes_fournisseurs_ht[0]:.2f} $")
+    st.write(f"**Besoin en fonds de roulement Année 1** : {bfr[0]:.2f} $")
+    st.write(f"**Volume crédit client HT Année 2** : {volume_credit_client_ht[1]:.2f} $")
+    st.write(f"**Volume dettes fournisseurs HT Année 2** : {volume_dettes_fournisseurs_ht[1]:.2f} $")
+    st.write(f"**Besoin en fonds de roulement Année 2** : {bfr[1]:.2f} $")
+    st.write(f"**Volume crédit client HT Année 3** : {volume_credit_client_ht[2]:.2f} $")
+    st.write(f"**Volume dettes fournisseurs HT Année 3** : {volume_dettes_fournisseurs_ht[2]:.2f} $")
+    st.write(f"**Besoin en fonds de roulement Année 3** : {bfr[2]:.2f} $")
     
     # Préparer les données pour le tableau
     data_table = {
@@ -5543,24 +5543,24 @@ def page_besoin_fonds_roulement():
         ],
         "Année 1": [
             "",
-            f"{volume_credit_client_ht[0]:.2f} €",
+            f"{volume_credit_client_ht[0]:.2f} $",
             "",
-            f"{volume_dettes_fournisseurs_ht[0]:.2f} €",
-            f"{bfr[0]:.2f} €"
+            f"{volume_dettes_fournisseurs_ht[0]:.2f} $",
+            f"{bfr[0]:.2f} $"
         ],
         "Année 2": [
             "",
-            f"{volume_credit_client_ht[1]:.2f} €",
+            f"{volume_credit_client_ht[1]:.2f} $",
             "",
-            f"{volume_dettes_fournisseurs_ht[1]:.2f} €",
-            f"{bfr[1]:.2f} €"
+            f"{volume_dettes_fournisseurs_ht[1]:.2f} $",
+            f"{bfr[1]:.2f} $"
         ],
         "Année 3": [
             "",
-            f"{volume_credit_client_ht[2]:.2f} €",
+            f"{volume_credit_client_ht[2]:.2f} $",
             "",
-            f"{volume_dettes_fournisseurs_ht[2]:.2f} €",
-            f"{bfr[2]:.2f} €"
+            f"{volume_dettes_fournisseurs_ht[2]:.2f} $",
+            f"{bfr[2]:.2f} $"
         ]
     }
     
@@ -5649,7 +5649,7 @@ def telecharger_document_complet():
     table_inv.style = 'Light List Accent 1'
     table_inv.alignment = WD_TABLE_ALIGNMENT.CENTER
     hdr_cells_inv = table_inv.rows[0].cells
-    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"]
+    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"]
     for i, header in enumerate(headers_inv):
         hdr_cells_inv[i].text = header
         for paragraph in hdr_cells_inv[i].paragraphs:
@@ -5662,7 +5662,7 @@ def telecharger_document_complet():
         row_cells[0].text = row.get("Investissements", "")
         row_cells[1].text = row.get("Taux (%)", "")
         row_cells[2].text = str(row.get("Durée (mois)", "")) if row.get("Durée (mois)", "") != "-" else "-"
-        row_cells[3].text = row.get("Montant (€)", "")
+        row_cells[3].text = row.get("Montant ($)", "")
         
         # Mise en forme des lignes spécifiques
         if row["Investissements"] in ["INVESTISSEMENTS", "FINANCEMENT DES INVESTISSEMENTS", "TOTAL SUBVENTIONS", "TOTAL EMPRUNTS"]:
@@ -5786,9 +5786,9 @@ def telecharger_document_complet():
     for row in export_data_soldes['table_data']:
         row_cells_soldes = table_soldes.add_row().cells
         row_cells_soldes[0].text = row.get("Description", "")
-        row_cells_soldes[1].text = f"{row.get('Année 1', 0):,.2f} €"
-        row_cells_soldes[2].text = f"{row.get('Année 2', 0):,.2f} €"
-        row_cells_soldes[3].text = f"{row.get('Année 3', 0):,.2f} €"
+        row_cells_soldes[1].text = f"{row.get('Année 1', 0):,.2f} $"
+        row_cells_soldes[2].text = f"{row.get('Année 2', 0):,.2f} $"
+        row_cells_soldes[3].text = f"{row.get('Année 3', 0):,.2f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -5813,9 +5813,9 @@ def telecharger_document_complet():
     for row in export_data_capacite['table_data']:
         row_cells_cap = table_cap.add_row().cells
         row_cells_cap[0].text = row.get("Description", "")
-        row_cells_cap[1].text = f"{row.get('Année 1', 0):,.2f} €"
-        row_cells_cap[2].text = f"{row.get('Année 2', 0):,.2f} €"
-        row_cells_cap[3].text = f"{row.get('Année 3', 0):,.2f} €"
+        row_cells_cap[1].text = f"{row.get('Année 1', 0):,.2f} $"
+        row_cells_cap[2].text = f"{row.get('Année 2', 0):,.2f} $"
+        row_cells_cap[3].text = f"{row.get('Année 3', 0):,.2f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -5840,9 +5840,9 @@ def telecharger_document_complet():
     for row in export_data_seuil['table_data']:
         row_cells_seuil = table_seuil.add_row().cells
         row_cells_seuil[0].text = row.get("Description", "")
-        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} €"
-        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} €"
-        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} €"
+        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} $"
+        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} $"
+        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -6043,49 +6043,49 @@ def page_plan_financement_trois_ans():
             "Excédent de trésorerie"
         ],
         "Année 1": [
-            f"{immobilisations[0]:,.2f} €",
-            f"{acquisition_stocks[0]:,.2f} €",
-            f"{variation_bfr[0]:,.2f} €",
-            f"{remboursements_emprunts[0]:,.2f} €",
-            f"{total_besoins[0]:,.2f} €",
-            f"{apport_personnel_list[0]:,.2f} €",
-            f"{emprunts[0]:,.2f} €",
-            f"{subventions_list[0]:,.2f} €",
-            f"{autres_financements_list[0]:,.2f} €",
-            f"{capacite_autofinancement_values[0]:,.2f} €",
-            f"{total_ressources[0]:,.2f} €",
-            f"{variation_tresorerie[0]:,.2f} €",
-            f"{excedent_tresorerie[0]:,.2f} €"
+            f"{immobilisations[0]:,.2f} $",
+            f"{acquisition_stocks[0]:,.2f} $",
+            f"{variation_bfr[0]:,.2f} $",
+            f"{remboursements_emprunts[0]:,.2f} $",
+            f"{total_besoins[0]:,.2f} $",
+            f"{apport_personnel_list[0]:,.2f} $",
+            f"{emprunts[0]:,.2f} $",
+            f"{subventions_list[0]:,.2f} $",
+            f"{autres_financements_list[0]:,.2f} $",
+            f"{capacite_autofinancement_values[0]:,.2f} $",
+            f"{total_ressources[0]:,.2f} $",
+            f"{variation_tresorerie[0]:,.2f} $",
+            f"{excedent_tresorerie[0]:,.2f} $"
         ],
         "Année 2": [
-            f"{immobilisations[1]:,.2f} €",
-            f"{acquisition_stocks[1]:,.2f} €",
-            f"{variation_bfr[1]:,.2f} €",
-            f"{remboursements_emprunts[1]:,.2f} €",
-            f"{total_besoins[1]:,.2f} €",
-            f"{apport_personnel_list[1]:,.2f} €",
-            f"{emprunts[1]:,.2f} €",
-            f"{subventions_list[1]:,.2f} €",
-            f"{autres_financements_list[1]:,.2f} €",
-            f"{capacite_autofinancement_values[1]:,.2f} €",
-            f"{total_ressources[1]:,.2f} €",
-            f"{variation_tresorerie[1]:,.2f} €",
-            f"{excedent_tresorerie[1]:,.2f} €"
+            f"{immobilisations[1]:,.2f} $",
+            f"{acquisition_stocks[1]:,.2f} $",
+            f"{variation_bfr[1]:,.2f} $",
+            f"{remboursements_emprunts[1]:,.2f} $",
+            f"{total_besoins[1]:,.2f} $",
+            f"{apport_personnel_list[1]:,.2f} $",
+            f"{emprunts[1]:,.2f} $",
+            f"{subventions_list[1]:,.2f} $",
+            f"{autres_financements_list[1]:,.2f} $",
+            f"{capacite_autofinancement_values[1]:,.2f} $",
+            f"{total_ressources[1]:,.2f} $",
+            f"{variation_tresorerie[1]:,.2f} $",
+            f"{excedent_tresorerie[1]:,.2f} $"
         ],
         "Année 3": [
-            f"{immobilisations[2]:,.2f} €",
-            f"{acquisition_stocks[2]:,.2f} €",
-            f"{variation_bfr[2]:,.2f} €",
-            f"{remboursements_emprunts[2]:,.2f} €",
-            f"{total_besoins[2]:,.2f} €",
-            f"{apport_personnel_list[2]:,.2f} €",
-            f"{emprunts[2]:,.2f} €",
-            f"{subventions_list[2]:,.2f} €",
-            f"{autres_financements_list[2]:,.2f} €",
-            f"{capacite_autofinancement_values[2]:,.2f} €",
-            f"{total_ressources[2]:,.2f} €",
-            f"{variation_tresorerie[2]:,.2f} €",
-            f"{excedent_tresorerie[2]:,.2f} €"
+            f"{immobilisations[2]:,.2f} $",
+            f"{acquisition_stocks[2]:,.2f} $",
+            f"{variation_bfr[2]:,.2f} $",
+            f"{remboursements_emprunts[2]:,.2f} $",
+            f"{total_besoins[2]:,.2f} $",
+            f"{apport_personnel_list[2]:,.2f} $",
+            f"{emprunts[2]:,.2f} $",
+            f"{subventions_list[2]:,.2f} $",
+            f"{autres_financements_list[2]:,.2f} $",
+            f"{capacite_autofinancement_values[2]:,.2f} $",
+            f"{total_ressources[2]:,.2f} $",
+            f"{variation_tresorerie[2]:,.2f} $",
+            f"{excedent_tresorerie[2]:,.2f} $"
         ]
     }
     
@@ -6183,7 +6183,7 @@ def telecharger_document_complet():
     table_inv.style = 'Light List Accent 1'
     table_inv.alignment = WD_TABLE_ALIGNMENT.CENTER
     hdr_cells_inv = table_inv.rows[0].cells
-    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"]
+    headers_inv = ["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"]
     for i, header in enumerate(headers_inv):
         hdr_cells_inv[i].text = header
         for paragraph in hdr_cells_inv[i].paragraphs:
@@ -6196,7 +6196,7 @@ def telecharger_document_complet():
         row_cells[0].text = row.get("Investissements", "")
         row_cells[1].text = row.get("Taux (%)", "")
         row_cells[2].text = str(row.get("Durée (mois)", "")) if row.get("Durée (mois)", "") != "-" else "-"
-        row_cells[3].text = row.get("Montant (€)", "")
+        row_cells[3].text = row.get("Montant ($)", "")
         
         # Mise en forme des lignes spécifiques
         if row["Investissements"] in ["INVESTISSEMENTS", "FINANCEMENT DES INVESTISSEMENTS", "TOTAL SUBVENTIONS", "TOTAL EMPRUNTS"]:
@@ -6320,9 +6320,9 @@ def telecharger_document_complet():
     for row in export_data_soldes['table_data']:
         row_cells_soldes = table_soldes.add_row().cells
         row_cells_soldes[0].text = row.get("Description", "")
-        row_cells_soldes[1].text = f"{row.get('Année 1', 0):,.2f} €"
-        row_cells_soldes[2].text = f"{row.get('Année 2', 0):,.2f} €"
-        row_cells_soldes[3].text = f"{row.get('Année 3', 0):,.2f} €"
+        row_cells_soldes[1].text = f"{row.get('Année 1', 0):,.2f} $"
+        row_cells_soldes[2].text = f"{row.get('Année 2', 0):,.2f} $"
+        row_cells_soldes[3].text = f"{row.get('Année 3', 0):,.2f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -6347,9 +6347,9 @@ def telecharger_document_complet():
     for row in export_data_capacite['table_data']:
         row_cells_cap = table_cap.add_row().cells
         row_cells_cap[0].text = row.get("Description", "")
-        row_cells_cap[1].text = f"{row.get('Année 1', 0):,.2f} €"
-        row_cells_cap[2].text = f"{row.get('Année 2', 0):,.2f} €"
-        row_cells_cap[3].text = f"{row.get('Année 3', 0):,.2f} €"
+        row_cells_cap[1].text = f"{row.get('Année 1', 0):,.2f} $"
+        row_cells_cap[2].text = f"{row.get('Année 2', 0):,.2f} $"
+        row_cells_cap[3].text = f"{row.get('Année 3', 0):,.2f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -6374,9 +6374,9 @@ def telecharger_document_complet():
     for row in export_data_seuil['table_data']:
         row_cells_seuil = table_seuil.add_row().cells
         row_cells_seuil[0].text = row.get("Description", "")
-        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} €"
-        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} €"
-        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} €"
+        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} $"
+        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} $"
+        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} $"
     
     # Ajouter une note
     doc.add_paragraph()
@@ -6717,7 +6717,7 @@ def page_budget_previsionnel_tresorerie():
         amounts = encaissements[key]
         total = sum(amounts)
         amounts_with_total = amounts + [total]
-        table_data[key] = [f"{value:,.2f} €" if value != 0 else "-" for value in amounts_with_total]
+        table_data[key] = [f"{value:,.2f} $" if value != 0 else "-" for value in amounts_with_total]
     
     # Décaissements
     for key in decaissements:
@@ -6725,16 +6725,16 @@ def page_budget_previsionnel_tresorerie():
         amounts = decaissements[key]
         total = sum(amounts)
         # Remplacer 0 par '-' si nécessaire
-        amounts_with_total = [f"{value:,.2f} €" if value != 0 else "-" for value in amounts] + [f"{total:,.2f} €" if total != 0 else "-"]
+        amounts_with_total = [f"{value:,.2f} $" if value != 0 else "-" for value in amounts] + [f"{total:,.2f} $" if total != 0 else "-"]
         table_data[key] = amounts_with_total
     
     # Totaux et soldes
-    table_data["Total des encaissements"] = [f"{value:,.2f} €" if value != 0 else "-" for value in total_encaissements]
-    table_data["Total des décaissements"] = [f"{value:,.2f} €" if value != 0 else "-" for value in total_decaissements]
-    solde_precedent_formatted = [f"{value:,.2f} €" if isinstance(value, (int, float)) and value != 0 else "-" for value in solde_precedent]
+    table_data["Total des encaissements"] = [f"{value:,.2f} $" if value != 0 else "-" for value in total_encaissements]
+    table_data["Total des décaissements"] = [f"{value:,.2f} $" if value != 0 else "-" for value in total_decaissements]
+    solde_precedent_formatted = [f"{value:,.2f} $" if isinstance(value, (int, float)) and value != 0 else "-" for value in solde_precedent]
     table_data["Solde précédent"] = solde_precedent_formatted
-    table_data["Solde du mois"] = [f"{value:,.2f} €" if value != 0 else "-" for value in solde_mois]
-    table_data["Solde de trésorerie (cumul)"] = [f"{value:,.2f} €" if value != 0 else "-" for value in solde_tresorerie_cumul]
+    table_data["Solde du mois"] = [f"{value:,.2f} $" if value != 0 else "-" for value in solde_mois]
+    table_data["Solde de trésorerie (cumul)"] = [f"{value:,.2f} $" if value != 0 else "-" for value in solde_tresorerie_cumul]
     
     # Assurer que toutes les listes ont la même longueur
     max_length = max(len(lst) for lst in table_data.values())
@@ -6854,8 +6854,8 @@ def page_douze_tableaux():
     # Capacité d'autofinancement (simplifiée)
     capacite_autofinancement = resultat_net + amortissements_annee1  # Les amortissements sont réintégrés
     
-    st.write(f"**Résultat Net Année 1 :** {resultat_net:.2f} €")
-    st.write(f"**Capacité d'Autofinancement Année 1 :** {capacite_autofinancement:.2f} €")
+    st.write(f"**Résultat Net Année 1 :** {resultat_net:.2f} $")
+    st.write(f"**Capacité d'Autofinancement Année 1 :** {capacite_autofinancement:.2f} $")
     
     # Vous pouvez répéter les calculs pour les années 2 et 3 si nécessaire
     
@@ -7513,8 +7513,8 @@ def page_generation_business_plan():
                     paragraph = doc.add_paragraph()
                     bold_run = paragraph.add_run(line[2:-2])  # Texte sans `**`
                     bold_run.bold = True
-                elif re.match(r'^\*\*.+?\*\*\s[\d.,]+\s?[€$%]$', line):  # Nombres avec symboles monétaires
-                    match = re.match(r'^\*\*(.+?)\*\*\s([\d.,]+\s?[€$%])$', line)
+                elif re.match(r'^\*\*.+?\*\*\s[\d.,]+\s?[$$%]$', line):  # Nombres avec symboles monétaires
+                    match = re.match(r'^\*\*(.+?)\*\*\s([\d.,]+\s?[$$%])$', line)
                     if match:
                         paragraph = doc.add_paragraph()
                         bold_run = paragraph.add_run(match.group(1))  # Texte en gras
@@ -7614,7 +7614,7 @@ def page_generation_business_plan():
 
         # Ajouter les différents tableaux
         if export_data_investissements.get("table_data"):
-            ajouter_tableau(export_data_investissements["table_data"], ["Investissements", "Taux (%)", "Durée (mois)", "Montant (€)"], "Investissements et Financements")
+            ajouter_tableau(export_data_investissements["table_data"], ["Investissements", "Taux (%)", "Durée (mois)", "Montant ($)"], "Investissements et Financements")
         if export_data_salaires.get("table_data"):
             ajouter_tableau(export_data_salaires["table_data"], ["Description", "Année 1", "Année 2", "Année 3"], "Salaires et Charges Sociales")
         if export_data_amortissements.get("amortissements"):
@@ -7745,3 +7745,4 @@ tabs = st.tabs(tab_names)
 for i, tab in enumerate(tabs):
     with tab:
         sections[i]()
+
