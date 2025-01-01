@@ -44,74 +44,36 @@ def collect_persona_pme():
     
     # Données Démographiques
     st.subheader("Données Démographiques")
-    age = st.slider("Âge", 18, 100, 30)
-    sexe = st.selectbox("Sexe", ["Homme", "Femme", "Autre"])
-    
-    # Localisation Géographique avec options
-    localisation_type = st.selectbox("Type de Localisation", ["Zone Urbaine", "Zone Péri-Urbaine", "Zone Rurale"])
+    age = st.number_input("Âge", min_value=18, max_value=100, value=30)
+    sexe = st.text_input("Sexe", "Homme/Femme/Autre")
     localisation_detail = st.text_input("Localisation Géographique (ex: Paris, France)", "Paris, France")
-    
-    education = st.selectbox("Niveau d'Éducation", ["Alphabétisation", "Langues Parlées", "Secondaire", "Licence", "Master", "Doctorat", "Autre"])
-    
-    profession = st.selectbox("Profession", ["Artisans", "Commerçants", "Agriculteurs", "Employés", "Indépendants", "Autre"])
-    
+    education = st.text_input("Niveau d'Éducation", "Ex: Licence, Master")
+    profession = st.text_input("Profession", "Ex: Ingénieur, Designer")
     revenu_moyen = st.number_input("Revenu Moyen ($)", min_value=0, step=100, value=1000)
     
     # Paramètres Comportementaux
     st.subheader("Paramètres Comportementaux")
     
-    # Sensibilité au Prix
-    sensibilite_prix = st.selectbox("Sensibilité au Prix", ["Budgets Limités", "Nécessité de Micro-Paiements", "Autre"])
-    
-    # Fréquence et Volume d’Achat
-    frequence_achat = st.selectbox("Fréquence d'Achat", ["Achats Ponctuels", "Saisonniers", "Hebdomadaires", "Mensuels", "Autre"])
-    volume_achat = st.selectbox("Volume d'Achat", ["Faible", "Moyen", "Élevé"])
-    
-    # Perception de la Qualité
-    perception_qualite = st.multiselect(
-        "Perception de la Qualité",
-        ["Fiabilité", "Durabilité", "Esthétique", "Performance", "Autre"]
-    )
-    
-    # Utilisation Technologique
-    utilisation_tech = st.selectbox("Utilisation Technologique", ["Téléphones Basiques", "Smartphones d’Entrée de Gamme", "Accès Limité à Internet", "Smartphones Avancés", "Autre"])
-    
-    # Accessibilité
-    acces_transport = st.selectbox("Accessibilité (Transport)", ["Distance aux Points de Vente", "Transport Limité", "Facilité d'Accès", "Autre"])
-    
-    # Temps Disponible
-    temps_disponible = st.selectbox("Temps Disponible", ["Horaires de Travail", "Saison des Récoltes", "Temps Libre Régulier", "Autre"])
-    
-    # Besoins Spécifiques
-    besoins_specifiques = st.multiselect(
-        "Besoins Spécifiques",
-        ["Accès à l’Eau", "Énergie", "Outils Agricoles", "Services Financiers de Base", 
-         "Éducation des Enfants", "Soins de Santé", "Autre"]
-    )
+    sensibilite_prix = st.text_input("Sensibilité au Prix", "Décrivez la sensibilité au prix...")
+    frequence_achat = st.text_input("Fréquence d'Achat", "Décrivez la fréquence d'achat...")
+    volume_achat = st.text_input("Volume d'Achat", "Décrivez le volume d'achat...")
+    perception_qualite = st.text_area("Perception de la Qualité", "Décrivez la perception de la qualité...")
+    utilisation_tech = st.text_area("Utilisation Technologique", "Décrivez l'utilisation technologique...")
+    acces_transport = st.text_area("Accessibilité (Transport)", "Décrivez l'accessibilité via le transport...")
+    temps_disponible = st.text_area("Temps Disponible", "Décrivez le temps disponible...")
+    besoins_specifiques = st.text_area("Besoins Spécifiques", "Décrivez les besoins spécifiques...")
+    motivations = st.text_area("Motivations", "Décrivez les motivations des clients...")
     
     # Capacité d’Adoption de l’Innovation
     st.subheader("Capacité d’Adoption de l’Innovation")
     
-    # Familiarité avec certaines technologies
-    familiarite_tech = st.multiselect(
-        "Familiarité avec certaines Technologies",
-        ["Mobile Money", "Radios Communautaires", "Solutions Solaires", "Autre"]
-    )
-    
-    # Ouverture au changement
-    ouverture_changement = st.selectbox("Ouverture au Changement", ["Faible", "Moyenne", "Élevée"])
-    
-    # Barrières psychologiques/culturelles
-    barrières = st.multiselect(
-        "Barrières Psychologiques/Culturelles",
-        ["Méfiance envers les Nouvelles Solutions Étrangères", "Préférence pour le Contact Humain", 
-         "Importance de la Recommandation de la Famille ou du Chef de Village", "Autre"]
-    )
+    familiarite_tech = st.text_area("Familiarité avec certaines Technologies", "Décrivez la familiarité technologique...")
+    ouverture_changement = st.text_input("Ouverture au Changement", "Faible/Moyenne/Élevée")
+    barrières = st.text_area("Barrières Psychologiques/Culturelles", "Décrivez les barrières psychologiques ou culturelles...")
     
     persona = {
         "âge": age,
         "sexe": sexe,
-        "type_localisation": localisation_type,
         "localisation": localisation_detail,
         "éducation": education,
         "profession": profession,
@@ -124,12 +86,126 @@ def collect_persona_pme():
         "acces_transport": acces_transport,
         "temps_disponible": temps_disponible,
         "besoins_specifiques": besoins_specifiques,
+        "motivations": motivations,
         "familiarite_tech": familiarite_tech,
         "ouverture_changement": ouverture_changement,
         "barrieres": barrières
     }
     
     return persona
+
+def collect_analyse_marche_pme():
+    st.header("Analyse du Marché - PME")
+    
+    # Taille du Marché
+    st.subheader("Taille du Marché")
+    taille_marche = st.text_area("Taille du Marché", "Décrivez la taille du marché, les segments et la valeur totale.")
+    
+    # Segments du Marché
+    st.subheader("Segments du Marché")
+    segments_marche = st.text_area("Segments du Marché", "Décrivez les segments du marché...")
+    
+    # Valeur Totale du Marché ($)
+    st.subheader("Valeur Totale du Marché ($)")
+    valeur_totale = st.text_area("Valeur Totale du Marché ($)", "Décrivez la valeur totale du marché...")
+    
+    # Offres Concurrentes
+    st.subheader("Offres Concurrentes")
+    offres_concurrentes = st.text_area("Offres Concurrentes", "Décrivez les offres concurrentes...")
+    
+    # Niveau de Satisfaction
+    st.subheader("Niveau de Satisfaction")
+    niveau_satisfaction = st.text_area("Niveau de Satisfaction", "Décrivez le niveau de satisfaction...")
+    
+    # Tendances du Marché
+    st.subheader("Tendances du Marché")
+    tendances = st.text_area("Tendances du Marché", "Décrivez les tendances du marché...")
+    
+    # Innovations Émergentes
+    st.subheader("Innovations Émergentes")
+    innovations = st.text_area("Innovations Émergentes", "Décrivez les innovations émergentes...")
+    
+    # Comportements Émergents
+    st.subheader("Comportements Émergents")
+    comportements_emergents = st.text_area("Comportements Émergents", "Décrivez les comportements émergents...")
+    
+    analyse_marche = {
+        "taille_marche": taille_marche,
+        "segments_marche": segments_marche,
+        "valeur_totale": valeur_totale,
+        "offres_concurrentes": offres_concurrentes,
+        "niveau_satisfaction": niveau_satisfaction,
+        "tendances": tendances,
+        "innovations": innovations,
+        "comportements_emergents": comportements_emergents
+    }
+    
+    return analyse_marche
+
+def collect_facteurs_limitants_pme():
+    st.header("Facteurs Limitants - PME")
+    
+    # Contraintes Technologiques
+    st.subheader("Contraintes Technologiques")
+    contraintes_techno = st.text_area("Contraintes Technologiques", "Décrivez les contraintes technologiques...")
+    
+    # Contraintes Économiques
+    st.subheader("Contraintes Économiques")
+    contraintes_economiques = st.text_area("Contraintes Économiques", "Décrivez les contraintes économiques...")
+    
+    # Contraintes Culturelles
+    st.subheader("Contraintes Culturelles")
+    contraintes_culturelles = st.text_area("Contraintes Culturelles", "Décrivez les contraintes culturelles...")
+    
+    # Contraintes Psychologiques et Physiologiques
+    st.subheader("Contraintes Psychologiques et Physiologiques")
+    contraintes_psych_phys = st.text_area("Contraintes Psychologiques et Physiologiques", "Décrivez ces contraintes...")
+    
+    # Contraintes Réglementaires
+    st.subheader("Contraintes Réglementaires")
+    contraintes_reglementaires = st.text_area("Contraintes Réglementaires", "Décrivez les contraintes réglementaires...")
+    
+    facteurs_limitants = {
+        "contraintes_technologiques": contraintes_techno,
+        "contraintes_economiques": contraintes_economiques,
+        "contraintes_culturelles": contraintes_culturelles,
+        "contraintes_psych_phys": contraintes_psych_phys,
+        "contraintes_reglementaires": contraintes_reglementaires
+    }
+    
+    return facteurs_limitants
+
+def collect_concurrence_pme():
+    st.header("Évaluation de la Concurrence - PME")
+    
+    # Concurrents Directs
+    concurrents_directs = st.text_area("Concurrents Directs", "Listez les concurrents directs...")
+    
+    # Concurrents Indirects
+    concurrents_indirects = st.text_area("Concurrents Indirects", "Listez les concurrents indirects...")
+    
+    # Forces des Concurrents
+    forces_concurrents = st.text_area("Forces des Concurrents", "Décrivez les forces des concurrents...")
+    
+    # Faiblesses des Concurrents
+    faiblesses_concurrents = st.text_area("Faiblesses des Concurrents", "Décrivez les faiblesses des concurrents...")
+    
+    # Niveau de Satisfaction des Clients envers les Concurrents
+    satisfaction_concurrence = st.slider("Satisfaction des Clients envers les Concurrents", 0, 10, 5)
+    
+    # Niveau de Confiance des Clients envers les Concurrents
+    confiance_concurrence = st.slider("Confiance des Clients envers les Concurrents", 0, 10, 5)
+    
+    concurrence = {
+        "concurrents_directs": concurrents_directs,
+        "concurrents_indirects": concurrents_indirects,
+        "forces_concurrents": forces_concurrents,
+        "faiblesses_concurrents": faiblesses_concurrents,
+        "satisfaction_concurrence": satisfaction_concurrence,
+        "confiance_concurrence": confiance_concurrence
+    }
+    
+    return concurrence
 
 
 def collect_problem_tree_pme():
@@ -224,139 +300,6 @@ def collect_problem_tree_pme():
     return problem_tree
 
 
-
-def collect_analyse_marche_pme():
-    st.header("Analyse du Marché - PME")
-    
-    # Taille du Marché Local
-    st.subheader("Taille du Marché Local")
-    population = st.number_input("Population Concernée", min_value=0, step=1000, value=100000)
-    pouvoir_achat = st.number_input("Pouvoir d’Achat Moyen ($)", min_value=0, step=100, value=500)
-    infrastructures = st.text_area("Infrastructures Disponibles", "Décrivez les infrastructures disponibles...")
-    
-    # Segments du Marché
-    st.subheader("Segments du Marché")
-    segments = st.multiselect(
-        "Segments",
-        ["Populations Urbaines", "Populations Rurales", "Artisans", "Commerçants", 
-         "Coopératives", "PME Locales", "Secteur Informel", "Autre"]
-    )
-    
-    # Offres Concurrentes Existantes
-    st.subheader("Offres Concurrentes Existantes")
-    solutions_traditionnelles = st.text_area("Solutions Traditionnelles (Artisanales, Informelles)", "Décrivez les solutions traditionnelles...")
-    importations_bas_gamme = st.text_area("Importations Bas de Gamme", "Décrivez les importations bas de gamme...")
-    programmes_ong = st.text_area("Programmes d’ONG", "Décrivez les programmes d’ONG existants...")
-    concurrents = st.text_area("Concurrents Locaux ou Étrangers", "Listez les concurrents locaux ou étrangers...")
-    modeles_low_cost = st.text_area("Modèles Low-Cost", "Décrivez les modèles low-cost présents sur le marché...")
-    
-    # Niveau de Satisfaction Actuel
-    st.subheader("Niveau de Satisfaction Actuel")
-    satisfaction = st.slider("Niveau de Satisfaction des Clients envers les Solutions Actuelles", 0, 10, 5)
-    manque_fiabilite = st.checkbox("Manque de Fiabilité")
-    manque_formation = st.checkbox("Manque de Formation")
-    manque_sav = st.checkbox("Manque de Service Après-Vente (SAV)")
-    
-    # Tendances du Marché
-    st.subheader("Tendances du Marché")
-    adoption_mobile_money = st.checkbox("Adoption Progressive du Mobile Money")
-    sensibilisation_energie_solaire = st.checkbox("Sensibilisation Croissante à l’Énergie Solaire")
-    emergence_cooperatives = st.checkbox("Émergence de Petites Coopératives")
-    engouement_solutions_durables = st.checkbox("Engouement pour des Solutions Durables et Réparables")
-    
-    # Innovations et Comportements Émergents
-    st.subheader("Innovations et Comportements Émergents")
-    reemploi = st.checkbox("Réemploi")
-    economie_circulaire = st.checkbox("Économie Circulaire")
-    mise_en_commun = st.checkbox("Mise en Commun de Ressources")
-    transferts_mobile = st.checkbox("Augmentation des Transferts d’Argent via Mobile")
-    
-    analyse_marche = {
-        "population_concernee": population,
-        "pouvoir_achat_moyen": pouvoir_achat,
-        "infrastructures": infrastructures,
-        "segments": segments,
-        "solutions_traditionnelles": solutions_traditionnelles,
-        "importations_bas_gamme": importations_bas_gamme,
-        "programmes_ong": programmes_ong,
-        "concurrents": concurrents,
-        "modeles_low_cost": modeles_low_cost,
-        "satisfaction": satisfaction,
-        "manque_fiabilite": manque_fiabilite,
-        "manque_formation": manque_formation,
-        "manque_sav": manque_sav,
-        "tendances_mobile_money": adoption_mobile_money,
-        "tendances_energie_solaire": sensibilisation_energie_solaire,
-        "tendances_cooperatives": emergence_cooperatives,
-        "tendances_solutions_durables": engouement_solutions_durables,
-        "innovations_reemploi": reemploi,
-        "innovations_economie_circulaire": economie_circulaire,
-        "innovations_mise_en_commun": mise_en_commun,
-        "innovations_transferts_mobile": transferts_mobile
-    }
-    
-    return analyse_marche
-
-def collect_facteurs_limitants_pme():
-    st.header("Facteurs Limitants - PME")
-    
-    # Contraintes Technologiques
-    st.subheader("Contraintes Technologiques")
-    techno_description = st.text_area("Description des Contraintes Technologiques", "Décrivez les contraintes technologiques...")
-    
-    # Contraintes Économiques
-    st.subheader("Contraintes Économiques")
-    economiques_description = st.text_area("Description des Contraintes Économiques", "Décrivez les contraintes économiques...")
-    
-    # Contraintes Culturelles
-    st.subheader("Contraintes Culturelles")
-    culturelles_description = st.text_area("Description des Contraintes Culturelles", "Décrivez les contraintes culturelles...")
-    
-    # Contraintes Psychologiques et Physiologiques
-    st.subheader("Contraintes Psychologiques et Physiologiques")
-    psych_phys_description = st.text_area("Description des Contraintes Psychologiques et Physiologiques", "Décrivez ces contraintes...")
-    
-    # Contraintes Réglementaires
-    st.subheader("Contraintes Réglementaires")
-    regulatoires_description = st.text_area("Description des Contraintes Réglementaires", "Décrivez les contraintes réglementaires...")
-    
-    facteurs_limitants = {
-        "contraintes_technologiques": techno_description,
-        "contraintes_economiques": economiques_description,
-        "contraintes_culturelles": culturelles_description,
-        "contraintes_psych_phys": psych_phys_description,
-        "contraintes_reglementaires": regulatoires_description
-    }
-    
-    return facteurs_limitants
-
-def collect_concurrence_pme():
-    st.header("Évaluation de la Concurrence - PME")
-    
-    # Concurrents Locaux
-    concurrents_locaux = st.text_area("Concurrents Locaux", "Listez les concurrents locaux...")
-    
-    # Concurrents Informels
-    concurrents_informels = st.text_area("Concurrents Informels", "Listez les concurrents informels...")
-    
-    # Substituts Traditionnels
-    substituts_traditionnels = st.text_area("Substituts Traditionnels", "Listez les substituts traditionnels...")
-    
-    # Niveau de Satisfaction des Clients envers les Concurrents
-    satisfaction_concurrence = st.slider("Satisfaction des Clients envers les Concurrents", 0, 10, 5)
-    
-    # Niveau de Confiance des Clients envers les Concurrents
-    confiance_concurrence = st.slider("Confiance des Clients envers les Concurrents", 0, 10, 5)
-    
-    concurrence = {
-        "concurrents_locaux": concurrents_locaux,
-        "concurrents_informels": concurrents_informels,
-        "substituts_traditionnels": substituts_traditionnels,
-        "satisfaction_concurrence": satisfaction_concurrence,
-        "confiance_concurrence": confiance_concurrence
-    }
-    
-    return concurrence
 
 # ----------------------------------------------------------------------------
 # 2) Fonctions de collecte des données pour Startups
@@ -3211,13 +3154,28 @@ def page_detail_amortissements():
     st.write("---")
     
     # Récupérer la durée d'amortissement
-    duree_amortissement = data.get("duree_amortissement", 0)
+    duree_amortissement = data.get("duree_amortissement", 3)  # Par défaut à 3 ans si non défini
     if duree_amortissement <= 0:
         st.warning("La durée d'amortissement doit être supérieure à zéro.")
         return
     
     # Récupérer les montants des investissements
     besoins_demarrage = data.get("besoins_demarrage", {})
+    
+    # Fonction pour calculer les amortissements
+    def calcul_amortissements(items):
+        amortissements = {}
+        total_amort = [0.0, 0.0, 0.0]
+        for item in items:
+            amount = besoins_demarrage.get(item, 0.0)
+            annual_depreciation = amount / duree_amortissement if duree_amortissement > 0 else 0.0
+            amortization_years = [0.0, 0.0, 0.0]
+            for year in range(3):
+                if year < duree_amortissement:
+                    amortization_years[year] = annual_depreciation
+                    total_amort[year] += annual_depreciation
+            amortissements[item] = amortization_years
+        return amortissements, total_amort
     
     # Incorporels
     incorporels_items = [
@@ -3227,18 +3185,7 @@ def page_detail_amortissements():
         "Frais de dossier",
         "Frais de notaire"
     ]
-    incorporels_amortissements = {}
-    total_incorporels_amort = [0.0, 0.0, 0.0]
-    
-    for item in incorporels_items:
-        amount = besoins_demarrage.get(item, 0.0)
-        annual_depreciation = amount / duree_amortissement if duree_amortissement > 0 else 0.0
-        amortization_years = [0.0, 0.0, 0.0]
-        for year in range(3):
-            if year < duree_amortissement:
-                amortization_years[year] = annual_depreciation
-                total_incorporels_amort[year] += annual_depreciation
-        incorporels_amortissements[item] = amortization_years
+    incorporels_amortissements, total_incorporels_amort = calcul_amortissements(incorporels_items)
     
     # Corporels
     corporels_items = [
@@ -3248,18 +3195,7 @@ def page_detail_amortissements():
         "Matériel autre",
         "Matériel de bureau"
     ]
-    corporels_amortissements = {}
-    total_corporels_amort = [0.0, 0.0, 0.0]
-    
-    for item in corporels_items:
-        amount = besoins_demarrage.get(item, 0.0)
-        annual_depreciation = amount / duree_amortissement if duree_amortissement > 0 else 0.0
-        amortization_years = [0.0, 0.0, 0.0]
-        for year in range(3):
-            if year < duree_amortissement:
-                amortization_years[year] = annual_depreciation
-                total_corporels_amort[year] += annual_depreciation
-        corporels_amortissements[item] = amortization_years
+    corporels_amortissements, total_corporels_amort = calcul_amortissements(corporels_items)
     
     # Total amortissements par année
     total_amortissements = [
@@ -3269,6 +3205,24 @@ def page_detail_amortissements():
     # Création d'un tableau unique
     st.subheader("Amortissements")
     amortissements_data = []
+    
+    # Ajout des totaux des catégories
+    amortissements_data.append({
+        "Amortissement": "Amortissements incorporels",
+        "Année 1": f"{total_incorporels_amort[0]:.2f}",
+        "Année 2": f"{total_incorporels_amort[1]:.2f}",
+        "Année 3": f"{total_incorporels_amort[2]:.2f}"
+    })
+    
+    # Ajout d'une ligne vide pour la lisibilité
+    amortissements_data.append({
+        "Amortissement": "",
+        "Année 1": "",
+        "Année 2": "",
+        "Année 3": ""
+    })
+    
+    # Ajout des détails des amortissements incorporels
     for item in incorporels_items:
         amortization_years = incorporels_amortissements.get(item, [0.0, 0.0, 0.0])
         amortissements_data.append({
@@ -3277,6 +3231,29 @@ def page_detail_amortissements():
             "Année 2": f"{amortization_years[1]:.2f}",
             "Année 3": f"{amortization_years[2]:.2f}"
         })
+    
+    # Ajout d'une ligne vide pour la lisibilité
+    amortissements_data.append({
+        "Amortissement": "",
+        "Année 1": "",
+        "Année 2": "",
+        "Année 3": ""
+    })
+    amortissements_data.append({
+        "Amortissement": "Amortissements corporels",
+        "Année 1": f"{total_corporels_amort[0]:.2f}",
+        "Année 2": f"{total_corporels_amort[1]:.2f}",
+        "Année 3": f"{total_corporels_amort[2]:.2f}"
+    })
+        # Ajout d'une ligne vide pour la lisibilité
+    amortissements_data.append({
+        "Amortissement": "",
+        "Année 1": "",
+        "Année 2": "",
+        "Année 3": ""
+    })
+        
+    # Ajout des détails des amortissements corporels
     for item in corporels_items:
         amortization_years = corporels_amortissements.get(item, [0.0, 0.0, 0.0])
         amortissements_data.append({
@@ -3285,6 +3262,15 @@ def page_detail_amortissements():
             "Année 2": f"{amortization_years[1]:.2f}",
             "Année 3": f"{amortization_years[2]:.2f}"
         })
+    
+    # Ajout d'une ligne vide pour la lisibilité
+    amortissements_data.append({
+        "Amortissement": "",
+        "Année 1": "",
+        "Année 2": "",
+        "Année 3": ""
+    })
+    
     # Total amortissements
     amortissements_data.append({
         "Amortissement": "Total Amortissements",
@@ -3292,8 +3278,17 @@ def page_detail_amortissements():
         "Année 2": f"{total_amortissements[1]:.2f}",
         "Année 3": f"{total_amortissements[2]:.2f}"
     })
+    
+    # Création du DataFrame
     df_amortissements = pd.DataFrame(amortissements_data)
-    st.table(df_amortissements)
+    
+    # Affichage du tableau avec des bordures pour plus de clarté
+    st.table(df_amortissements.style.set_properties(**{
+        'text-align': 'right'
+    }).set_table_styles([
+        {'selector': 'th', 'props': [('text-align', 'center')]}
+    ]))
+
     
     # Stocker les amortissements dans les données pour exportation
     data["amortissements"] = {
@@ -3739,7 +3734,19 @@ def page_compte_resultats_previsionnel():
     ]
     
     # Achats consommés (charges variables) - Supposés nuls si pas de marchandises vendues
-    charges_variables = [0.0, 0.0, 0.0]
+    data["charges_variables"] = data.get("charges_variables", {})
+    charges_variables = data["charges_variables"]
+    cout_achat_marchandises_pct=charges_variables.get("cout_achat_marchandises_pct", 0.0)
+    
+    charges_variables = [ca_marchandises[0]* cout_achat_marchandises_pct / 100.0,
+                         ca_marchandises[1]* cout_achat_marchandises_pct / 100.0,
+                         ca_marchandises[2]* cout_achat_marchandises_pct / 100.0
+                         ]
+    
+    # charges exploitations (charges exploitations) - Supposés nuls si pas de marchandises vendues
+    
+    charges_exploitations = charges_variables 
+
     
     # Marge brute = Total CA - Achats consommés
     marge_brute = [
@@ -3895,7 +3902,7 @@ def page_compte_resultats_previsionnel():
             f"{ca_marchandises[0]:,.2f} $",
             f"{ca_services[0]:,.2f} $",
             "",
-            "",
+            f"{charges_exploitations[0]:,.2f} $",
             f"{charges_variables[0]:,.2f} $",
             "",
             f"{marge_brute[0]:,.2f} $",
@@ -3907,7 +3914,7 @@ def page_compte_resultats_previsionnel():
             f"{ca_marchandises[1]:,.2f} $",
             f"{ca_services[1]:,.2f} $",
             "",
-            "",
+            f"{charges_exploitations[1]:,.2f} $",
             f"{charges_variables[1]:,.2f} $",
             "",
             f"{marge_brute[1]:,.2f} $",
@@ -3919,7 +3926,7 @@ def page_compte_resultats_previsionnel():
             f"{ca_marchandises[2]:,.2f} $",
             f"{ca_services[2]:,.2f} $",
             "",
-            "",
+            f"{charges_exploitations[2]:,.2f} $",
             f"{charges_variables[2]:,.2f} $",
             "",
             f"{marge_brute[2]:,.2f} $",
@@ -3974,6 +3981,7 @@ def page_compte_resultats_previsionnel():
         "total_ca": total_ca,
         "ca_marchandises": ca_marchandises,
         "ca_services": ca_services,
+        "charges_exploitations":charges_exploitations,
         "charges_variables": charges_variables,
         "marge_brute": marge_brute,
         "charges_fixes": total_charges_fixes,
@@ -4063,7 +4071,7 @@ def page_soldes_intermediaires_de_gestion():
     total_ca = get_three_years_data("total_ca")
     ca_marchandises = get_three_years_data("ca_marchandises")
     ca_services = get_three_years_data("ca_services")
-    achats_consommes = get_three_years_data("achats_consommes")  # Actuellement défini à [0.0, 0.0, 0.0]
+    achats_consommes = get_three_years_data("charges_variables")  # Actuellement défini à [0.0, 0.0, 0.0]
     charges_fixes = get_three_years_data("charges_fixes")
     impot_societes = get_three_years_data("impot_societes")
     impots_et_taxes = get_three_years_data("impots_et_taxes")
@@ -5111,25 +5119,21 @@ def page_seuil_rentabilite_economique():
     # Définir "Seuil de rentabilite_economique" comme index
     df.set_index("Seuil de rentabilite_economique", inplace=True)
     
-    # Définir le formatage pour chaque colonne
-    format_dict = {
-        "Année 1": "{:,.0f} $",
-        "Année 2": "{:,.0f} $",
-        "Année 3": "{:,.0f} $",
-        "Taux de marge sur coûts variables": "{:.0f} %",
-        "Point mort en chiffre d'affaires par jour ouvré": "{:.0f} $"
-    }
-    
-    # Appliquer le formatage et afficher le tableau
-    st.table(
-        df.style.format(format_dict)
-          .set_properties(**{'text-align': 'right'})
-          .set_table_styles([{
-              'selector': 'th',
-              'props': [('text-align', 'center')]
-          }])
-    )
-    
+    # Étape 4: Définir une fonction de formatage
+    # Étape 4: Définir une fonction de formatage
+    def format_row(row):
+        if row.name == "Taux de marge sur coûts variables":
+            # Formater en pourcentage avec deux décimales
+            return row.apply(lambda x: "{:.2f} %".format(x))
+        else:
+            # Formater en dollars avec séparateurs de milliers et sans décimales
+            return row.apply(lambda x: "{:,.0f} $".format(x) if isinstance(x, (int, float)) else x)
+
+    # Étape 5: Appliquer le formatage
+    df_formatted = df.apply(format_row, axis=1)
+
+    # Étape 6: Afficher le tableau formaté avec Streamlit
+    st.table(df_formatted)
     # Stocker les résultats dans les données
     data["seuil_rentabilite_economique"] = {
         "ventes_production_reelle": ventes_production_reelle,
@@ -5403,9 +5407,9 @@ def telecharger_document_complet():
     for row in export_data_seuil['table_data']:
         row_cells_seuil = table_seuil.add_row().cells
         row_cells_seuil[0].text = row.get("Description", "")
-        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} $"
-        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} $"
-        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} $"
+        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.1f} "
+        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.1f} "
+        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.1f} "
     
     # Ajouter une note
     doc.add_paragraph()
@@ -5840,9 +5844,9 @@ def telecharger_document_complet():
     for row in export_data_seuil['table_data']:
         row_cells_seuil = table_seuil.add_row().cells
         row_cells_seuil[0].text = row.get("Description", "")
-        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} $"
-        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} $"
-        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} $"
+        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.2f} "
+        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.2f} "
+        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.2f} "
     
     # Ajouter une note
     doc.add_paragraph()
@@ -5931,7 +5935,6 @@ def page_plan_financement_trois_ans():
         besoins_demarrage.get("Caution ou dépôt de garantie", 0),
         besoins_demarrage.get("Frais de dossier", 0),
         besoins_demarrage.get("Frais de notaire", 0),
-        besoins_demarrage.get("Enseigne et éléments de communication", 0)
     ])
     
     immobilisations_corp = sum([
@@ -6152,7 +6155,8 @@ def telecharger_document_complet():
     export_data_plan_financement = st.session_state.get('export_data_plan_financement_trois_ans', {})
     export_data_budget_tresorerie_part1 = st.session_state.get('export_data_budget_previsionnel_tresorerie_part1', {})
     export_data_budget_tresorerie_part2 = st.session_state.get('export_data_budget_previsionnel_tresorerie_part2', {})
-    
+    print(export_data_plan_financement)
+    st.write(export_data_plan_financement)
     # Vérifiez que toutes les données nécessaires sont présentes
     if not all([
         export_data_investissements.get("table_data"),
@@ -6374,9 +6378,9 @@ def telecharger_document_complet():
     for row in export_data_seuil['table_data']:
         row_cells_seuil = table_seuil.add_row().cells
         row_cells_seuil[0].text = row.get("Description", "")
-        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.0f} $"
-        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.0f} $"
-        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.0f} $"
+        row_cells_seuil[1].text = f"{row.get('Année 1', 0):,.2f} "
+        row_cells_seuil[2].text = f"{row.get('Année 2', 0):,.2f} "
+        row_cells_seuil[3].text = f"{row.get('Année 3', 0):,.2f} "
     
     # Ajouter une note
     doc.add_paragraph()
@@ -6400,7 +6404,7 @@ def telecharger_document_complet():
     
     for row in export_data_plan_financement['table_data']:
         row_cells_plan = table_plan.add_row().cells
-        row_cells_plan[0].text = row.get("Description", "")
+        row_cells_plan[0].text = row.get("Plan de financement à trois ans", "")
         row_cells_plan[1].text = row.get("Année 1", "")
         row_cells_plan[2].text = row.get("Année 2", "")
         row_cells_plan[3].text = row.get("Année 3", "")
@@ -7672,7 +7676,9 @@ def page_generation_business_plan():
         st.download_button("Téléchargez le document Word", word_buffer, file_name="business_plan.docx", mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
 # Sélection du type d'entreprise et nom
-st.sidebar.header("Configuration Initiale")
+
+st.title('Business Plan')
+st.sidebar.header("Configuration Initiale pour le business model")
 type_entreprise = st.sidebar.selectbox("Type d'entreprise", ["PME", "Startup"], key="type_entreprise")
 nom_entreprise = st.sidebar.text_input("Nom de l'entreprise", value="", key="nom_entreprise")
 
@@ -7745,4 +7751,5 @@ tabs = st.tabs(tab_names)
 for i, tab in enumerate(tabs):
     with tab:
         sections[i]()
+
 
