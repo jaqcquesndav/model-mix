@@ -7739,10 +7739,9 @@ except ValueError:
     st.error("L'onglet 'Génération du Business Plan' n'a pas été trouvé dans la liste des onglets.")
     index_generation_bp = len(tab_names)  # Ajouter à la fin si non trouvé
 
-# Insérer les nouveaux onglets avant "Génération du Business Plan"
-tab_names = tab_names[:index_generation_bp] + business_model_tab_names + tab_names[index_generation_bp:]
-sections = sections[:index_generation_bp] + business_model_sections + sections[index_generation_bp:]
-
+# Placer les nouveaux onglets au début
+tab_names = business_model_tab_names + tab_names
+sections = business_model_sections + sections
 
 # Création des onglets
 tabs = st.tabs(tab_names)
