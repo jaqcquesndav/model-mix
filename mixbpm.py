@@ -40,59 +40,406 @@ openai.api_key = api_key
 # ----------------------------------------------------------------------------
 
 def collect_persona_pme():
-    st.header("Persona - PME")
-    
-    # Données Démographiques
-    st.subheader("Données Démographiques")
-    age = st.number_input("Âge", min_value=18, max_value=100, value=30)
-    sexe = st.text_input("Sexe", "Homme/Femme/Autre")
-    localisation_detail = st.text_input("Localisation Géographique (ex: Paris, France)", "Paris, France")
-    education = st.text_input("Niveau d'Éducation", "Ex: Licence, Master")
-    profession = st.text_input("Profession", "Ex: Ingénieur, Designer")
-    revenu_moyen = st.number_input("Revenu Moyen ($)", min_value=0, step=100, value=1000)
-    
-    # Paramètres Comportementaux
-    st.subheader("Paramètres Comportementaux")
-    
-    sensibilite_prix = st.text_input("Sensibilité au Prix", "Décrivez la sensibilité au prix...")
-    frequence_achat = st.text_input("Fréquence d'Achat", "Décrivez la fréquence d'achat...")
-    volume_achat = st.text_input("Volume d'Achat", "Décrivez le volume d'achat...")
-    perception_qualite = st.text_area("Perception de la Qualité", "Décrivez la perception de la qualité...")
-    utilisation_tech = st.text_area("Utilisation Technologique", "Décrivez l'utilisation technologique...")
-    acces_transport = st.text_area("Accessibilité (Transport)", "Décrivez l'accessibilité via le transport...")
-    temps_disponible = st.text_area("Temps Disponible", "Décrivez le temps disponible...")
-    besoins_specifiques = st.text_area("Besoins Spécifiques", "Décrivez les besoins spécifiques...")
-    motivations = st.text_area("Motivations", "Décrivez les motivations des clients...")
-    
-    # Capacité d’Adoption de l’Innovation
-    st.subheader("Capacité d’Adoption de l’Innovation")
-    
-    familiarite_tech = st.text_area("Familiarité avec certaines Technologies", "Décrivez la familiarité technologique...")
-    ouverture_changement = st.text_input("Ouverture au Changement", "Faible/Moyenne/Élevée")
-    barrières = st.text_area("Barrières Psychologiques/Culturelles", "Décrivez les barrières psychologiques ou culturelles...")
-    
-    persona = {
-        "âge": age,
-        "sexe": sexe,
-        "localisation": localisation_detail,
-        "éducation": education,
-        "profession": profession,
-        "revenu_moyen": revenu_moyen,
-        "sensibilite_prix": sensibilite_prix,
-        "frequence_achat": frequence_achat,
-        "volume_achat": volume_achat,
-        "perception_qualite": perception_qualite,
-        "utilisation_tech": utilisation_tech,
-        "acces_transport": acces_transport,
-        "temps_disponible": temps_disponible,
-        "besoins_specifiques": besoins_specifiques,
-        "motivations": motivations,
-        "familiarite_tech": familiarite_tech,
-        "ouverture_changement": ouverture_changement,
-        "barrieres": barrières
-    }
-    
+    """
+    Fonction pour sélectionner le type de persona.
+    """
+    type_persona = st.selectbox(
+        "Sélectionnez le type de Persona",
+        ["B2C", "B2B", "Ménage"],
+        key="type_persona_selectbox"
+    )
+    st.write(f"**Type de Persona sélectionné :** {type_persona}")
+    return type_persona
+
+def collect_persona_details(type_persona):
+    """
+    Fonction pour collecter les détails du persona en fonction du type sélectionné.
+    """
+    persona = {"type": type_persona}
+
+    if type_persona == "B2C":
+        st.subheader("Persona - B2C")
+        
+        # Données Démographiques B2C
+        st.subheader("Données Démographiques")
+        age = st.number_input("Âge", min_value=18, max_value=100, value=30, key="b2c_age")
+        sexe = st.text_input("Sexe", placeholder="Homme, Femme, Autre", key="b2c_sexe")
+        localisation_detail = st.text_input(
+            "Localisation Géographique (ex: Paris, France)",
+            "Paris, France",
+            key="b2c_localisation"
+        )
+        education = st.text_input(
+            "Niveau d'Éducation",
+            placeholder="Baccalauréat, Licence, Master, Doctorat, Autre",
+            key="b2c_education"
+        )
+        profession = st.text_input("Profession", "Ex: Ingénieur, Designer", key="b2c_profession")
+        revenu_moyen = st.number_input("Revenu Moyen (€)", min_value=0, step=100, value=30000, key="b2c_revenu")
+        
+        # Paramètres Comportementaux B2C
+        st.subheader("Paramètres Comportementaux")
+        sensibilite_prix = st.text_input(
+            "Sensibilité au Prix",
+            placeholder="Faible, Moyenne, Élevée",
+            key="b2c_sensibilite_prix"
+        )
+        if sensibilite_prix and sensibilite_prix not in ["Faible", "Moyenne", "Élevée"]:
+            st.warning("Veuillez entrer une valeur valide pour la Sensibilité au Prix : Faible, Moyenne ou Élevée.")
+        
+        frequence_achat = st.text_input(
+            "Fréquence d'Achat",
+            placeholder="Rarement, Mensuellement, Hebdomadairement",
+            key="b2c_frequence_achat"
+        )
+        if frequence_achat and frequence_achat not in ["Rarement", "Mensuellement", "Hebdomadairement"]:
+            st.warning("Veuillez entrer une valeur valide pour la Fréquence d'Achat : Rarement, Mensuellement ou Hebdomadairement.")
+        
+        volume_achat = st.text_input(
+            "Volume d'Achat",
+            placeholder="Faible, Moyen, Élevé",
+            key="b2c_volume_achat"
+        )
+        if volume_achat and volume_achat not in ["Faible", "Moyen", "Élevé"]:
+            st.warning("Veuillez entrer une valeur valide pour le Volume d'Achat : Faible, Moyen ou Élevé.")
+        
+        perception_qualite = st.text_area(
+            "Perception de la Qualité",
+            "Décrivez la perception de la qualité...",
+            key="b2c_perception_qualite"
+        )
+        utilisation_tech = st.text_area(
+            "Utilisation Technologique",
+            "Décrivez l'utilisation technologique...",
+            key="b2c_utilisation_tech"
+        )
+        acces_transport = st.text_area(
+            "Accessibilité (Transport)",
+            "Décrivez l'accessibilité via le transport...",
+            key="b2c_acces_transport"
+        )
+        temps_disponible = st.text_area(
+            "Temps Disponible",
+            "Décrivez le temps disponible...",
+            key="b2c_temps_disponible"
+        )
+        besoins_specifiques = st.text_area(
+            "Besoins Spécifiques",
+            "Décrivez les besoins spécifiques...",
+            key="b2c_besoins_specifiques"
+        )
+        motivations = st.text_area(
+            "Motivations",
+            "Décrivez les motivations des clients...",
+            key="b2c_motivations"
+        )
+        
+        # Capacité d’Adoption de l’Innovation B2C
+        st.subheader("Capacité d’Adoption de l’Innovation")
+        familiarite_tech = st.text_area(
+            "Familiarité avec certaines Technologies",
+            "Décrivez la familiarité technologique...",
+            key="b2c_familiarite_tech"
+        )
+        ouverture_changement = st.text_input(
+            "Ouverture au Changement",
+            placeholder="Faible, Moyenne, Élevée",
+            key="b2c_ouverture_changement"
+        )
+        if ouverture_changement and ouverture_changement not in ["Faible", "Moyenne", "Élevée"]:
+            st.warning("Veuillez entrer une valeur valide pour l'Ouverture au Changement : Faible, Moyenne ou Élevée.")
+        
+        barrières = st.text_area(
+            "Barrières Psychologiques/Culturelles",
+            "Décrivez les barrières psychologiques ou culturelles...",
+            key="b2c_barrieres"
+        )
+        
+        # Compilation du persona B2C
+        persona.update({
+            "âge": age,
+            "sexe": sexe,
+            "localisation": localisation_detail,
+            "éducation": education,
+            "profession": profession,
+            "revenu_moyen": revenu_moyen,
+            "sensibilite_prix": sensibilite_prix,
+            "frequence_achat": frequence_achat,
+            "volume_achat": volume_achat,
+            "perception_qualite": perception_qualite,
+            "utilisation_tech": utilisation_tech,
+            "acces_transport": acces_transport,
+            "temps_disponible": temps_disponible,
+            "besoins_specifiques": besoins_specifiques,
+            "motivations": motivations,
+            "familiarite_tech": familiarite_tech,
+            "ouverture_changement": ouverture_changement,
+            "barrieres": barrières
+        })
+
+    elif type_persona == "B2B":
+        st.subheader("Persona - B2B")
+        
+        # Données Démographiques B2B
+        st.subheader("Données Démographiques")
+        taille_entreprise = st.text_input(
+            "Taille de l'Entreprise",
+            placeholder="PME, Grande Entreprise, Multinationale",
+            key="b2b_taille_entreprise"
+        )
+        secteur_activite = st.text_input(
+            "Secteur d'Activité",
+            "Ex: Technologie, Santé",
+            key="b2b_secteur_activite"
+        )
+        localisation_entreprise = st.text_input(
+            "Localisation de l'Entreprise",
+            "Paris, France",
+            key="b2b_localisation_entreprise"
+        )
+        chiffre_affaires = st.number_input(
+            "Chiffre d'Affaires (€)",
+            min_value=0,
+            step=10000,
+            value=500000,
+            key="b2b_chiffre_affaires"
+        )
+        nombre_employes = st.number_input(
+            "Nombre d'Employés",
+            min_value=1,
+            step=1,
+            value=50,
+            key="b2b_nombre_employes"
+        )
+        
+        # Décideurs et Influenceurs B2B
+        st.subheader("Décideurs et Influenceurs")
+        role_decideur = st.text_input(
+            "Rôle du Décideur",
+            "Ex: Directeur des Achats",
+            key="b2b_role_decideur"
+        )
+        influenceur = st.text_input(
+            "Influenceurs Internes",
+            "Ex: Équipe IT, Marketing",
+            key="b2b_influenceur"
+        )
+        
+        # Paramètres Comportementaux B2B
+        st.subheader("Paramètres Comportementaux")
+        sensibilite_prix_b2b = st.text_input(
+            "Sensibilité au Prix",
+            placeholder="Faible, Moyenne, Élevée",
+            key="b2b_sensibilite_prix"
+        )
+        if sensibilite_prix_b2b and sensibilite_prix_b2b not in ["Faible", "Moyenne", "Élevée"]:
+            st.warning("Veuillez entrer une valeur valide pour la Sensibilité au Prix : Faible, Moyenne ou Élevée.")
+        
+        cycle_achat = st.text_input(
+            "Cycle d'Achat",
+            placeholder="Long, Moyen, Court",
+            key="b2b_cycle_achat"
+        )
+        if cycle_achat and cycle_achat not in ["Long", "Moyen", "Court"]:
+            st.warning("Veuillez entrer une valeur valide pour le Cycle d'Achat : Long, Moyen ou Court.")
+        
+        volume_achat_b2b = st.text_input(
+            "Volume d'Achat",
+            placeholder="Faible, Moyen, Élevé",
+            key="b2b_volume_achat"
+        )
+        if volume_achat_b2b and volume_achat_b2b not in ["Faible", "Moyen", "Élevé"]:
+            st.warning("Veuillez entrer une valeur valide pour le Volume d'Achat : Faible, Moyen ou Élevé.")
+        
+        perception_qualite_b2b = st.text_area(
+            "Perception de la Qualité",
+            "Décrivez la perception de la qualité...",
+            key="b2b_perception_qualite"
+        )
+        besoins_specifiques_b2b = st.text_area(
+            "Besoins Spécifiques",
+            "Décrivez les besoins spécifiques de l'entreprise...",
+            key="b2b_besoins_specifiques"
+        )
+        motivations_b2b = st.text_area(
+            "Motivations",
+            "Décrivez les motivations de l'entreprise...",
+            key="b2b_motivations"
+        )
+        
+        # Capacité d’Adoption de l’Innovation B2B
+        st.subheader("Capacité d’Adoption de l’Innovation")
+        familiarite_tech_b2b = st.text_area(
+            "Familiarité avec certaines Technologies",
+            "Décrivez la familiarité technologique de l'entreprise...",
+            key="b2b_familiarite_tech"
+        )
+        ouverture_changement_b2b = st.text_input(
+            "Ouverture au Changement",
+            placeholder="Faible, Moyenne, Élevée",
+            key="b2b_ouverture_changement"
+        )
+        if ouverture_changement_b2b and ouverture_changement_b2b not in ["Faible", "Moyenne", "Élevée"]:
+            st.warning("Veuillez entrer une valeur valide pour l'Ouverture au Changement : Faible, Moyenne ou Élevée.")
+        
+        barrières_b2b = st.text_area(
+            "Barrières Psychologiques/Culturelles",
+            "Décrivez les barrières psychologiques ou culturelles...",
+            key="b2b_barrieres"
+        )
+        
+        # Compilation du persona B2B
+        persona.update({
+            "taille_entreprise": taille_entreprise,
+            "secteur_activite": secteur_activite,
+            "localisation_entreprise": localisation_entreprise,
+            "chiffre_affaires": chiffre_affaires,
+            "nombre_employes": nombre_employes,
+            "role_decideur": role_decideur,
+            "influenceur": influenceur,
+            "sensibilite_prix": sensibilite_prix_b2b,
+            "cycle_achat": cycle_achat,
+            "volume_achat": volume_achat_b2b,
+            "perception_qualite": perception_qualite_b2b,
+            "besoins_specifiques": besoins_specifiques_b2b,
+            "motivations": motivations_b2b,
+            "familiarite_tech": familiarite_tech_b2b,
+            "ouverture_changement": ouverture_changement_b2b,
+            "barrieres": barrières_b2b
+        })
+
+    elif type_persona == "Ménage":
+        st.subheader("Persona - Ménage")
+        
+        # Données Démographiques Ménage
+        st.subheader("Données Démographiques")
+        taille_menage = st.number_input(
+            "Nombre de Personnes dans le Ménage",
+            min_value=1,
+            step=1,
+            value=4,
+            key="menage_taille_menage"
+        )
+        revenu_menage = st.number_input(
+            "Revenu Mensuel du Ménage (€)",
+            min_value=0,
+            step=100,
+            value=4000,
+            key="menage_revenu_menage"
+        )
+        localisation_menage = st.text_input(
+            "Localisation Géographique (ex: Lyon, France)",
+            "Lyon, France",
+            key="menage_localisation"
+        )
+        type_logement = st.text_input(
+            "Type de Logement",
+            placeholder="Appartement, Maison, Studio, Autre",
+            key="menage_type_logement"
+        )
+        
+        # Paramètres Comportementaux Ménage
+        st.subheader("Paramètres Comportementaux")
+        sensibilite_prix_menage = st.text_input(
+            "Sensibilité au Prix",
+            placeholder="Faible, Moyenne, Élevée",
+            key="menage_sensibilite_prix"
+        )
+        if sensibilite_prix_menage and sensibilite_prix_menage not in ["Faible", "Moyenne", "Élevée"]:
+            st.warning("Veuillez entrer une valeur valide pour la Sensibilité au Prix : Faible, Moyenne ou Élevée.")
+        
+        frequence_achat_menage = st.text_input(
+            "Fréquence d'Achat",
+            placeholder="Rarement, Mensuellement, Hebdomadairement",
+            key="menage_frequence_achat"
+        )
+        if frequence_achat_menage and frequence_achat_menage not in ["Rarement", "Mensuellement", "Hebdomadairement"]:
+            st.warning("Veuillez entrer une valeur valide pour la Fréquence d'Achat : Rarement, Mensuellement ou Hebdomadairement.")
+        
+        volume_achat_menage = st.text_input(
+            "Volume d'Achat",
+            placeholder="Faible, Moyen, Élevé",
+            key="menage_volume_achat"
+        )
+        if volume_achat_menage and volume_achat_menage not in ["Faible", "Moyen", "Élevé"]:
+            st.warning("Veuillez entrer une valeur valide pour le Volume d'Achat : Faible, Moyen ou Élevé.")
+        
+        perception_qualite_menage = st.text_area(
+            "Perception de la Qualité",
+            "Décrivez la perception de la qualité...",
+            key="menage_perception_qualite"
+        )
+        utilisation_tech_menage = st.text_area(
+            "Utilisation Technologique",
+            "Décrivez l'utilisation technologique dans le ménage...",
+            key="menage_utilisation_tech"
+        )
+        acces_transport_menage = st.text_area(
+            "Accessibilité (Transport)",
+            "Décrivez l'accessibilité via le transport pour le ménage...",
+            key="menage_acces_transport"
+        )
+        temps_disponible_menage = st.text_area(
+            "Temps Disponible",
+            "Décrivez le temps disponible pour le ménage...",
+            key="menage_temps_disponible"
+        )
+        besoins_specifiques_menage = st.text_area(
+            "Besoins Spécifiques",
+            "Décrivez les besoins spécifiques du ménage...",
+            key="menage_besoins_specifiques"
+        )
+        motivations_menage = st.text_area(
+            "Motivations",
+            "Décrivez les motivations du ménage...",
+            key="menage_motivations"
+        )
+        
+        # Capacité d’Adoption de l’Innovation Ménage
+        st.subheader("Capacité d’Adoption de l’Innovation")
+        familiarite_tech_menage = st.text_area(
+            "Familiarité avec certaines Technologies",
+            "Décrivez la familiarité technologique du ménage...",
+            key="menage_familiarite_tech"
+        )
+        ouverture_changement_menage = st.text_input(
+            "Ouverture au Changement",
+            placeholder="Faible, Moyenne, Élevée",
+            key="menage_ouverture_changement"
+        )
+        if ouverture_changement_menage and ouverture_changement_menage not in ["Faible", "Moyenne", "Élevée"]:
+            st.warning("Veuillez entrer une valeur valide pour l'Ouverture au Changement : Faible, Moyenne ou Élevée.")
+        
+        barrières_menage = st.text_area(
+            "Barrières Psychologiques/Culturelles",
+            "Décrivez les barrières psychologiques ou culturelles...",
+            key="menage_barrieres"
+        )
+        
+        # Compilation du persona Ménage
+        persona.update({
+            "taille_menage": taille_menage,
+            "revenu_menage": revenu_menage,
+            "localisation_menage": localisation_menage,
+            "type_logement": type_logement,
+            "sensibilite_prix": sensibilite_prix_menage,
+            "frequence_achat": frequence_achat_menage,
+            "volume_achat": volume_achat_menage,
+            "perception_qualite": perception_qualite_menage,
+            "utilisation_tech": utilisation_tech_menage,
+            "acces_transport": acces_transport_menage,
+            "temps_disponible": temps_disponible_menage,
+            "besoins_specifiques": besoins_specifiques_menage,
+            "motivations": motivations_menage,
+            "familiarite_tech": familiarite_tech_menage,
+            "ouverture_changement": ouverture_changement_menage,
+            "barrieres": barrières_menage
+        })
+
     return persona
+
+
+
 
 def collect_analyse_marche_pme():
     st.header("Analyse du Marché - PME")
@@ -1419,7 +1766,7 @@ def page_ameliore_business_model():
 def page_collecte_donnees():
     st.header("Étape 1 : Collecte des Données")
     st.write("Veuillez remplir les informations initiales pour générer le Business Model Canvas.")
-
+    
     # Créer des sous-onglets pour chaque section de collecte
     collecte_tabs = st.tabs([
         "Persona",
@@ -1428,25 +1775,41 @@ def page_collecte_donnees():
         "Facteurs Limitants",
         "Concurrence",
     ])
-
+    
     # Collecte de Persona
     with collecte_tabs[0]:
-        if st.session_state.type_entreprise == "PME":
-            with st.form("form_persona_pme"):
-                persona = collect_persona_pme()
-                submit_persona = st.form_submit_button("Valider Persona")
+        if 'type_entreprise' not in st.session_state:
+            st.warning("Veuillez sélectionner le type d'entreprise dans la barre latérale.")
+        else:
+            if st.session_state.type_entreprise == "PME":
+                st.subheader("Collecte de Persona pour PME")
+                
+                # Sélection du type de persona **hors** du formulaire
+                type_persona = collect_persona_pme()
+                
+                # Formulaire pour collecter les détails du persona
+                with st.form("form_persona_pme"):
+                    persona = collect_persona_details(type_persona)
+                    submit_persona = st.form_submit_button("Valider Persona")
+                
+                if submit_persona:
+                    st.session_state.persona = persona
+                    st.success("Données Persona enregistrées avec succès !")
             
-            if submit_persona:
-                st.session_state.persona = persona
-                st.success("Données Persona enregistrées avec succès !")
-        elif st.session_state.type_entreprise == "Startup":
-            with st.form("form_persona_startup"):
-                persona = collect_persona_startup()
-                submit_persona = st.form_submit_button("Valider Persona")
-            
-            if submit_persona:
-                st.session_state.persona = persona
-                st.success("Données Persona enregistrées avec succès !")
+            elif st.session_state.type_entreprise == "Startup":
+                st.subheader("Collecte de Persona pour Startup")
+                
+                # Sélection du type de persona **hors** du formulaire
+                type_persona = collect_persona_pme()
+                
+                # Formulaire pour collecter les détails du persona
+                with st.form("form_persona_startup"):
+                    persona = collect_persona_details(type_persona)  # Assurez-vous d'avoir une fonction similaire pour les startups si nécessaire
+                    submit_persona = st.form_submit_button("Valider Persona")
+                
+                if submit_persona:
+                    st.session_state.persona = persona
+                    st.success("Données Persona enregistrées avec succès !")
 
     # Collecte de l'Arbre à Problème
     with collecte_tabs[1]:
@@ -1638,21 +2001,31 @@ def page_informations_generales():
     # Mise à jour des données dans le dictionnaire principal
     st.session_state["data"]["informations_generales"] = info
 
-# Section 2 : Besoins de Démarrage
 def page_besoins_demarrage():
     st.title("Besoins de Démarrage")
     
     # Accès au dictionnaire principal
-    data = st.session_state["data"]
+    data = st.session_state.get("data", {})
     
-    # Liste des besoins
+    # Liste des besoins réorganisée
     besoins = [
-        "Frais d’établissement", "Frais d’ouverture de compteurs", "Logiciels, formations",
-        "Dépôt de marque", "Droits d’entrée", "Achat fonds de commerce ou parts",
-        "Droit au bail", "Caution ou dépôt de garantie", "Frais de dossier",
-        "Frais de notaire", "Enseigne et éléments de communication", "Véhicule",
-        "Matériel professionnel", "Matériel autre", "Matériel de bureau",
-        "Stock de matières et produits", "Trésorerie de départ"
+        "Frais d’établissement", 
+        "Logiciels, formations",
+        "Matériel professionnel",
+        "Matériel autre",
+        "Matériel de bureau",
+        "Stock de matières et produits",
+        "Enseigne et éléments de communication",
+        "Véhicule",
+        "Frais de dossier",
+        "Frais de notaire",
+        "Trésorerie de départ",
+        "Frais d’ouverture de compteurs",
+        "Dépôt de marque",
+        "Droits d’entrée",
+        "Achat fonds de commerce ou parts",
+        "Droit au bail",
+        "Caution ou dépôt de garantie"
     ]
     
     # Initialiser le dictionnaire pour stocker les besoins
@@ -1686,8 +2059,8 @@ def page_besoins_demarrage():
     
     # Mise à jour des données dans le dictionnaire principal
     st.session_state["data"] = data
-    
-import streamlit as st
+
+
 
 def calculer_pret_interet_fixe(montant, taux_annuel, duree_mois):
     """
@@ -1748,7 +2121,7 @@ def calculer_pret_interet_fixe(montant, taux_annuel, duree_mois):
         "interets_annee1": round(interets_annee1, 2),
         "interets_annee2": round(interets_annee2, 2),
         "interets_annee3": round(interets_annee3, 2)
-    }
+    }  
 
 def page_financement():
     st.title("Financement des Besoins de Démarrage")
@@ -1770,7 +2143,7 @@ def page_financement():
         "Apport personnel ou familial ($)",
         min_value=0.0,
         key="financement_apport_personnel",
-        value=financements_dict.get("Apport personnel ou familial", 4000.00)
+        value=financements_dict.get("Apport personnel ou familial", 0.00)
     )
     financements_dict["Apport personnel ou familial"] = apport_personnel
     total_financement += apport_personnel
@@ -1780,7 +2153,7 @@ def page_financement():
         "Apports en nature (en valeur) ($)",
         min_value=0.0,
         key="financement_apport_nature",
-        value=financements_dict.get("Apports en nature (en valeur)", 1200.00)
+        value=financements_dict.get("Apports en nature (en valeur)", 0.00)
     )
     financements_dict["Apports en nature (en valeur)"] = apport_nature
     total_financement += apport_nature
@@ -1886,7 +2259,7 @@ def page_financement():
         "Autre financement ($)",
         min_value=0.0,
         key="financement_autre",
-        value=financements_dict.get("Autre financement", 1000.00)
+        value=financements_dict.get("Autre financement", 0.00)
     )
     financements_dict["Autre financement"] = autre_financement
     total_financement += autre_financement
@@ -1910,11 +2283,10 @@ def page_financement():
 
 
 
-# Section 4 : Charges Fixes sur 3 Années
 def page_charges_fixes():
     st.title("Charges Fixes sur 3 Années")
     
-    data = st.session_state["data"]
+    data = st.session_state.get("data", {})
     
     charges_fixes = [
         "Assurances véhicule et RC pro", "Téléphone, internet", "Autres abonnements",
@@ -1924,90 +2296,160 @@ def page_charges_fixes():
         "Expert comptable, avocats", "Frais bancaires et terminal carte bleue", "Taxes, CFE"
     ]
     
-    data["charges_fixes"] = data.get("charges_fixes", {"annee1": {}, "annee2": {}, "annee3": {}})
+    # Initialisation des charges fixes si non présentes
+    if "charges_fixes" not in data:
+        data["charges_fixes"] = {"annee1": {}, "annee2": {}, "annee3": {}}
+        for charge in charges_fixes:
+            data["charges_fixes"]["annee1"][charge] = 0.0
+            data["charges_fixes"]["annee2"][charge] = 0.0
+            data["charges_fixes"]["annee3"][charge] = 0.0
     charges_fixes_dict = data["charges_fixes"]
     
-    total_annee1 = total_annee2 = total_annee3 = 0.0
+    # Initialisation des charges supplémentaires si non présentes
+    if "charges_supplementaires" not in data:
+        data["charges_supplementaires"] = []
     
+    # Fonctions de mise à jour
+    def update_year1(charge):
+        year1_key = f"charge_{charge}_annee1"
+        year2_key = f"charge_{charge}_annee2"
+        year3_key = f"charge_{charge}_annee3"
+        
+        year1_val = st.session_state.get(year1_key, 0.0)
+        
+        # Mettre à jour année 2 et 3 seulement si l'utilisateur n'a pas déjà modifié ces champs
+        if st.session_state.get(f"updated_{year2_key}", False) == False:
+            st.session_state[year2_key] = year1_val
+            charges_fixes_dict["annee2"][charge] = year1_val
+        if st.session_state.get(f"updated_{year3_key}", False) == False:
+            st.session_state[year3_key] = year1_val
+            charges_fixes_dict["annee3"][charge] = year1_val
+
+    def update_year2(charge):
+        year2_key = f"charge_{charge}_annee2"
+        year3_key = f"charge_{charge}_annee3"
+        
+        year2_val = st.session_state.get(year2_key, 0.0)
+        
+        # Mettre à jour année 3 seulement si l'utilisateur n'a pas déjà modifié ce champ
+        if st.session_state.get(f"updated_{year3_key}", False) == False:
+            st.session_state[year3_key] = year2_val
+            charges_fixes_dict["annee3"][charge] = year2_val
+
+    def update_year3(charge):
+        # Indiquer que l'année 3 a été mise à jour manuellement
+        year3_key = f"charge_{charge}_annee3"
+        st.session_state[f"updated_{year3_key}"] = True
+
     st.subheader("Charges Fixes par Défaut")
     for charge in charges_fixes:
         col1, col2, col3 = st.columns(3)
         with col1:
+            year1_key = f"charge_{charge}_annee1"
+            if year1_key not in st.session_state:
+                st.session_state[year1_key] = charges_fixes_dict["annee1"].get(charge, 0.0)
             montant1 = st.number_input(
                 f"{charge} - Année 1 ($)",
                 min_value=0.0,
-                key=f"charge_{charge}_annee1",
-                value=charges_fixes_dict["annee1"].get(charge, 0.0)
+                key=year1_key,
+                on_change=update_year1,
+                args=(charge,),
+                value=st.session_state[year1_key]
             )
             charges_fixes_dict["annee1"][charge] = montant1
         with col2:
+            year2_key = f"charge_{charge}_annee2"
+            if year2_key not in st.session_state:
+                st.session_state[year2_key] = charges_fixes_dict["annee2"].get(charge, 0.0)
+                st.session_state[f"updated_{year2_key}"] = False
             montant2 = st.number_input(
                 f"{charge} - Année 2 ($)",
                 min_value=0.0,
-                key=f"charge_{charge}_annee2",
-                value=charges_fixes_dict["annee2"].get(charge, 0.0)
+                key=year2_key,
+                on_change=update_year2,
+                args=(charge,),
+                value=st.session_state[year2_key]
             )
             charges_fixes_dict["annee2"][charge] = montant2
         with col3:
+            year3_key = f"charge_{charge}_annee3"
+            if year3_key not in st.session_state:
+                st.session_state[year3_key] = charges_fixes_dict["annee3"].get(charge, 0.0)
+                st.session_state[f"updated_{year3_key}"] = False
             montant3 = st.number_input(
                 f"{charge} - Année 3 ($)",
                 min_value=0.0,
-                key=f"charge_{charge}_annee3",
-                value=charges_fixes_dict["annee3"].get(charge, 0.0)
+                key=year3_key,
+                on_change=update_year3,
+                args=(charge,),
+                value=st.session_state[year3_key]
             )
             charges_fixes_dict["annee3"][charge] = montant3
         
-        total_annee1 += montant1
-        total_annee2 += montant2
-        total_annee3 += montant3
-    
     # Charges supplémentaires
     st.write("---")
     st.subheader("Ajouter des Charges Supplémentaires")
     
-    if "charges_supplementaires" not in data:
-        data["charges_supplementaires"] = []
-    
     nouvelle_charge = st.text_input("Nom de la nouvelle charge :", key="nouvelle_charge")
     
     if st.button("Ajouter la charge"):
+        nouvelle_charge = nouvelle_charge.strip()
         if nouvelle_charge and nouvelle_charge not in data["charges_supplementaires"]:
             data["charges_supplementaires"].append(nouvelle_charge)
             charges_fixes_dict["annee1"][nouvelle_charge] = 0.0
             charges_fixes_dict["annee2"][nouvelle_charge] = 0.0
             charges_fixes_dict["annee3"][nouvelle_charge] = 0.0
+            # Réinitialiser le champ de texte
             st.session_state["nouvelle_charge"] = ""
     
     for charge in data["charges_supplementaires"]:
         col1, col2, col3 = st.columns(3)
         with col1:
+            year1_key = f"charge_{charge}_supp_annee1"
+            if year1_key not in st.session_state:
+                st.session_state[year1_key] = charges_fixes_dict["annee1"].get(charge, 0.0)
             montant1 = st.number_input(
                 f"{charge} - Année 1 ($)",
                 min_value=0.0,
-                key=f"charge_{charge}_supp_annee1",
-                value=charges_fixes_dict["annee1"].get(charge, 0.0)
+                key=year1_key,
+                on_change=update_year1,
+                args=(charge,),
+                value=st.session_state[year1_key]
             )
             charges_fixes_dict["annee1"][charge] = montant1
         with col2:
+            year2_key = f"charge_{charge}_supp_annee2"
+            if year2_key not in st.session_state:
+                st.session_state[year2_key] = charges_fixes_dict["annee2"].get(charge, 0.0)
+                st.session_state[f"updated_{year2_key}"] = False
             montant2 = st.number_input(
                 f"{charge} - Année 2 ($)",
                 min_value=0.0,
-                key=f"charge_{charge}_supp_annee2",
-                value=charges_fixes_dict["annee2"].get(charge, 0.0)
+                key=year2_key,
+                on_change=update_year2,
+                args=(charge,),
+                value=st.session_state[year2_key]
             )
             charges_fixes_dict["annee2"][charge] = montant2
         with col3:
+            year3_key = f"charge_{charge}_supp_annee3"
+            if year3_key not in st.session_state:
+                st.session_state[year3_key] = charges_fixes_dict["annee3"].get(charge, 0.0)
+                st.session_state[f"updated_{year3_key}"] = False
             montant3 = st.number_input(
                 f"{charge} - Année 3 ($)",
                 min_value=0.0,
-                key=f"charge_{charge}_supp_annee3",
-                value=charges_fixes_dict["annee3"].get(charge, 0.0)
+                key=year3_key,
+                on_change=update_year3,
+                args=(charge,),
+                value=st.session_state[year3_key]
             )
             charges_fixes_dict["annee3"][charge] = montant3
-        
-        total_annee1 += montant1
-        total_annee2 += montant2
-        total_annee3 += montant3
+    
+    # Calcul des totaux
+    total_annee1 = sum(charges_fixes_dict["annee1"].values())
+    total_annee2 = sum(charges_fixes_dict["annee2"].values())
+    total_annee3 = sum(charges_fixes_dict["annee3"].values())
     
     data["total_charges_fixes_annee1"] = total_annee1
     data["total_charges_fixes_annee2"] = total_annee2
@@ -2020,49 +2462,99 @@ def page_charges_fixes():
     
     st.session_state["data"] = data
 
-# Section 5 : Chiffre d'Affaires Prévisionnel
 def page_chiffre_affaires():
     st.title("Chiffre d'Affaires Prévisionnel")
     
-    data = st.session_state["data"]
-    type_vente = data["informations_generales"].get("type_vente", "Marchandises")
+    data = st.session_state.get("data", {})
+    type_vente = data.get("informations_generales", {}).get("type_vente", "Marchandises")
     
     data["chiffre_affaires"] = data.get("chiffre_affaires", {})
     chiffre_affaires_dict = data["chiffre_affaires"]
     
+    mois = [f"Mois {i}" for i in range(1, 13)]
+    
+    # Fonctions de mise à jour
+    def update_jours_travailles(nom_vente):
+        key_jours_mois1 = f"{nom_vente}_Mois 1_jours"
+        new_val = st.session_state.get(key_jours_mois1, 0)
+        for mois_nom in mois[1:]:
+            key = f"{nom_vente}_{mois_nom}_jours"
+            if not st.session_state.get(f"updated_{key}", False):
+                st.session_state[key] = new_val
+                chiffre_affaires_dict[key] = new_val
+
+    def update_ca_moyen_jour(nom_vente):
+        key_ca_mois1 = f"{nom_vente}_Mois 1_ca_moyen"
+        new_val = st.session_state.get(key_ca_mois1, 0.0)
+        for mois_nom in mois[1:]:
+            key = f"{nom_vente}_{mois_nom}_ca_moyen"
+            if not st.session_state.get(f"updated_{key}", False):
+                st.session_state[key] = new_val
+                chiffre_affaires_dict[key] = new_val
+
+    def mark_updated(key):
+        st.session_state[f"updated_{key}"] = True
+
     def calcul_chiffre_affaires(nom_vente):
-        mois = [f"Mois {i}" for i in range(1, 13)]
+        mois_list = [f"Mois {i}" for i in range(1, 13)]
         data_ca = []
         
         st.subheader(f"Année 1 - {nom_vente}")
-        for mois_nom in mois:
+        for mois_nom in mois_list:
             col1, col2, col3 = st.columns(3)
             key_jours = f"{nom_vente}_{mois_nom}_jours"
             key_ca_moyen = f"{nom_vente}_{mois_nom}_ca_moyen"
+            key_ca = f"{nom_vente}_{mois_nom}_ca"
+            
             with col1:
-                jours_travailles = st.number_input(
-                    f"{mois_nom} - Nombre de jours travaillés",
-                    min_value=0,
-                    key=key_jours,
-                    value=chiffre_affaires_dict.get(key_jours, 0)
-                )
-                chiffre_affaires_dict[key_jours] = jours_travailles
+                if mois_nom == "Mois 1":
+                    montant_jours = st.number_input(
+                        f"{mois_nom} - Nombre de jours travaillés",
+                        min_value=0,
+                        key=key_jours,
+                        value=chiffre_affaires_dict.get(key_jours, 0),
+                        on_change=update_jours_travailles,
+                        args=(nom_vente,)
+                    )
+                else:
+                    montant_jours = st.number_input(
+                        f"{mois_nom} - Nombre de jours travaillés",
+                        min_value=0,
+                        key=key_jours,
+                        value=chiffre_affaires_dict.get(key_jours, 0),
+                        on_change=lambda key=key_jours: mark_updated(key)
+                    )
+                chiffre_affaires_dict[key_jours] = montant_jours
+            
             with col2:
-                ca_moyen_jour = st.number_input(
-                    f"{mois_nom} - Chiffre d'affaires moyen / jour ($)",
-                    min_value=0.0,
-                    key=key_ca_moyen,
-                    value=chiffre_affaires_dict.get(key_ca_moyen, 0.0)
-                )
-                chiffre_affaires_dict[key_ca_moyen] = ca_moyen_jour
-            ca_mensuel = jours_travailles * ca_moyen_jour
-            chiffre_affaires_dict[f"{nom_vente}_{mois_nom}_ca"] = ca_mensuel
+                if mois_nom == "Mois 1":
+                    montant_ca_moyen = st.number_input(
+                        f"{mois_nom} - Chiffre d'affaires moyen / jour ($)",
+                        min_value=0.0,
+                        key=key_ca_moyen,
+                        value=chiffre_affaires_dict.get(key_ca_moyen, 0.0),
+                        on_change=update_ca_moyen_jour,
+                        args=(nom_vente,)
+                    )
+                else:
+                    montant_ca_moyen = st.number_input(
+                        f"{mois_nom} - Chiffre d'affaires moyen / jour ($)",
+                        min_value=0.0,
+                        key=key_ca_moyen,
+                        value=chiffre_affaires_dict.get(key_ca_moyen, 0.0),
+                        on_change=lambda key=key_ca_moyen: mark_updated(key)
+                    )
+                chiffre_affaires_dict[key_ca_moyen] = montant_ca_moyen
+            
+            ca_mensuel = montant_jours * montant_ca_moyen
+            chiffre_affaires_dict[key_ca] = ca_mensuel
             data_ca.append({
                 "mois": mois_nom,
-                "jours_travailles": jours_travailles,
-                "ca_moyen_jour": ca_moyen_jour,
+                "jours_travailles": montant_jours,
+                "ca_moyen_jour": montant_ca_moyen,
                 "ca_mensuel": ca_mensuel
             })
+            
             with col3:
                 st.write(f"CA mensuel: {ca_mensuel:.2f} $")
         
@@ -2126,7 +2618,6 @@ def page_chiffre_affaires():
     st.markdown(f"**Total Chiffre d'Affaires Année 3 (toutes ventes) :** {total_ca_annee3:.2f} $")
     
     st.session_state["data"] = data
-
 # Section 6 : Charges Variables
 def page_charges_variables():
     st.title("Charges Variables")
@@ -2325,12 +2816,9 @@ def page_tresorerie():
     tresorerie_depart1 = besoins_demarrage.get("Trésorerie de départ", 0.0)
     
     total_charges_fixes_annee1 = data.get("total_charges_fixes_annee1", 0.0)
-    tresorerie_depart = st.number_input(
-        "Montant de la trésorerie initiale ($)",
-        min_value=0.0,
-        key="tresorerie_depart",
-        value=data.get("tresorerie_depart", tresorerie_depart1 )
-    )
+    st.markdown(f"**Trésorerie de départ :** {tresorerie_depart1 :.2f} $")
+    tresorerie_depart=tresorerie_depart1
+    
     data["tresorerie_depart"] = tresorerie_depart
     
     seuil_tresorerie = total_charges_fixes_annee1 / 4.0  # 3 mois de charges fixes
@@ -3890,7 +4378,7 @@ def page_compte_resultats_previsionnel():
             "Chiffre d'affaires HT vente de marchandises",
             "Chiffre d'affaires HT services",
             "",
-            "Charges d'exploitation",
+            "Charges d'exploitation(charge variable)",
             "Achats consommés",
             "",
             "Marge brute",
@@ -7694,14 +8182,12 @@ if 'business_model_precedent' not in st.session_state:
 business_model_tab_names = [
     "Collecte des Données",
     "Générer Business Model",
-    "Améliorer Business Model"
 ]
 
 # Fonctions correspondantes pour les nouveaux onglets
 business_model_sections = [
     page_collecte_donnees,
     page_generer_business_model,
-    page_ameliore_business_model
 ]
 
 # Liste des noms d'onglets existants
@@ -7710,12 +8196,7 @@ business_model_sections = [
 tab_names = [
     "Informations Générales", "Besoins de Démarrage", "Financement",
     "Charges Fixes", "Chiffre d'Affaires", "Charges Variables",
-    "Fonds de Roulement", "Salaires", "Rentabilité", "Trésorerie", "Récapitulatif",
-    "Investissements et Financements", "Salaires et Charges Sociales", "Détail des Amortissements",
-    "Compte de Résultats Prévisionnel", "Soldes Intermédiaires de Gestion",
-    "Capacité d'Autofinancement", "Seuil de Rentabilité Économique",
-    "Besoin en Fonds de Roulement", "Plan de Financement sur 3 Ans",
-    "Budget Prévisionnel de Trésorerie","Génération du Business Plan", "Tableaux d'Analyse Financière"
+    "Fonds de Roulement", "Salaires", "Rentabilité", "Trésorerie","Génération du Business Plan", "Tableaux d'Analyse Financière"
 ]
 
 # Mise à jour de la liste des fonctions correspondantes
@@ -7723,14 +8204,8 @@ sections = [
     page_informations_generales, page_besoins_demarrage, page_financement,
     page_charges_fixes, page_chiffre_affaires, page_charges_variables,
     page_fonds_roulement, page_salaires, page_rentabilite, page_tresorerie,
-    page_recapitulatif, page_investissements_et_financements,
-    page_salaires_charges_sociales, page_detail_amortissements,
-    page_compte_resultats_previsionnel, page_soldes_intermediaires_de_gestion,
-    page_capacite_autofinancement, page_seuil_rentabilite_economique,
-    page_besoin_fonds_roulement, page_plan_financement_trois_ans,
-    page_budget_previsionnel_tresorerie,page_generation_business_plan, page_douze_tableaux
+    page_generation_business_plan, page_douze_tableaux
 ]
-
 
 # Trouver l'index de "Génération du Business Plan"
 try:
@@ -7739,9 +8214,10 @@ except ValueError:
     st.error("L'onglet 'Génération du Business Plan' n'a pas été trouvé dans la liste des onglets.")
     index_generation_bp = len(tab_names)  # Ajouter à la fin si non trouvé
 
-# Placer les nouveaux onglets au début
-tab_names = business_model_tab_names + tab_names
+# Insérer les nouveaux onglets avant "Génération du Business Plan"
+tab_names =business_model_tab_names + tab_names
 sections = business_model_sections + sections
+
 
 # Création des onglets
 tabs = st.tabs(tab_names)
