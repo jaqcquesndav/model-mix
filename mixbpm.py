@@ -8196,7 +8196,7 @@ business_model_sections = [
 tab_names = [
     "Informations Générales", "Besoins de Démarrage", "Financement",
     "Charges Fixes", "Chiffre d'Affaires", "Charges Variables",
-    "Fonds de Roulement", "Salaires", "Rentabilité", "Trésorerie","Génération du Business Plan", "Tableaux d'Analyse Financière"
+    "Fonds de Roulement", "Salaires", "Rentabilité", "Trésorerie","Génération du Business Plan"
 ]
 
 # Mise à jour de la liste des fonctions correspondantes
@@ -8204,7 +8204,7 @@ sections = [
     page_informations_generales, page_besoins_demarrage, page_financement,
     page_charges_fixes, page_chiffre_affaires, page_charges_variables,
     page_fonds_roulement, page_salaires, page_rentabilite, page_tresorerie,
-    page_generation_business_plan, page_douze_tableaux
+    page_generation_business_plan
 ]
 
 # Trouver l'index de "Génération du Business Plan"
