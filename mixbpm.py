@@ -19,6 +19,7 @@ import re
 import base64
 import streamlit.components.v1 as components
 from bs4 import BeautifulSoup
+import os
 
 
 
@@ -33,7 +34,8 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Configuration de l'API OpenAI
 
-api_key = st.secrets["API_KEY"]
+#api_key = st.secrets["API_KEY"]
+api_key = os.getenv("API_KEY")
 openai.api_key = api_key
 # ----------------------------------------------------------------------------
 # Business Model 
