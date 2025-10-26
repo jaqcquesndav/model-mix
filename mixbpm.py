@@ -7388,7 +7388,7 @@ def generate_section(system_message, query, documents, combined_content, tableau
         ],
         temperature=0.9
     )
-    return completion['choices'][0]['message']['content']
+    return completion.choices[0].message.content
 
 def extract_company_name(text):
     match = re.search(r"(nom de l'entreprise est|Nom de l'entreprise|La vision de) ([\w\s]+)", text, re.IGNORECASE)
