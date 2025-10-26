@@ -1,12 +1,10 @@
 import streamlit as st
 import pandas as pd
-import openai
-from langchain.llms import OpenAI
-from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import PyPDFLoader
-from langchain.embeddings.openai import OpenAIEmbeddings
+from openai import OpenAI
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
+from langchain_community.vectorstores import FAISS
 from langchain.chains import ConversationalRetrievalChain
 from langchain.memory import ConversationBufferMemory
 from markdown_pdf import MarkdownPdf, Section
@@ -36,7 +34,7 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 #api_key = st.secrets["API_KEY"]
 api_key = os.getenv("API_KEY")
-openai.api_key = api_key
+client = OpenAI(api_key=api_key)
 # ----------------------------------------------------------------------------
 # Business Model 
 # ----------------------------------------------------------------------------
@@ -1324,7 +1322,7 @@ def obtenir_business_model(nom_entreprise, type_entreprise,previousdata, rubriqu
         """
 
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "Tu es un assistant expert en génération de business  et business plan."},
@@ -7365,12 +7363,12 @@ def load_and_split_documents(file_path):
 def create_faiss_db(documents):
     if not documents:
         raise ValueError("Aucun document trouvé pour créer la base de données FAISS.")
-    embeddings = OpenAIEmbeddings(openai_api_key=api_key )
+    embeddings = OpenAIEmbeddings(api_key=api_key)
     return FAISS.from_documents(documents, embeddings)
 
 def generate_section(system_message, query, documents, combined_content, tableau_financier, business_model):
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
-    llm = ChatOpenAI(openai_api_key=api_key )
+    llm = ChatOpenAI(api_key=api_key)
     if documents:
         db = create_faiss_db(documents)
         qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=db.as_retriever(), memory=memory, verbose=True)
@@ -7378,7 +7376,7 @@ def generate_section(system_message, query, documents, combined_content, tableau
         full_content = combined_content + " " + combined_info + " " + query+ " "+tableau_financier
     else:
         full_content = combined_content + " " + query+ "Dans ce données où vous allez recuperer les informations generales de l'entreprises "+ tableau_financier+ "utiliser les données financier pour enrichir les arguments aussi sachez que le nom du projet  correspond nom de l'entreprise. Voici les autres informations à considerer c'est les informations du business model et ca doit etre tenue compte lors de la generation:"+ business_model
-    completion = openai.ChatCompletion.create(
+    completion = client.chat.completions.create(
         model="gpt-4o",
         messages=[
             {"role": "system", "content": system_message},
