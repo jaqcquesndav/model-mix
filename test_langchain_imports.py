@@ -16,10 +16,13 @@ def test_langchain_imports():
         print("✓ Successfully imported: PyPDFLoader, FAISS from langchain_community")
         
         # Test core langchain imports
-        from langchain.text_splitter import RecursiveCharacterTextSplitter
-        from langchain.chains import ConversationalRetrievalChain
-        from langchain.memory import ConversationBufferMemory
-        print("✓ Successfully imported: RecursiveCharacterTextSplitter, ConversationalRetrievalChain, ConversationBufferMemory from langchain")
+        from langchain_text_splitters import RecursiveCharacterTextSplitter
+        print("✓ Successfully imported: RecursiveCharacterTextSplitter from langchain_text_splitters")
+        
+        # Test langchain_classic imports for chains and memory
+        from langchain_classic.chains import ConversationalRetrievalChain
+        from langchain_classic.memory import ConversationBufferMemory
+        print("✓ Successfully imported: ConversationalRetrievalChain, ConversationBufferMemory from langchain_classic")
         
         print("\n✅ All Langchain imports successful!")
         return True
@@ -27,7 +30,7 @@ def test_langchain_imports():
     except ImportError as e:
         print(f"\n❌ Import error: {e}")
         print("\nPlease ensure all dependencies are installed:")
-        print("  pip install langchain>=0.1.0 langchain-community>=0.0.20 langchain-openai>=0.0.5")
+        print("  pip install langchain>=0.1.0 langchain-community>=0.0.20 langchain-openai>=0.0.5 langchain-classic")
         return False
 
 if __name__ == "__main__":
