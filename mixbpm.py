@@ -32,8 +32,12 @@ st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # Configuration de l'API OpenAI
 
-#api_key = st.secrets["API_KEY"]
-api_key = os.getenv("API_KEY")
+api_key = st.secrets["API_KEY"]
+
+if not api_key:
+    st.error("🔑 Clé API OpenAI requise. Veuillez la configurer dans les secrets Streamlit.")
+    st.stop()
+    
 client = OpenAI(api_key=api_key)
 # ----------------------------------------------------------------------------
 # Business Model 
