@@ -19,6 +19,35 @@ import streamlit.components.v1 as components
 from bs4 import BeautifulSoup
 import os
 
+# Initialisation de la persistance des données
+def init_session_state():
+    """Initialise les variables de session pour maintenir la persistance des données"""
+    if 'initialized' not in st.session_state:
+        st.session_state.initialized = True
+        # Variables principales
+        if 'nom_entreprise' not in st.session_state:
+            st.session_state.nom_entreprise = ""
+        if 'type_entreprise' not in st.session_state:
+            st.session_state.type_entreprise = ""
+        # Données collectées
+        if 'persona_data' not in st.session_state:
+            st.session_state.persona_data = {}
+        if 'analyse_marche_data' not in st.session_state:
+            st.session_state.analyse_marche_data = {}
+        if 'facteurs_limitants_data' not in st.session_state:
+            st.session_state.facteurs_limitants_data = {}
+        if 'concurrence_data' not in st.session_state:
+            st.session_state.concurrence_data = {}
+        if 'problem_tree_data' not in st.session_state:
+            st.session_state.problem_tree_data = {}
+        if 'financial_data' not in st.session_state:
+            st.session_state.financial_data = {}
+        if 'business_model_precedent' not in st.session_state:
+            st.session_state.business_model_precedent = ""
+
+# Appel de l'initialisation
+init_session_state()
+
 
 
 hide_streamlit_style = """
@@ -66,42 +95,42 @@ def collect_persona_details(type_persona):
         
         # Données Démographiques B2C
         st.subheader("Données Démographiques")
-        age = st.number_input("Âge", min_value=18, max_value=100, value=30, key="b2c_age")
-        sexe = st.text_input("Sexe", placeholder="Homme, Femme, Autre", key="b2c_sexe")
+        age = st.number_input("Âge", min_value=18, max_value=100, value=st.session_state.get('b2c_age', 28), key="b2c_age")
+        sexe = st.text_input("Sexe", placeholder="Homme, Femme, Autre", value=st.session_state.get('b2c_sexe', ''), key="b2c_sexe")
         localisation_detail = st.text_input(
-            "Localisation Géographique (ex: Paris, France)",
-            "Paris, France",
+            "Localisation Géographique (ex: Kinshasa, Lubumbashi, Goma)",
+            value=st.session_state.get('b2c_localisation', 'Kinshasa, RDC'),
             key="b2c_localisation"
         )
         education = st.text_input(
             "Niveau d'Éducation",
-            placeholder="Baccalauréat, Licence, Master, Doctorat, Autre",
+            placeholder="Primaire, Secondaire, Supérieur, Alphabétisé, Non-alphabétisé",
+            value=st.session_state.get('b2c_education', ''),
             key="b2c_education"
         )
-        profession = st.text_input("Profession", "Ex: Ingénieur, Designer", key="b2c_profession")
-        revenu_moyen = st.number_input("Revenu Moyen (€)", min_value=0, step=100, value=30000, key="b2c_revenu")
+        profession = st.text_input("Profession", value=st.session_state.get('b2c_profession', 'Ex: Commerçant, Fonctionnaire'), key="b2c_profession")
+        revenu_moyen = st.number_input("Revenu Moyen (FC)", min_value=0, step=50000, value=st.session_state.get('b2c_revenu', 300000), key="b2c_revenu")
         
         # Paramètres Comportementaux B2C
         st.subheader("Paramètres Comportementaux")
         sensibilite_prix = st.text_input(
             "Sensibilité au Prix",
-            placeholder="Faible, Moyenne, Élevée",
+            placeholder="Très sensible, Modérément sensible, Peu sensible",
+            value=st.session_state.get('b2c_sensibilite_prix', ''),
             key="b2c_sensibilite_prix"
         )
-        if sensibilite_prix and sensibilite_prix not in ["Faible", "Moyenne", "Élevée"]:
-            st.warning("Veuillez entrer une valeur valide pour la Sensibilité au Prix : Faible, Moyenne ou Élevée.")
         
         frequence_achat = st.text_input(
             "Fréquence d'Achat",
-            placeholder="Rarement, Mensuellement, Hebdomadairement",
+            placeholder="Quotidienne, Hebdomadaire, Mensuelle, Occasionnelle",
+            value=st.session_state.get('b2c_frequence_achat', ''),
             key="b2c_frequence_achat"
         )
-        if frequence_achat and frequence_achat not in ["Rarement", "Mensuellement", "Hebdomadairement"]:
-            st.warning("Veuillez entrer une valeur valide pour la Fréquence d'Achat : Rarement, Mensuellement ou Hebdomadairement.")
         
         volume_achat = st.text_input(
             "Volume d'Achat",
-            placeholder="Faible, Moyen, Élevé",
+            placeholder="Petites quantités, Quantités moyennes, Gros volumes",
+            value=st.session_state.get('b2c_volume_achat', ''),
             key="b2c_volume_achat"
         )
         if volume_achat and volume_achat not in ["Faible", "Moyen", "Élevé"]:
@@ -180,6 +209,9 @@ def collect_persona_details(type_persona):
             "ouverture_changement": ouverture_changement,
             "barrieres": barrières
         })
+        
+        # Sauvegarder dans le session state pour persistance
+        st.session_state.persona_data = persona
 
     elif type_persona == "B2B":
         st.subheader("Persona - B2B")
@@ -198,21 +230,21 @@ def collect_persona_details(type_persona):
         )
         localisation_entreprise = st.text_input(
             "Localisation de l'Entreprise",
-            "Paris, France",
+            value=st.session_state.get('b2b_localisation_entreprise', 'Kinshasa, RDC'),
             key="b2b_localisation_entreprise"
         )
         chiffre_affaires = st.number_input(
-            "Chiffre d'Affaires (€)",
+            "Chiffre d'Affaires (FC)",
             min_value=0,
-            step=10000,
-            value=500000,
+            step=5000000,
+            value=st.session_state.get('b2b_chiffre_affaires', 500000000),
             key="b2b_chiffre_affaires"
         )
         nombre_employes = st.number_input(
             "Nombre d'Employés",
             min_value=1,
             step=1,
-            value=50,
+            value=st.session_state.get('b2b_nombre_employes', 25),
             key="b2b_nombre_employes"
         )
         
@@ -325,20 +357,21 @@ def collect_persona_details(type_persona):
             key="menage_taille_menage"
         )
         revenu_menage = st.number_input(
-            "Revenu Mensuel du Ménage (€)",
+            "Revenu Mensuel du Ménage (FC)",
             min_value=0,
-            step=100,
-            value=4000,
+            step=25000,
+            value=st.session_state.get('menage_revenu_menage', 400000),
             key="menage_revenu_menage"
         )
         localisation_menage = st.text_input(
-            "Localisation Géographique (ex: Lyon, France)",
-            "Lyon, France",
+            "Localisation Géographique (ex: Kinshasa, Gombe)",
+            value=st.session_state.get('menage_localisation', 'Kinshasa, Gombe'),
             key="menage_localisation"
         )
         type_logement = st.text_input(
             "Type de Logement",
-            placeholder="Appartement, Maison, Studio, Autre",
+            placeholder="Villa, Appartement, Maison de passage, Parcelle, Studio",
+            value=st.session_state.get('menage_type_logement', ''),
             key="menage_type_logement"
         )
         
@@ -662,11 +695,11 @@ def collect_persona_startup():
     # Données Démographiques
     st.subheader("Données Démographiques")
     age = st.number_input("Âge", min_value=18, max_value=100, value=30)
-    sexe = st.text_input("Sexe", "Homme/Femme/Autre")
-    localisation_detail = st.text_input("Localisation Géographique (ex: Paris, France)", "Paris, France")
-    education = st.text_input("Niveau d'Éducation", "Ex: Licence, Master")
-    profession = st.text_input("Profession", "Ex: Ingénieur, Designer")
-    revenu_moyen = st.number_input("Revenu Moyen ($)", min_value=0, step=100, value=1000)
+    sexe = st.text_input("Sexe", value=st.session_state.get('startup_sexe', 'Homme/Femme/Autre'))
+    localisation_detail = st.text_input("Localisation Géographique (ex: Kinshasa, Lubumbashi)", value=st.session_state.get('startup_localisation', 'Kinshasa, RDC'))
+    education = st.text_input("Niveau d'Éducation", value=st.session_state.get('startup_education', 'Ex: Licence, Master'))
+    profession = st.text_input("Profession", value=st.session_state.get('startup_profession', 'Ex: Entrepreneur, Commerçant'))
+    revenu_moyen = st.number_input("Revenu Moyen (FC)", min_value=0, step=50000, value=st.session_state.get('startup_revenu', 250000))
     
     # Paramètres Comportementaux
     st.subheader("Paramètres Comportementaux")
@@ -7528,19 +7561,62 @@ def markdown_to_word_via_text(markdown_content):
 # Fonction pour convertir un dictionnaire en texte formaté
 def format_table_data(data, title):
     if not data:
-        return f"{title} : Aucune donnée disponible.\n"
+        return f"### {title}\nAucune donnée disponible pour cette section.\n\n"
     
-    text = f"{title} :\n"
-    for key, value in data.items():
-        if isinstance(value, dict):
-            text += f"  {key} :\n"
-            for sub_key, sub_value in value.items():
-                text += f"    {sub_key} : {sub_value}\n"
-        elif isinstance(value, list):
-            text += f"  {key} : {', '.join(map(str, value))}\n"
-        else:
-            text += f"  {key} : {value}\n"
-    return text + "\n"
+    text = f"### {title}\n\n"
+    
+    # Formatage des données en tableau markdown si possible
+    if isinstance(data, dict) and any(isinstance(v, dict) for v in data.values()):
+        # Essayer de créer un tableau markdown
+        first_item = next((v for v in data.values() if isinstance(v, dict)), None)
+        if first_item:
+            headers = list(first_item.keys())
+            text += "| " + " | ".join(headers) + " |\n"
+            text += "|" + "---|" * len(headers) + "\n"
+            
+            for key, value in data.items():
+                if isinstance(value, dict):
+                    row_values = [str(value.get(h, '')) for h in headers]
+                    text += "| " + " | ".join(row_values) + " |\n"
+    else:
+        # Format simple
+        for key, value in data.items():
+            if isinstance(value, dict):
+                text += f"**{key}** :\n"
+                for sub_key, sub_value in value.items():
+                    text += f"  - {sub_key} : {sub_value}\n"
+            elif isinstance(value, list):
+                text += f"**{key}** : {', '.join(map(str, value))}\n"
+            else:
+                text += f"**{key}** : {value}\n"
+    
+    # Ajouter une analyse contextuelle spécifique à la RDC
+    analysis = generate_rdc_analysis(title, data)
+    text += f"\n**Analyse pour la RDC :** {analysis}\n\n"
+    
+    return text
+
+def generate_rdc_analysis(title, data):
+    """
+    Génère une analyse spécifique au contexte économique de la RDC.
+    """
+    analyses_rdc = {
+        "Investissements et financements": "Dans le contexte congolais, il est crucial de diversifier les sources de financement (banques locales, institutions de microfinance, partenaires internationaux). Considérer l'impact du taux de change USD/FC sur les investissements.",
+        
+        "Salaires et Charges Sociales": "Les charges sociales en RDC incluent l'INSS, l'IPR et autres taxes. Il faut tenir compte du salaire minimum interprofessionnel garanti (SMIG) et des spécificités du marché du travail local.",
+        
+        "Compte de résultats prévisionnel": "Dans l'économie congolaise, intégrer les fluctuations monétaires, la saisonnalité des activités et l'impact des infrastructures sur les coûts opérationnels.",
+        
+        "Seuil de rentabilité économique": "En RDC, le seuil doit tenir compte des contraintes logistiques, des coûts énergétiques élevés et de la volatilité du marché local.",
+        
+        "Besoin en fonds de roulement": "Considérer les délais de paiement clients souvent allongés en RDC et prévoir une trésorerie suffisante pour les variations saisonnières.",
+        
+        "Plan de financement à trois ans": "Prendre en compte l'inflation, l'évolution du taux de change et les opportunités de financement via les institutions congolaises et internationales.",
+        
+        "Budget prévisionnel de trésorerie": "Intégrer les spécificités du système bancaire congolais, les coûts de transfert et la nécessité de maintenir des réserves pour les imprévus."
+    }
+    
+    return analyses_rdc.get(title, "Adapter cette analyse aux réalités économiques de la RDC : infrastructure, réglementation locale, marchés et comportements des consommateurs congolais.")
 
 def page_generation_business_plan():
     st.title("Générateur de Business Plan")
@@ -7804,6 +7880,71 @@ def page_generation_business_plan():
 
                 Annexes du projet:
 
+            """,
+            "Plan financier": """
+                Générer cette section du business plan:
+
+                ## VIII. Plan financier
+
+                Générer cette section avec des analyses détaillées, l'objectif pour cette section est de :
+                - Présenter l'ensemble des éléments financiers du projet avec des analyses approfondies
+                - Démontrer la viabilité financière et la rentabilité du projet
+                - Fournir des conclusions stratégiques basées sur les données financières
+
+                ### Contenu à générer :
+
+                1. **Introduction générale** :
+                - Présenter l'importance de l'analyse financière pour la viabilité du projet
+                - Expliquer la méthodologie utilisée pour les projections
+
+                2. **Analyse des investissements et financements** :
+                - Analyser les besoins en investissements initiaux
+                - Commenter la structure de financement proposée
+                - Évaluer l'adéquation entre besoins et ressources
+
+                3. **Analyse des charges et de la rentabilité** :
+                - Analyser l'évolution prévisionnelle des charges (salaires, amortissements)
+                - Commenter la structure des coûts et leur optimisation
+                - Évaluer les marges et la rentabilité progressive
+
+                4. **Analyse des soldes intermédiaires de gestion** :
+                - Interpréter les indicateurs clés (CA, valeur ajoutée, EBE, résultat)
+                - Analyser l'évolution de la performance sur 3 ans
+                - Identifier les leviers d'amélioration
+
+                5. **Analyse de la capacité d'autofinancement et du seuil de rentabilité** :
+                - Commenter la génération de cash-flow
+                - Analyser le point mort et sa progression
+                - Évaluer la soutenabilité financière
+
+                6. **Analyse du besoin en fonds de roulement** :
+                - Expliquer l'évolution du BFR
+                - Analyser l'impact sur la trésorerie
+                - Proposer des actions d'optimisation
+
+                7. **Analyse du plan de financement sur 3 ans** :
+                - Vérifier l'équilibre emplois/ressources
+                - Analyser la structure financière
+                - Évaluer les besoins de financement complémentaires
+
+                8. **Analyse de la trésorerie prévisionnelle** :
+                - Commenter l'évolution mensuelle de la trésorerie
+                - Identifier les périodes critiques
+                - Proposer des solutions de gestion de trésorerie
+
+                9. **Synthèse et conclusions financières** :
+                - Synthétiser les principaux enseignements de l'analyse
+                - Évaluer la viabilité globale du projet
+                - Formuler des recommandations stratégiques
+                - Identifier les facteurs clés de succès financier
+                - Proposer des indicateurs de suivi de performance
+
+                **Instructions spéciales** :
+                - Sous chaque analyse de tableau, ajouter une conclusion de 2-3 phrases
+                - Créer des liens logiques entre les différentes analyses
+                - Terminer par une conclusion générale qui guide vers les prochaines étapes
+                - Utiliser les données financières concrètes pour étayer chaque analyse
+
             """
         }
 
@@ -7817,6 +7958,7 @@ def page_generation_business_plan():
             "Stratégie Marketing": "Décrire la stratégie marketing, y compris les segments cibles, le positionnement, le mix marketing (Produit, Prix, Place, Promotion) et les actions commerciales prévues.",
             "Moyens de production et organisation": "Décrire les moyens humains et matériels, ainsi que l'organisation opérationnelle de l'entreprise.",
             "Étude des risques": "Identifier les risques potentiels et proposer des stratégies pour les atténuer.",
+            "Plan financier": "Analyser en détail tous les éléments financiers du projet, commenter chaque tableau avec des conclusions, établir des liens logiques entre les analyses, et formuler une synthèse stratégique de la viabilité financière.",
             "Annexes": "Inclure tous les documents annexes pertinents pour étayer le plan d'affaires."
         }
 
@@ -7843,6 +7985,25 @@ def page_generation_business_plan():
             else:
                 first_part.append(section)
 
+        # Récupérer toutes les données des étapes précédentes
+        business_model_precedent = st.session_state.get('business_model_precedent', '')
+        persona_data = st.session_state.get('persona_data', {})
+        marche_data = st.session_state.get('marche_data', {})
+        concurrence_data = st.session_state.get('concurrence_data', {})
+        facteurs_limitants = st.session_state.get('facteurs_limitants', {})
+        
+        # Construire un contexte enrichi avec toutes les données précédentes
+        contexte_complet = f"""
+        DONNÉES DU BUSINESS MODEL: {business_model_precedent}
+        
+        INFORMATIONS PERSONA: {persona_data}
+        
+        ANALYSE DE MARCHÉ: {marche_data}
+        
+        ANALYSE CONCURRENCE: {concurrence_data}
+        
+        FACTEURS LIMITANTS: {facteurs_limitants}
+        """
         
         results_first_part = {}
         results_second_part = {}
@@ -7891,7 +8052,7 @@ def page_generation_business_plan():
                     if section_name in ["Couverture", "Sommaire"]:
                         results_first_part[section_name] = generate_section(system_message, query, documents, combined_content, "", business_model="")
                     else:
-                        results_first_part[section_name] = generate_section(system_message, query, documents, combined_content, final_text, business_model=st.session_state.business_model_precedent)
+                        results_first_part[section_name] = generate_section(system_message, query, documents, combined_content + contexte_complet, final_text, business_model=contexte_complet)
                 except ValueError as e:
                     results_first_part[section_name] = f"Erreur: {str(e)}"
                 
@@ -7919,7 +8080,7 @@ def page_generation_business_plan():
                 query = queries[section_name]
                 
                 try:
-                    results_second_part[section_name] = generate_section(system_message, query, documents, combined_content, final_text, business_model=st.session_state.business_model_precedent)
+                    results_second_part[section_name] = generate_section(system_message, query, documents, combined_content + contexte_complet, final_text, business_model=contexte_complet)
                 except ValueError as e:
                     results_second_part[section_name] = f"Erreur: {str(e)}"
                 
