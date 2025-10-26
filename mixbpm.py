@@ -1,14 +1,12 @@
 import streamlit as st
 import pandas as pd
 import openai
-from langchain.llms import OpenAI
-from langchain.chat_models import ChatOpenAI
-from langchain.document_loaders import PyPDFLoader
-from langchain.embeddings.openai import OpenAIEmbeddings
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import FAISS
-from langchain.chains import ConversationalRetrievalChain
-from langchain.memory import ConversationBufferMemory
+from langchain_openai import OpenAI, ChatOpenAI, OpenAIEmbeddings
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain_classic.chains import ConversationalRetrievalChain
+from langchain_classic.memory import ConversationBufferMemory
 from markdown_pdf import MarkdownPdf, Section
 from io import BytesIO
 from docx import Document
@@ -7365,19 +7363,21 @@ def load_and_split_documents(file_path):
 def create_faiss_db(documents):
     if not documents:
         raise ValueError("Aucun document trouvé pour créer la base de données FAISS.")
-    embeddings = OpenAIEmbeddings(openai_api_key=api_key )
+    embeddings = OpenAIEmbeddings(openai_api_key=api_key)
     return FAISS.from_documents(documents, embeddings)
 
 def generate_section(system_message, query, documents, combined_content, tableau_financier, business_model):
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
-    llm = ChatOpenAI(openai_api_key=api_key )
+    llm = ChatOpenAI(openai_api_key=api_key)
     if documents:
         db = create_faiss_db(documents)
         qa_chain = ConversationalRetrievalChain.from_llm(llm, retriever=db.as_retriever(), memory=memory, verbose=True)
-        combined_info = qa_chain.run({'question': query})
-        full_content = combined_content + " " + combined_info + " " + query+ " "+tableau_financier
+        # Use invoke instead of deprecated run method
+        result = qa_chain.invoke({'question': query})
+        combined_info = result.get('answer', '') if isinstance(result, dict) else str(result)
+        full_content = combined_content + " " + combined_info + " " + query + " " + tableau_financier
     else:
-        full_content = combined_content + " " + query+ "Dans ce données où vous allez recuperer les informations generales de l'entreprises "+ tableau_financier+ "utiliser les données financier pour enrichir les arguments aussi sachez que le nom du projet  correspond nom de l'entreprise. Voici les autres informations à considerer c'est les informations du business model et ca doit etre tenue compte lors de la generation:"+ business_model
+        full_content = combined_content + " " + query + "Dans ce données où vous allez recuperer les informations generales de l'entreprises " + tableau_financier + "utiliser les données financier pour enrichir les arguments aussi sachez que le nom du projet  correspond nom de l'entreprise. Voici les autres informations à considerer c'est les informations du business model et ca doit etre tenue compte lors de la generation:" + business_model
     completion = openai.ChatCompletion.create(
         model="gpt-4o",
         messages=[
