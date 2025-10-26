@@ -109,7 +109,7 @@ def collect_persona_details(type_persona):
             key="b2c_education"
         )
         profession = st.text_input("Profession", value=st.session_state.get('b2c_profession', 'Ex: Commerçant, Fonctionnaire'), key="b2c_profession")
-        revenu_moyen = st.number_input("Revenu Moyen (FC)", min_value=0, step=50000, value=st.session_state.get('b2c_revenu', 300000), key="b2c_revenu")
+        revenu_moyen = st.number_input("Revenu Moyen (USD)", min_value=0, step=10, value=st.session_state.get('b2c_revenu', 150), key="b2c_revenu")
         
         # Paramètres Comportementaux B2C
         st.subheader("Paramètres Comportementaux")
@@ -234,10 +234,10 @@ def collect_persona_details(type_persona):
             key="b2b_localisation_entreprise"
         )
         chiffre_affaires = st.number_input(
-            "Chiffre d'Affaires (FC)",
+            "Chiffre d'Affaires (USD)",
             min_value=0,
-            step=5000000,
-            value=st.session_state.get('b2b_chiffre_affaires', 500000000),
+            step=5000,
+            value=st.session_state.get('b2b_chiffre_affaires', 250000),
             key="b2b_chiffre_affaires"
         )
         nombre_employes = st.number_input(
@@ -357,10 +357,10 @@ def collect_persona_details(type_persona):
             key="menage_taille_menage"
         )
         revenu_menage = st.number_input(
-            "Revenu Mensuel du Ménage (FC)",
+            "Revenu Mensuel du Ménage (USD)",
             min_value=0,
-            step=25000,
-            value=st.session_state.get('menage_revenu_menage', 400000),
+            step=25,
+            value=st.session_state.get('menage_revenu_menage', 200),
             key="menage_revenu_menage"
         )
         localisation_menage = st.text_input(
@@ -699,7 +699,7 @@ def collect_persona_startup():
     localisation_detail = st.text_input("Localisation Géographique (ex: Kinshasa, Lubumbashi)", value=st.session_state.get('startup_localisation', 'Kinshasa, RDC'))
     education = st.text_input("Niveau d'Éducation", value=st.session_state.get('startup_education', 'Ex: Licence, Master'))
     profession = st.text_input("Profession", value=st.session_state.get('startup_profession', 'Ex: Entrepreneur, Commerçant'))
-    revenu_moyen = st.number_input("Revenu Moyen (FC)", min_value=0, step=50000, value=st.session_state.get('startup_revenu', 250000))
+    revenu_moyen = st.number_input("Revenu Moyen (USD)", min_value=0, step=25, value=st.session_state.get('startup_revenu', 125))
     
     # Paramètres Comportementaux
     st.subheader("Paramètres Comportementaux")
@@ -7601,19 +7601,19 @@ def generate_rdc_analysis(title, data):
     Génère une analyse spécifique au contexte économique de la RDC.
     """
     analyses_rdc = {
-        "Investissements et financements": "Dans le contexte congolais, il est crucial de diversifier les sources de financement (banques locales, institutions de microfinance, partenaires internationaux). Considérer l'impact du taux de change USD/FC sur les investissements.",
+        "Investissements et financements": "Dans le contexte congolais, il est crucial de diversifier les sources de financement (banques locales, institutions de microfinance, partenaires internationaux). Considérer l'impact du taux de change USD/FC sur les investissements. Tous les montants sont exprimés en USD pour faciliter les comparaisons internationales.",
         
-        "Salaires et Charges Sociales": "Les charges sociales en RDC incluent l'INSS, l'IPR et autres taxes. Il faut tenir compte du salaire minimum interprofessionnel garanti (SMIG) et des spécificités du marché du travail local.",
+        "Salaires et Charges Sociales": "Les charges sociales en RDC incluent l'INSS, l'IPR et autres taxes. Il faut tenir compte du salaire minimum interprofessionnel garanti (SMIG) converti en USD et des spécificités du marché du travail local. Attention aux fluctuations du taux de change.",
         
-        "Compte de résultats prévisionnel": "Dans l'économie congolaise, intégrer les fluctuations monétaires, la saisonnalité des activités et l'impact des infrastructures sur les coûts opérationnels.",
+        "Compte de résultats prévisionnel": "Dans l'économie congolaise, intégrer les fluctuations monétaires USD/FC, la saisonnalité des activités et l'impact des infrastructures sur les coûts opérationnels. Les montants en USD facilitent l'analyse comparative.",
         
-        "Seuil de rentabilité économique": "En RDC, le seuil doit tenir compte des contraintes logistiques, des coûts énergétiques élevés et de la volatilité du marché local.",
+        "Seuil de rentabilité économique": "En RDC, le seuil doit tenir compte des contraintes logistiques, des coûts énergétiques élevés et de la volatilité du marché local. L'expression en USD permet une meilleure évaluation de la rentabilité.",
         
-        "Besoin en fonds de roulement": "Considérer les délais de paiement clients souvent allongés en RDC et prévoir une trésorerie suffisante pour les variations saisonnières.",
+        "Besoin en fonds de roulement": "Considérer les délais de paiement clients souvent allongés en RDC et prévoir une trésorerie suffisante pour les variations saisonnières. Les montants en USD offrent une stabilité de référence face aux fluctuations du FC.",
         
-        "Plan de financement à trois ans": "Prendre en compte l'inflation, l'évolution du taux de change et les opportunités de financement via les institutions congolaises et internationales.",
+        "Plan de financement à trois ans": "Prendre en compte l'inflation locale, l'évolution du taux de change USD/FC et les opportunités de financement via les institutions congolaises et internationales. L'utilisation de l'USD comme référence facilite les négociations avec les bailleurs.",
         
-        "Budget prévisionnel de trésorerie": "Intégrer les spécificités du système bancaire congolais, les coûts de transfert et la nécessité de maintenir des réserves pour les imprévus."
+        "Budget prévisionnel de trésorerie": "Intégrer les spécificités du système bancaire congolais, les coûts de transfert et la nécessité de maintenir des réserves pour les imprévus. Les montants en USD permettent une meilleure planification face à la volatilité monétaire locale."
     }
     
     return analyses_rdc.get(title, "Adapter cette analyse aux réalités économiques de la RDC : infrastructure, réglementation locale, marchés et comportements des consommateurs congolais.")
