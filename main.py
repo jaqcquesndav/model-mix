@@ -23,7 +23,6 @@ st.set_page_config(
 try:
     from services.business import init_session_state
     from ui.components import configurer_sidebar_principal, afficher_template_info
-    from ui.pages import page_collecte_donnees, page_generer_business_model
     from templates import get_templates_list
     
     # Import des pages financières de base (version simplifiée)
@@ -82,9 +81,10 @@ def main():
 def create_main_navigation():
     """Crée la navigation principale de l'application"""
     
-    # Onglets principaux simplifiés
+    # Onglets principaux restructurés
     main_tabs = [
         "ℹ️ Informations Générales",
+        "📊 Analyse de Marché", 
         "🎨 Business Model", 
         "💰 Financier",
         "🎯 Business Plan Complet"
@@ -93,61 +93,47 @@ def create_main_navigation():
     # Création des onglets principaux
     main_tabs_ui = st.tabs(main_tabs)
     
-    # 1. Informations Générales (premier onglet)
+    # 1. Informations Générales
     with main_tabs_ui[0]:
         page_informations_generales()
     
-    # 2. Business Model (avec sous-onglets incluant analyse de marché)
+    # 2. Analyse de Marché (nouvel onglet principal)
     with main_tabs_ui[1]:
-        business_model_subtabs = [
-            "📊 Analyse de Marché",
-            "🎨 Créativité & Business Model",
-            "🎯 Business Model Final"
+        analyse_marche_subtabs = [
+            "🏪 Analyse du Marché",
+            "⚔️ Analyse de la Concurrence"
         ]
         
-        bm_tabs = st.tabs(business_model_subtabs)
+        market_tabs = st.tabs(analyse_marche_subtabs)
         
-        # Analyse de Marché (combine marché + concurrence)
-        with bm_tabs[0]:
-            analyse_marche_subtabs = [
-                "🏪 Analyse du Marché",
-                "⚔️ Analyse de la Concurrence"
-            ]
-            
-            market_tabs = st.tabs(analyse_marche_subtabs)
-            
-            with market_tabs[0]:
-                try:
-                    from ui.pages import afficher_analyse_marche
-                    afficher_analyse_marche()
-                except Exception as e:
-                    st.error(f"Fonction d'analyse de marché non encore implémentée : {str(e)}")
-                    st.info("Cette section sera disponible prochainement")
-            
-            with market_tabs[1]:
-                try:
-                    from ui.pages import afficher_analyse_concurrence
-                    afficher_analyse_concurrence()
-                except Exception as e:
-                    st.error(f"Fonction d'analyse de concurrence non encore implémentée : {str(e)}")
-                    st.info("Cette section sera disponible prochainement")
-        
-        # Créativité & Business Model
-        with bm_tabs[1]:
+        with market_tabs[0]:
             try:
-                page_collecte_donnees()
+                from ui.pages import afficher_analyse_marche
+                afficher_analyse_marche()
             except Exception as e:
-                st.error(f"Erreur lors du chargement de la page : {str(e)}")
+                st.error(f"Fonction d'analyse de marché non encore implémentée : {str(e)}")
+                st.info("Cette section sera disponible prochainement")
         
-        # Business Model Final
-        with bm_tabs[2]:
+        with market_tabs[1]:
             try:
-                page_generer_business_model()
+                from ui.pages import afficher_analyse_concurrence
+                afficher_analyse_concurrence()
             except Exception as e:
-                st.error(f"Erreur lors du chargement de la page : {str(e)}")
+                st.error(f"Fonction d'analyse de concurrence non encore implémentée : {str(e)}")
+                st.info("Cette section sera disponible prochainement")
     
-    # 3. Financier (avec sous-onglets pour tous les éléments financiers)
+    # 3. Business Model (simplifié, sans sous-onglets)
     with main_tabs_ui[2]:
+        try:
+            # Import de la page Business Model Initial directement
+            from ui.pages.business_model_initial import page_business_model_initial
+            page_business_model_initial()
+        except Exception as e:
+            st.error(f"Erreur lors du chargement du Business Model : {str(e)}")
+            st.info("Veuillez vérifier que le module business_model_initial est disponible")
+    
+    # 4. Financier (avec sous-onglets pour tous les éléments financiers)
+    with main_tabs_ui[3]:
         financial_subtabs = [
             "💰 Besoins de Démarrage",
             "🏦 Financement", 
@@ -203,8 +189,8 @@ def create_main_navigation():
                     st.error(f"Erreur lors du chargement de la page financière : {str(e)}")
                     st.info("Veuillez rafraîchir la page ou contacter le support technique.")
 
-    # 4. Business Plan Complet
-    with main_tabs_ui[3]:
+    # 5. Business Plan Complet
+    with main_tabs_ui[4]:
         try:
             with st.expander("✨ Nouvelle fonctionnalité", expanded=False):
                 st.success("🎯 **Business Plan Complet** - Nouvelle version qui intègre automatiquement tous les tableaux financiers dans le plan d'affaires généré!")
