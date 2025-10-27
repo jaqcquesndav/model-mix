@@ -100,14 +100,22 @@ def create_main_navigation():
     # 2. Analyse de Marché (nouvel onglet principal)
     with main_tabs_ui[1]:
         analyse_marche_subtabs = [
-            "🏪 Analyse du Marché",
-            "⚔️ Analyse de la Concurrence",
-            "🌳 Arbre à Problème"
+            "� Arbre à Problème",
+            "�🏪 Analyse du Marché",
+            "⚔️ Analyse de la Concurrence"
         ]
         
         market_tabs = st.tabs(analyse_marche_subtabs)
         
         with market_tabs[0]:
+            try:
+                from ui.pages.business_model_initial import page_arbre_probleme
+                page_arbre_probleme()
+            except Exception as e:
+                st.error(f"Erreur lors du chargement de l'arbre à problème : {str(e)}")
+                st.info("Veuillez vérifier que le module arbre à problème est disponible")
+        
+        with market_tabs[1]:
             try:
                 from ui.pages import afficher_analyse_marche
                 afficher_analyse_marche()
@@ -115,21 +123,13 @@ def create_main_navigation():
                 st.error(f"Fonction d'analyse de marché non encore implémentée : {str(e)}")
                 st.info("Cette section sera disponible prochainement")
         
-        with market_tabs[1]:
+        with market_tabs[2]:
             try:
                 from ui.pages import afficher_analyse_concurrence
                 afficher_analyse_concurrence()
             except Exception as e:
                 st.error(f"Fonction d'analyse de concurrence non encore implémentée : {str(e)}")
                 st.info("Cette section sera disponible prochainement")
-        
-        with market_tabs[2]:
-            try:
-                from ui.pages.business_model_initial import page_arbre_probleme
-                page_arbre_probleme()
-            except Exception as e:
-                st.error(f"Erreur lors du chargement de l'arbre à problème : {str(e)}")
-                st.info("Veuillez vérifier que le module arbre à problème est disponible")
     
     # 3. Business Model (simplifié, sans sous-onglets)
     with main_tabs_ui[2]:
