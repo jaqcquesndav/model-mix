@@ -3,6 +3,7 @@ Pages financières de base - Version simplifiée pour préserver le workflow
 """
 
 import streamlit as st
+from datetime import date
 
 def page_informations_generales():
     """Page des informations générales - Version simplifiée"""
@@ -1342,39 +1343,184 @@ def page_rentabilite():
         st.warning("Veuillez renseigner le chiffre d'affaires et les charges pour voir l'analyse de rentabilité")
 
 def page_generation_business_plan():
-    """Page de génération du business plan - Version simplifiée"""
+    """Page de génération du business plan - Version améliorée"""
     st.title("📄 Génération Business Plan")
-    st.info("⚠️ Version simplifiée - Fonctionnalité de base.")
     
     if "data" not in st.session_state:
         st.session_state.data = {}
     
     data = st.session_state.data
     
-    if st.button("Générer Business Plan"):
-        st.success("Génération en cours...")
+    # Vérification des données disponibles
+    has_info_gen = "informations_generales" in data and data["informations_generales"]
+    has_financial = any([
+        data.get("total_ca_annee1", 0) > 0,
+        data.get("total_charges_fixes_annee1", 0) > 0,
+        data.get("besoins_demarrage", {})
+    ])
+    has_business_model = st.session_state.get('business_model_precedent', '')
+    
+    # Interface améliorée
+    col1, col2 = st.columns([2, 1])
+    
+    with col2:
+        st.markdown("### 📊 Statut des données")
+        if has_info_gen:
+            st.success("✅ Informations générales")
+        else:
+            st.warning("⚠️ Informations générales manquantes")
+            
+        if has_business_model:
+            st.success("✅ Business Model")
+        else:
+            st.warning("⚠️ Business Model manquant")
+            
+        if has_financial:
+            st.success("✅ Données financières")
+        else:
+            st.warning("⚠️ Données financières manquantes")
         
-        # Récapitulatif des données
-        st.subheader("Récapitulatif des données")
+        st.markdown("---")
         
-        # Informations générales
-        if "informations_generales" in data:
-            st.write("**Informations générales :**")
-            for key, value in data["informations_generales"].items():
-                st.write(f"- {key}: {value}")
+        if has_info_gen and has_financial:
+            st.success("🟢 Prêt à générer")
+        else:
+            st.error("🔴 Données insuffisantes")
+    
+    with col1:
+        if not (has_info_gen and has_financial):
+            st.error("❌ **Données insuffisantes pour générer le business plan**")
+            st.info("💡 Complétez d'abord les sections suivantes :")
+            
+            if not has_info_gen:
+                st.markdown("- **Finances** → **Informations Générales**")
+            if not has_financial:
+                st.markdown("- **Finances** → **Données financières** (CA, charges, etc.)")
+            if not has_business_model:
+                st.markdown("- **Business Model** → **Business Model Final**")
+                
+        else:
+            st.success("✅ **Prêt à générer votre business plan**")
+            
+            # Options de génération
+            format_sortie = st.selectbox(
+                "Format de sortie",
+                ["PDF", "Word", "Text"],
+                index=0
+            )
+            
+            include_charts = st.checkbox("Inclure les graphiques financiers", value=True)
+            
+            if st.button("📄 **Générer Business Plan**", type="primary", use_container_width=True):
+                with st.spinner("⏳ Génération en cours..."):
+                    
+                    # Génération du contenu
+                    business_plan_content = generer_business_plan_complet(data, has_business_model)
+                    
+                    st.success("🎉 **Business Plan généré avec succès !**")
+                    
+                    # Affichage du résultat
+                    st.markdown("### 📋 Votre Business Plan")
+                    
+                    # Zone de texte éditable
+                    business_plan_edite = st.text_area(
+                        "Contenu du Business Plan",
+                        value=business_plan_content,
+                        height=500,
+                        help="Vous pouvez modifier directement le contenu ici"
+                    )
+                    
+                    # Boutons d'action
+                    col_btn1, col_btn2 = st.columns(2)
+                    
+                    with col_btn1:
+                        nom_entreprise = data.get("informations_generales", {}).get("nom_entreprise", "entreprise")
+                        st.download_button(
+                            "📥 Télécharger",
+                            business_plan_edite,
+                            file_name=f"business_plan_{nom_entreprise}.txt",
+                            mime="text/plain"
+                        )
+                    
+                    with col_btn2:
+                        if st.button("💾 Sauvegarder"):
+                            st.session_state['business_plan_generated'] = business_plan_edite
+                            st.success("✅ Sauvegardé!")
+
+def generer_business_plan_complet(data, has_business_model):
+    """Génère le contenu complet du business plan"""
+    
+    content = []
+    
+    # En-tête
+    nom_entreprise = data.get("informations_generales", {}).get("nom_entreprise", "Mon Entreprise")
+    content.append(f"# BUSINESS PLAN - {nom_entreprise.upper()}")
+    content.append("=" * 50)
+    content.append("")
+    
+    # 1. Informations générales
+    content.append("## 1. PRÉSENTATION DE L'ENTREPRISE")
+    content.append("")
+    if "informations_generales" in data:
+        for key, value in data["informations_generales"].items():
+            if value:
+                content.append(f"**{key.replace('_', ' ').title()}:** {value}")
+    content.append("")
+    
+    # 2. Business Model (si disponible)
+    if has_business_model:
+        content.append("## 2. BUSINESS MODEL")
+        content.append("")
+        content.append(st.session_state.get('business_model_precedent', 'Business Model non disponible'))
+        content.append("")
+    
+    # 3. Analyse financière
+    content.append("## 3. ANALYSE FINANCIÈRE")
+    content.append("")
+    
+    # Données financières
+    ca_1 = data.get("total_ca_annee1", 0.0)
+    charges_fixes = data.get("total_charges_fixes_annee1", 0.0)
+    salaires = data.get("total_salaires_annee1", 0.0)
+    charges_variables = data.get("total_charges_variables_annee1", 0.0)
+    
+    if ca_1 > 0:
+        content.append("### Prévisions Année 1")
+        content.append(f"- **Chiffre d'affaires:** {ca_1:,.0f} $")
+        content.append(f"- **Charges fixes:** {charges_fixes:,.0f} $")
+        content.append(f"- **Salaires:** {salaires:,.0f} $")
+        content.append(f"- **Charges variables:** {charges_variables:,.0f} $")
         
-        # Données financières
-        ca_1 = data.get("total_ca_annee1", 0.0)
-        charges_fixes = data.get("total_charges_fixes_annee1", 0.0)
-        salaires = data.get("total_salaires_annee1", 0.0)
+        total_charges = charges_fixes + salaires + charges_variables
+        resultat = ca_1 - total_charges
         
-        if ca_1 > 0:
-            st.write("**Données financières :**")
-            st.write(f"- Chiffre d'affaires année 1: {ca_1:,.0f} $")
-            st.write(f"- Charges fixes année 1: {charges_fixes:,.0f} $")
-            st.write(f"- Salaires année 1: {salaires:,.0f} $")
+        content.append("")
+        content.append(f"**RÉSULTAT PRÉVISIONNEL:** {resultat:,.0f} $")
         
-        st.info("📝 Business Plan généré avec succès ! (Version basique)")
-    else:
-        st.write("Cliquez sur le bouton pour générer votre business plan.")
+        if resultat > 0:
+            content.append("✅ **Projet rentable**")
+        else:
+            content.append("⚠️ **Attention: Projet déficitaire**")
+    
+    content.append("")
+    
+    # 4. Besoins de démarrage
+    if "besoins_demarrage" in data and data["besoins_demarrage"]:
+        content.append("## 4. BESOINS DE DÉMARRAGE")
+        content.append("")
+        for categorie, montant in data["besoins_demarrage"].items():
+            if montant > 0:
+                content.append(f"- **{categorie.replace('_', ' ').title()}:** {montant:,.0f} $")
+        content.append("")
+    
+    # 5. Conclusion
+    content.append("## 5. CONCLUSION")
+    content.append("")
+    content.append("Ce business plan présente les éléments clés du projet d'entreprise.")
+    content.append("Les données financières prévisionnelles permettent d'évaluer la viabilité du projet.")
+    content.append("")
+    content.append("---")
+    content.append(f"*Document généré le {date.today().strftime('%d/%m/%Y')}*")
+    
+    return "\n".join(content)
 
