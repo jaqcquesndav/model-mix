@@ -162,3 +162,51 @@ def obtenir_estimation_cout(tokens: int, model: str = "gpt-4", type_tokens: str 
         return 0.0
     
     return (tokens / 1000) * TOKEN_COSTS[model][type_tokens]
+
+def obtenir_statistiques_tokens() -> Dict[str, Any]:
+    """Retourne les statistiques actuelles d'usage des tokens"""
+    init_token_counter()
+    usage = st.session_state['token_usage']
+    
+    return {
+        'total_tokens': usage['total_input_tokens'] + usage['total_output_tokens'],
+        'input_tokens': usage['total_input_tokens'],
+        'output_tokens': usage['total_output_tokens'],
+        'total_cost': usage['total_cost_usd'],
+        'requests_count': usage['requests_count'],
+        'session_start': usage['session_start'],
+        'user_limit': 50000,  # Limite par défaut
+        'limit_enabled': True
+    }
+
+def configurer_limite_tokens(nouvelle_limite: int, activer: bool = True):
+    """Configure la limite de tokens utilisateur"""
+    init_token_counter()
+    st.session_state['token_limit'] = nouvelle_limite
+    st.session_state['token_limit_enabled'] = activer
+
+def reinitialiser_compteur():
+    """Remet à zéro le compteur de tokens"""
+    if 'token_usage' in st.session_state:
+        del st.session_state['token_usage']
+    init_token_counter()
+
+def formater_nombre_tokens(tokens: int) -> str:
+    """Formate le nombre de tokens pour l'affichage"""
+    if tokens < 1000:
+        return str(tokens)
+    elif tokens < 1000000:
+        return f"{tokens/1000:.1f}K"
+    else:
+        return f"{tokens/1000000:.1f}M"
+
+def obtenir_pourcentage_utilisation() -> float:
+    """Calcule le pourcentage d'utilisation de la limite"""
+    stats = obtenir_statistiques_tokens()
+    limit_enabled = st.session_state.get('token_limit_enabled', True)
+    user_limit = st.session_state.get('token_limit', 50000)
+    
+    if not limit_enabled or user_limit == 0:
+        return 0.0
+    
+    return min(100.0, (stats['total_tokens'] / user_limit) * 100)
