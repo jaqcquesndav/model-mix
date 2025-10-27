@@ -83,92 +83,121 @@ def main():
 def create_main_navigation():
     """Crée la navigation principale de l'application"""
     
-    # Définition des onglets avec les nouvelles pages refactorisées
-    business_model_tabs = [
-        "🎨 Créativité & Business Model",
-        "🎯 Générer Business Model Final",
+    # Onglets principaux simplifiés
+    main_tabs = [
+        "ℹ️ Informations Générales",
+        "🎨 Business Model", 
+        "💰 Financier",
+        "📄 Génération Business Plan"
     ]
     
-    financial_tabs = [
-        "ℹ️ Informations Générales", 
-        "💰 Besoins de Démarrage", 
-        "🏦 Financement",
-        "📋 Charges Fixes", 
-        "📈 Chiffre d'Affaires", 
-        "📊 Charges Variables",
-        "💼 Fonds de Roulement", 
-        "👥 Salaires", 
-        "📊 Rentabilité", 
-        "💰 Trésorerie",
-        "📊 Récapitulatif Complet",
-        "💼 Investissements & Financements",
-        "📋 Détail Amortissements"
-    ]
+    # Création des onglets principaux
+    main_tabs_ui = st.tabs(main_tabs)
     
-    final_tabs = [
-        "📄 Génération Business Plan",
-        "🎯 Business Plan Complet (Nouveau)"
-    ]
+    # 1. Informations Générales (premier onglet)
+    with main_tabs_ui[0]:
+        page_informations_generales()
     
-    # Combinaison de tous les onglets
-    all_tabs = business_model_tabs + financial_tabs + final_tabs
-    
-    # Création des onglets
-    tabs = st.tabs(all_tabs)
-    
-    # Mapping des nouvelles pages refactorisées
-    new_pages = {
-        0: page_collecte_donnees,           # Créativité & Stratégie (contient Arbre à Problème + navigation)
-        1: page_generer_business_model,     # Générer Business Model (amélioration IA)
-    }
-    
-    # Mapping des pages existantes et nouvelles
-    existing_pages = {
-        2: page_informations_generales,     # Informations Générales
-        3: page_besoins_demarrage,         # Besoins de Démarrage
-        4: page_financement,               # Financement
-        5: page_charges_fixes,             # Charges Fixes
-        6: page_chiffre_affaires,          # Chiffre d'Affaires
-        7: page_charges_variables,         # Charges Variables
-        8: page_fonds_roulement,           # Fonds de Roulement
-        9: page_salaires,                  # Salaires
-        10: page_rentabilite,              # Rentabilité
-        11: page_tresorerie,               # Trésorerie
-        12: page_recapitulatif,            # Récapitulatif Complet - NOUVEAU
-        13: page_investissements_et_financements,  # Investissements & Financements - NOUVEAU
-        14: page_detail_amortissements,    # Détail Amortissements - NOUVEAU
-        15: page_generation_business_plan,  # Génération Business Plan
-        16: page_generation_business_plan_integree,  # Business Plan Complet - NOUVEAU
-    }
-    
-    # Affichage des pages dans leurs onglets respectifs
-    for i, tab in enumerate(tabs):
-        with tab:
+    # 2. Business Model (avec sous-onglets)
+    with main_tabs_ui[1]:
+        business_model_subtabs = [
+            "🎨 Créativité & Business Model",
+            "🎯 Business Model Final"
+        ]
+        
+        bm_tabs = st.tabs(business_model_subtabs)
+        
+        with bm_tabs[0]:
             try:
-                # Pages refactorisées
-                if i in new_pages:
-                    new_pages[i]()
-                # Pages existantes
-                elif i in existing_pages:
+                page_collecte_donnees()
+            except Exception as e:
+                st.error(f"Erreur lors du chargement de la page : {str(e)}")
+        
+        with bm_tabs[1]:
+            try:
+                page_generer_business_model()
+            except Exception as e:
+                st.error(f"Erreur lors du chargement de la page : {str(e)}")
+    
+    # 3. Financier (avec sous-onglets pour tous les éléments financiers)
+    with main_tabs_ui[2]:
+        financial_subtabs = [
+            "💰 Besoins de Démarrage",
+            "🏦 Financement", 
+            "📋 Charges Fixes",
+            "📈 Chiffre d'Affaires",
+            "📊 Charges Variables",
+            "💼 Fonds de Roulement",
+            "👥 Salaires",
+            "📊 Rentabilité", 
+            "💰 Trésorerie",
+            "📊 Récapitulatif Complet",
+            "💼 Investissements & Financements",
+            "📋 Détail Amortissements"
+        ]
+        
+        fin_tabs = st.tabs(financial_subtabs)
+        
+        # Mapping des pages financières
+        financial_pages = {
+            0: page_besoins_demarrage,
+            1: page_financement,
+            2: page_charges_fixes,
+            3: page_chiffre_affaires,
+            4: page_charges_variables,
+            5: page_fonds_roulement,
+            6: page_salaires,
+            7: page_rentabilite,
+            8: page_tresorerie,
+            9: page_recapitulatif,
+            10: page_investissements_et_financements,
+            11: page_detail_amortissements
+        }
+        
+        # Affichage des pages financières
+        for i, tab in enumerate(fin_tabs):
+            with tab:
+                try:
                     # Indication pour les nouvelles pages refactorisées
-                    if i in [12, 13, 14, 16]:  # Nouvelles pages
+                    if i in [9, 10, 11]:  # Nouvelles pages
                         with st.expander("✨ Nouvelle fonctionnalité", expanded=False):
-                            if i == 16:
-                                st.success("🎯 **Business Plan Complet** - Nouvelle version qui intègre automatiquement tous les tableaux financiers dans le plan d'affaires généré!")
-                            else:
-                                st.success("Cette page a été nouvellement développée dans l'architecture refactorisée.")
+                            st.success("Cette page a été nouvellement développée dans l'architecture refactorisée.")
                     # Ajout d'un indicateur pour les pages à migrer
-                    elif i >= 2 and i <= 11:  # Pages financières existantes
+                    else:  # Pages financières existantes
                         with st.expander("ℹ️ Info de migration", expanded=False):
                             st.info("Cette page utilise encore l'ancienne architecture. La migration vers la nouvelle structure est prévue.")
                     
-                    existing_pages[i]()
-                else:
-                    st.error(f"Page non trouvée pour l'onglet {i}")
-                    
+                    if i in financial_pages:
+                        financial_pages[i]()
+                    else:
+                        st.error(f"Page financière non trouvée pour l'onglet {i}")
+                        
+                except Exception as e:
+                    st.error(f"Erreur lors du chargement de la page financière : {str(e)}")
+                    st.info("Veuillez rafraîchir la page ou contacter le support technique.")
+    
+    # 4. Génération Business Plan
+    with main_tabs_ui[3]:
+        business_plan_subtabs = [
+            "📄 Génération Business Plan",
+            "🎯 Business Plan Complet (Nouveau)"
+        ]
+        
+        bp_tabs = st.tabs(business_plan_subtabs)
+        
+        with bp_tabs[0]:
+            try:
+                page_generation_business_plan()
             except Exception as e:
                 st.error(f"Erreur lors du chargement de la page : {str(e)}")
-                st.info("Veuillez rafraîchir la page ou contacter le support technique.")
+        
+        with bp_tabs[1]:
+            try:
+                with st.expander("✨ Nouvelle fonctionnalité", expanded=False):
+                    st.success("🎯 **Business Plan Complet** - Nouvelle version qui intègre automatiquement tous les tableaux financiers dans le plan d'affaires généré!")
+                page_generation_business_plan_integree()
+            except Exception as e:
+                st.error(f"Erreur lors du chargement de la page : {str(e)}")
 
 def afficher_sidebar_info():
     """Affiche des informations complémentaires dans la sidebar"""

@@ -28,15 +28,15 @@ def calculer_tableaux_financiers() -> Dict[str, Any]:
         'financements': st.session_state.get('financements', {})
     }
     
-    # Calcul des différents tableaux
+    # Calcul des différents tableaux (utilisant les fonctions 5 ans existantes)
     resultats['investissements'] = calculer_tableau_investissements(donnees_base['investissements'])
-    resultats['compte_resultats'] = calculer_compte_resultats(donnees_base)
-    resultats['soldes_intermediaires'] = calculer_soldes_intermediaires(donnees_base)
-    resultats['capacite_autofinancement'] = calculer_tableau_caf(donnees_base)
-    resultats['seuil_rentabilite'] = calculer_tableau_seuil_rentabilite(donnees_base)
-    resultats['bfr'] = calculer_tableau_bfr(donnees_base)
-    resultats['plan_financement'] = calculer_plan_financement_trois_ans(donnees_base)
-    resultats['budget_tresorerie'] = calculer_budget_tresorerie(donnees_base)
+    resultats['compte_resultats'] = calculer_compte_resultats_5_ans(donnees_base)
+    resultats['soldes_intermediaires'] = calculer_soldes_intermediaires_5_ans(donnees_base)
+    resultats['capacite_autofinancement'] = calculer_tableau_caf_5_ans(donnees_base)
+    resultats['seuil_rentabilite'] = calculer_tableau_seuil_rentabilite_5_ans(donnees_base)
+    resultats['bfr'] = calculer_tableau_bfr_5_ans(donnees_base)
+    resultats['plan_financement'] = calculer_plan_financement_5_ans(donnees_base)
+    resultats['budget_tresorerie'] = calculer_budget_tresorerie_5_ans(donnees_base)
     
     return resultats
 
@@ -1130,3 +1130,215 @@ def calculer_plan_financement_cinq_ans(donnees: Dict[str, Any]) -> Dict[str, Any
         'variation_tresorerie': variation_tresorerie,
         'tresorerie_cumulee': tresorerie_cumulee
     }
+
+def calculer_plan_financement_5_ans(donnees: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Calcule le plan de financement sur 5 ans
+    """
+    try:
+        # Données de financement
+        financement = donnees.get('financement', {})
+        apport_personnel = financement.get('apport_personnel', 0)
+        
+        # Prêts
+        prets = []
+        for i in range(1, 4):
+            pret = financement.get(f'pret_{i}', {})
+            if pret.get('montant', 0) > 0:
+                prets.append(pret)
+        
+        # Subventions
+        subventions = []
+        for i in range(1, 3):
+            subv = financement.get(f'subvention_{i}', {})
+            if subv.get('montant', 0) > 0:
+                subventions.append(subv)
+        
+        # Besoins
+        besoins_demarrage = donnees.get('besoins_demarrage', {})
+        total_besoins = sum(besoins_demarrage.values())
+        
+        # Calcul CAF (capacité d'autofinancement)
+        caf_data = calculer_tableau_caf_5_ans(donnees)
+        caf_annuelle = {}
+        if caf_data.get('success'):
+            for annee in ['annee_1', 'annee_2', 'annee_3', 'annee_4', 'annee_5']:
+                caf_annuelle[annee] = caf_data['tableau'][annee]['caf']
+        
+        # Calcul BFR
+        bfr_data = calculer_tableau_bfr_5_ans(donnees)
+        variation_bfr = {}
+        if bfr_data.get('success'):
+            for annee in ['annee_1', 'annee_2', 'annee_3', 'annee_4', 'annee_5']:
+                variation_bfr[annee] = bfr_data['tableau'][annee]['variation_bfr']
+        
+        plan_financement = {}
+        
+        for i, annee in enumerate(['annee_1', 'annee_2', 'annee_3', 'annee_4', 'annee_5']):
+            # Ressources
+            ressources = 0
+            if i == 0:  # Première année
+                ressources += apport_personnel
+                ressources += sum(pret.get('montant', 0) for pret in prets)
+                ressources += sum(subv.get('montant', 0) for subv in subventions)
+            
+            ressources += caf_annuelle.get(annee, 0)
+            
+            # Emplois
+            emplois = 0
+            if i == 0:  # Première année
+                emplois += total_besoins
+            
+            emplois += variation_bfr.get(annee, 0)
+            
+            # Remboursements de prêts
+            remboursements = 0
+            for pret in prets:
+                duree_mois = pret.get('duree_mois', 60)
+                if duree_mois > i * 12:  # Le prêt est encore en cours
+                    montant_pret = pret.get('montant', 0)
+                    taux = pret.get('taux', 5)
+                    details_pret = calculer_pret_interet_fixe(montant_pret, taux, duree_mois)
+                    remboursements += details_pret['mensualite'] * 12
+            
+            emplois += remboursements
+            
+            # Solde
+            solde = ressources - emplois
+            
+            plan_financement[annee] = {
+                'ressources': {
+                    'apport_personnel': apport_personnel if i == 0 else 0,
+                    'prets': sum(pret.get('montant', 0) for pret in prets) if i == 0 else 0,
+                    'subventions': sum(subv.get('montant', 0) for subv in subventions) if i == 0 else 0,
+                    'caf': caf_annuelle.get(annee, 0),
+                    'total_ressources': ressources
+                },
+                'emplois': {
+                    'investissements': total_besoins if i == 0 else 0,
+                    'variation_bfr': variation_bfr.get(annee, 0),
+                    'remboursements_prets': remboursements,
+                    'total_emplois': emplois
+                },
+                'solde': solde,
+                'solde_cumule': sum(plan_financement[a]['solde'] for a in plan_financement.keys()) + solde
+            }
+        
+        return {
+            'success': True,
+            'plan': plan_financement,
+            'resume': {
+                'equilibre_global': all(annee_data['solde'] >= 0 for annee_data in plan_financement.values()),
+                'solde_final': plan_financement['annee_5']['solde_cumule']
+            }
+        }
+        
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
+
+def calculer_budget_tresorerie_5_ans(donnees: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Calcule le budget de trésorerie mensuel pour les 5 années
+    """
+    try:
+        # Données CA 
+        ca_donnees = donnees.get('ca_mensuel', {})
+        
+        # Données charges fixes avec répartition mensuelle
+        charges_fixes_donnees = donnees.get('charges_fixes', [])
+        
+        # Délais de paiement
+        delai_clients = donnees.get('delai_paiement_clients', 30)
+        delai_fournisseurs = donnees.get('delai_paiement_fournisseurs', 30)
+        
+        # Trésorerie initiale
+        tresorerie_initiale = donnees.get('tresorerie_initiale', 0)
+        
+        budget_tresorerie = {}
+        tresorerie_cumul = tresorerie_initiale
+        
+        # Calcul pour 5 années (60 mois)
+        for annee in range(1, 6):
+            for mois in range(1, 13):
+                mois_global = (annee - 1) * 12 + mois
+                
+                # Encaissements (CA avec délai de paiement)
+                if mois_global <= delai_clients // 30:
+                    encaissements = 0  # Pas encore d'encaissements
+                else:
+                    mois_encaissement = mois_global - (delai_clients // 30)
+                    if mois_encaissement <= 12:  # Première année
+                        encaissements = ca_donnees.get(f'mois_{mois_encaissement}', 0)
+                    else:
+                        # Années suivantes - extrapolation basée sur les augmentations
+                        annee_ca = ((mois_encaissement - 1) // 12) + 1
+                        ca_annuel_key = f'annee_{annee_ca}' if annee_ca > 1 else 'annee_1'
+                        ca_annuel = ca_donnees.get(ca_annuel_key, 0)
+                        encaissements = ca_annuel / 12  # Répartition mensuelle
+                
+                # Décaissements
+                if mois <= 12:  # Première année
+                    ca_mois = ca_donnees.get(f'mois_{mois}', 0)
+                else:
+                    # Années suivantes
+                    ca_annuel_key = f'annee_{annee}'
+                    ca_annuel = ca_donnees.get(ca_annuel_key, 0)
+                    ca_mois = ca_annuel / 12
+                
+                charges_variables = ca_mois * 0.7  # 70% du CA (inverse de la marge de 30%)
+                
+                # Charges fixes mensuelles
+                charges_fixes_mois = 0
+                for charge in charges_fixes_donnees:
+                    if charge.get('repartition_mensuelle'):
+                        charges_fixes_mois += charge['repartition_mensuelle'].get(f'mois_{mois}', 0)
+                    else:
+                        charges_fixes_mois += charge.get(f'annee{annee}', 0) / 12
+                
+                # Charges variables avec délai de paiement fournisseurs
+                if mois_global <= delai_fournisseurs // 30:
+                    decaissements_variables = 0
+                else:
+                    mois_paiement = mois_global - (delai_fournisseurs // 30)
+                    if mois_paiement <= 12:
+                        ca_a_payer = ca_donnees.get(f'mois_{mois_paiement}', 0)
+                    else:
+                        annee_paiement = ((mois_paiement - 1) // 12) + 1
+                        ca_annuel_key = f'annee_{annee_paiement}'
+                        ca_annuel_paiement = ca_donnees.get(ca_annuel_key, 0)
+                        ca_a_payer = ca_annuel_paiement / 12
+                    decaissements_variables = ca_a_payer * 0.7
+                
+                total_decaissements = charges_fixes_mois + decaissements_variables
+                
+                # Solde du mois
+                solde_mois = encaissements - total_decaissements
+                tresorerie_cumul += solde_mois
+                
+                budget_tresorerie[f'annee_{annee}_mois_{mois}'] = {
+                    'encaissements': encaissements,
+                    'charges_fixes': charges_fixes_mois,
+                    'charges_variables_payees': decaissements_variables,
+                    'total_decaissements': total_decaissements,
+                    'solde_mois': solde_mois,
+                    'tresorerie_cumul': tresorerie_cumul,
+                    'tension_tresorerie': tresorerie_cumul < 0
+                }
+        
+        # Analyse des tensions de trésorerie
+        mois_deficitaires = [mois for mois, data in budget_tresorerie.items() 
+                           if data['tension_tresorerie']]
+        
+        return {
+            'success': True,
+            'budget': budget_tresorerie,
+            'resume': {
+                'tresorerie_finale': tresorerie_cumul,
+                'tresorerie_minimale': min(data['tresorerie_cumul'] for data in budget_tresorerie.values()),
+                'mois_deficitaires': mois_deficitaires,
+                'besoin_financement': abs(min(data['tresorerie_cumul'] for data in budget_tresorerie.values())) if any(data['tension_tresorerie'] for data in budget_tresorerie.values()) else 0
+            }
+        }
+        
+    except Exception as e:
+        return {'success': False, 'error': str(e)}
