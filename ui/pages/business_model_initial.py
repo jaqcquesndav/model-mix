@@ -113,7 +113,8 @@ def page_creation_business_model_manuel():
             st.session_state['debug_ai'] = st.checkbox(
                 "🐛 Mode debug IA", 
                 value=st.session_state.get('debug_ai', False),
-                help="Affiche les informations de debug pour l'IA"
+                help="Affiche les informations de debug pour l'IA",
+                key="debug_ai_checkbox_main"
             )
             
             # Test de configuration IA
@@ -627,12 +628,11 @@ def has_sufficient_data():
     has_probleme = bool(arbre_probleme.get('probleme_central', '').strip())
     has_marche = bool(analyse_marche.get('besoin_principal', '').strip())
     
-    # Debug - affichage temporaire
-    debug_checkbox = st.checkbox("🔍 Debug IA", help="Affiche les données disponibles pour l'IA", value=True, key="debug_ai_checkbox")  # Activé par défaut pour diagnostic
-    st.session_state['debug_ai'] = debug_checkbox
+    # Utilisation du mode debug configuré globalement
+    debug_enabled = st.session_state.get('debug_ai', False)
     
-    if debug_checkbox:
-        st.write("**Données détectées:**")
+    if debug_enabled:
+        st.write("**🔍 Debug - Données détectées:**")
         st.write(f"- Nom entreprise (session): '{nom_entreprise}'")
         st.write(f"- Nom entreprise (data): '{nom_entreprise_alt}'")
         st.write(f"- Has entreprise: {has_entreprise}")
