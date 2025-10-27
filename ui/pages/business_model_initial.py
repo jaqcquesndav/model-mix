@@ -672,15 +672,12 @@ def generate_business_model_suggestions(context_data):
         if st.session_state.get('debug_ai', False):
             st.write("🔄 Tentative génération IA...")
             
-        # Test de la configuration API
-        try:
-            api_key = st.secrets["API_KEY"]
-        except:
-            api_key = os.getenv("API_KEY")
+        # Test de la configuration API (comme dans Origin.txt)
+        api_key = os.getenv("API_KEY")
             
-        if not api_key or api_key == "sk-your-actual-openai-api-key-here":
+        if not api_key:
             if st.session_state.get('debug_ai', False):
-                st.warning("⚠️ Clé API non configurée, utilisation du fallback")
+                st.warning("⚠️ Variable d'environnement API_KEY non configurée, utilisation du fallback")
             return generate_fallback_suggestions(context_data)
         
         # Générer des suggestions pour chaque bloc du business model

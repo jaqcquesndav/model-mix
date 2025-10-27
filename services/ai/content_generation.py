@@ -21,14 +21,10 @@ from utils.token_utils import (
 # Configuration OpenAI
 def initialiser_openai():
     """Initialise la configuration OpenAI selon Origin.txt"""
-    # Configuration prioritaire: st.secrets["API_KEY"] (comme dans Origin.txt)
-    try:
-        api_key = st.secrets["API_KEY"]
-    except:
-        # Fallback: variable d'environnement (comme dans Origin.txt)
-        api_key = os.getenv("API_KEY")
+    # Configuration exacte comme dans Origin.txt
+    api_key = os.getenv("API_KEY")
     
-    if api_key and api_key != "sk-your-actual-openai-api-key-here":
+    if api_key:
         # Configuration OpenAI legacy (comme dans Origin.txt)
         openai.api_key = api_key
         # Nouvelle structure OpenAI v1+ pour client
@@ -157,14 +153,11 @@ Requête spécifique pour {section_name}:
             st.error(f"Limite de tokens dépassée: {limit_message}")
             return f"Erreur: {limit_message}"
         
-        # Configuration du client OpenAI (selon Origin.txt)
-        try:
-            api_key = st.secrets["API_KEY"]
-        except:
-            api_key = os.getenv("API_KEY")
+        # Configuration du client OpenAI (exactement comme dans Origin.txt)
+        api_key = os.getenv("API_KEY")
             
-        if not api_key or api_key == "sk-your-actual-openai-api-key-here":
-            st.error("Clé API OpenAI non configurée dans .streamlit/secrets.toml")
+        if not api_key:
+            st.error("Variable d'environnement API_KEY non configurée")
             return "Erreur: Clé API manquante"
         
         client = OpenAI(api_key=api_key)
