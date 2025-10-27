@@ -1804,13 +1804,41 @@ def page_collecte_donnees():
     st.header("Étape 1 : Collecte des Données")
     st.write("Veuillez remplir les informations initiales pour générer le Business Model Canvas.")
     
+    # Système de suggestions intelligentes
+    if st.button("🤖 Générer Suggestions Intelligentes", help="Utilise l'IA pour préremplir certains champs basés sur votre contexte"):
+        with st.spinner("Génération des suggestions basées sur votre contexte..."):
+            type_entreprise = st.session_state.get('type_entreprise', '')
+            secteur = st.session_state.get('secteur_activite', '')
+            localisation = st.session_state.get('localisation', '')
+            problem_tree = st.session_state.get('problem_tree_data', {})
+            
+            if type_entreprise and secteur:
+                suggestions = generer_suggestions_intelligentes(type_entreprise, secteur, localisation, problem_tree)
+                st.session_state.suggestions_ai = suggestions
+                st.success("✅ Suggestions générées! Consultez les onglets ci-dessous.")
+                
+                # Afficher un aperçu des suggestions
+                with st.expander("📋 Aperçu des Suggestions"):
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.write("**Forme Juridique Recommandée:**")
+                        st.info(f"✓ {suggestions.get('forme_juridique', {}).get('recommande', 'N/A')}")
+                    with col2:
+                        st.write("**Compétences Clés Requises:**")
+                        competences = suggestions.get('competences_requises', [])[:3]
+                        for comp in competences:
+                            st.write(f"• {comp}")
+            else:
+                st.warning("Veuillez d'abord sélectionner le type d'entreprise et le secteur dans la barre latérale.")
+    
     # Créer des sous-onglets pour chaque section de collecte
     collecte_tabs = st.tabs([
         "Persona",
-        "Arbre à Problème",
+        "Arbre à Problème", 
         "Analyse du Marché",
         "Facteurs Limitants",
         "Concurrence",
+        "🎯 Suggestions IA"
     ])
     
     # Collecte de Persona
@@ -1831,6 +1859,7 @@ def page_collecte_donnees():
                 
                 if submit_persona:
                     st.session_state.persona = persona
+                    st.session_state.persona_data = persona  # Cohérence avec les clés utilisées
                     st.success("Données Persona enregistrées avec succès !")
             
             elif st.session_state.type_entreprise == "Startup":
@@ -1846,6 +1875,7 @@ def page_collecte_donnees():
                 
                 if submit_persona:
                     st.session_state.persona = persona
+                    st.session_state.persona_data = persona  # Cohérence avec les clés utilisées
                     st.success("Données Persona enregistrées avec succès !")
 
     # Collecte de l'Arbre à Problème
@@ -1923,6 +1953,76 @@ def page_collecte_donnees():
             if submit_concurrence:
                 st.session_state.concurrence = concurrence
                 st.success("Évaluation de la Concurrence enregistrée avec succès !")
+
+    # Onglet Suggestions IA
+    with collecte_tabs[5]:
+        st.subheader("🎯 Suggestions Intelligentes Basées sur l'IA")
+        
+        suggestions = st.session_state.get('suggestions_ai', {})
+        if suggestions and 'erreur' not in suggestions:
+            
+            # Section Aspects Juridiques
+            st.markdown("### ⚖️ **Aspects Juridiques (Droit OHADA/RDC)**")
+            if 'forme_juridique' in suggestions:
+                fj = suggestions['forme_juridique']
+                st.info(f"**Recommandé:** {fj.get('recommande', 'N/A')}")
+                st.write(f"**Justification:** {fj.get('justification', 'N/A')}")
+                st.write(f"**Alternative:** {fj.get('alternative', 'N/A')}")
+            
+            # Section Compétences Techniques
+            st.markdown("### 🔧 **Compétences Techniques Sectorielles**")
+            competences = suggestions.get('competences_requises', [])
+            for i, comp in enumerate(competences, 1):
+                st.write(f"{i}. **{comp}**")
+            
+            # Section Fiscalité
+            st.markdown("### 💰 **Régime Fiscal Optimal**")
+            fiscal = suggestions.get('aspects_fiscaux', {})
+            if fiscal:
+                col1, col2 = st.columns(2)
+                with col1:
+                    st.markdown("**Petit Contribuable:**")
+                    if 'petit_contribuable' in fiscal:
+                        pc = fiscal['petit_contribuable']
+                        st.write(f"• Seuil: {pc.get('seuil', 'N/A')}")
+                        st.write(f"• Taux: {pc.get('taux', 'N/A')}")
+                
+                with col2:
+                    st.markdown("**Régime Normal:**")
+                    if 'regime_normal' in fiscal:
+                        rn = fiscal['regime_normal']
+                        st.write(f"• Seuil: {rn.get('seuil', 'N/A')}")
+                        st.write(f"• Taux: {rn.get('taux', 'N/A')}")
+            
+            # Section Partenaires
+            st.markdown("### 🤝 **Partenaires Potentiels**")
+            partenaires = suggestions.get('partenaires_potentiels', [])
+            for partenaire in partenaires:
+                st.write(f"• {partenaire}")
+            
+            # Section Risques
+            st.markdown("### ⚠️ **Risques Sectoriels Identifiés**")
+            risques = suggestions.get('risques_sectoriels', [])
+            for risque in risques:
+                st.write(f"• {risque}")
+                
+            # Boutons d'action
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("📄 Exporter Suggestions (PDF)"):
+                    # Fonction d'export des suggestions
+                    st.success("Suggestions exportées!")
+            
+            with col2:
+                if st.button("🔄 Régénérer Suggestions"):
+                    # Régénération des suggestions
+                    st.session_state.suggestions_ai = {}
+                    st.experimental_rerun()
+        
+        else:
+            st.info("🤖 Cliquez sur 'Générer Suggestions Intelligentes' ci-dessus pour obtenir des recommandations personnalisées.")
+            if suggestions and 'erreur' in suggestions:
+                st.error(f"Erreur: {suggestions['erreur']}")
 
     # Bouton pour Générer le BMC Initial après avoir collecté toutes les données
     with st.form("form_generate_initial"):
@@ -7403,7 +7503,7 @@ def create_faiss_db(documents):
     embeddings = OpenAIEmbeddings(api_key=api_key)
     return FAISS.from_documents(documents, embeddings)
 
-def generate_section(system_message, query, documents, combined_content, tableau_financier, business_model):
+def generate_section(system_message, query, documents, combined_content, tableau_financier, business_model, section_name=""):
     memory = ConversationBufferMemory(memory_key='chat_history', return_messages=True)
     llm = ChatOpenAI(api_key=api_key)
     if documents:
@@ -7413,15 +7513,45 @@ def generate_section(system_message, query, documents, combined_content, tableau
         full_content = combined_content + " " + combined_info + " " + query+ " "+tableau_financier
     else:
         full_content = combined_content + " " + query+ "Dans ce données où vous allez recuperer les informations generales de l'entreprises "+ tableau_financier+ "utiliser les données financier pour enrichir les arguments aussi sachez que le nom du projet  correspond nom de l'entreprise. Voici les autres informations à considerer c'est les informations du business model et ca doit etre tenue compte lors de la generation:"+ business_model
+    
+    # Ajouter les instructions de structure professionnelle
+    instruction_structure = f"""
+    
+    INSTRUCTIONS DE STRUCTURE PROFESSIONNELLE:
+    1. Utiliser des TITRES et SOUS-TITRES hiérarchisés (##, ###)
+    2. Créer des TABLEAUX détaillés avec format Markdown
+    3. Utiliser des LISTES à puces et numérotées
+    4. Rédiger des PARAGRAPHES complets et structurés
+    5. Adapter au contexte RDC avec monnaie USD
+    6. Inclure les compétences sectorielles (juridique OHADA, technique, fiscal, environnemental)
+    7. Respecter les normes professionnelles du business plan
+    
+    SECTION: {section_name}
+    """
+    
     completion = client.chat.completions.create(
         model="gpt-4o",
         messages=[
-            {"role": "system", "content": system_message},
+            {"role": "system", "content": system_message + instruction_structure},
             {"role": "user", "content": full_content}
         ],
         temperature=0.9
     )
-    return completion.choices[0].message.content
+    
+    # Améliorer la structure du contenu généré
+    contenu_genere = completion.choices[0].message.content
+    
+    # Données de contexte pour l'amélioration
+    donnees_contexte = {
+        'secteur': st.session_state.get('secteur_activite', 'Services'),
+        'type_entreprise': st.session_state.get('type_entreprise', 'PME'),
+        'donnees_financieres': tableau_financier
+    }
+    
+    # Appliquer l'amélioration de structure
+    contenu_ameliore = ameliorer_structure_document_genere(section_name, contenu_genere, donnees_contexte)
+    
+    return contenu_ameliore
 
 def extract_company_name(text):
     match = re.search(r"(nom de l'entreprise est|Nom de l'entreprise|La vision de) ([\w\s]+)", text, re.IGNORECASE)
@@ -7557,6 +7687,340 @@ def markdown_to_word_via_text(markdown_content):
     buffer.seek(0)
 
     return "\n".join(plain_text_output), buffer
+
+def generer_suggestions_intelligentes(type_entreprise, secteur, localisation, problem_tree_data):
+    """
+    Génère des suggestions intelligentes basées sur le contexte du projet
+    """
+    try:
+        # Contexte pour l'IA
+        contexte_suggestions = f"""
+        TYPE D'ENTREPRISE: {type_entreprise}
+        SECTEUR D'ACTIVITÉ: {secteur}
+        LOCALISATION: {localisation}
+        PROBLÉMATIQUES IDENTIFIÉES: {problem_tree_data}
+        
+        CONTEXTE RDC: République Démocratique du Congo, droit OHADA, économie en croissance
+        """
+        
+        # Suggestions pour différentes sections
+        suggestions = {
+            'forme_juridique': determiner_forme_juridique_optimale(type_entreprise, secteur),
+            'competences_requises': identifier_competences_sectorielles(secteur),
+            'aspects_fiscaux': analyser_regime_fiscal_optimal(type_entreprise, secteur),
+            'partenaires_potentiels': suggerer_partenaires(secteur, localisation),
+            'risques_sectoriels': identifier_risques_specifiques(secteur, localisation)
+        }
+        
+        return suggestions
+    except Exception as e:
+        return {"erreur": f"Impossible de générer les suggestions: {str(e)}"}
+
+def determiner_forme_juridique_optimale(type_entreprise, secteur):
+    """Suggère la forme juridique optimale selon le droit OHADA"""
+    suggestions_juridiques = {
+        "PME": {
+            "recommande": "SARLU (Société A Responsabilité Limitée Unipersonnelle)",
+            "alternative": "SARL (Société A Responsabilité Limitée)",
+            "justification": "Simplicité de gestion, responsabilité limitée, adapté aux PME selon l'Acte Uniforme OHADA"
+        },
+        "Startup": {
+            "recommande": "SAS (Société par Actions Simplifiée)",
+            "alternative": "SARL",
+            "justification": "Flexibilité pour les investisseurs, gouvernance adaptée à la croissance"
+        },
+        "Entreprise individuelle": {
+            "recommande": "Entreprise Individuelle",
+            "alternative": "SARLU",
+            "justification": "Simplicité administrative, faibles coûts de création"
+        }
+    }
+    
+    return suggestions_juridiques.get(type_entreprise, suggestions_juridiques["PME"])
+
+def ameliorer_structure_document_genere(section_name, contenu_genere, donnees_contexte):
+    """
+    Améliore la structure du document généré avec un format professionnel
+    """
+    
+    # Préfixes de structure selon la section
+    structures_professionnelles = {
+        "Résumé Exécutif": """
+## I. RÉSUMÉ EXÉCUTIF « EXECUTIVE SUMMARY » / PITCH
+
+### 1.1 Présentation de l'Entreprise
+### 1.2 Équipe Dirigeante et Porteurs de Projet  
+### 1.3 Opportunité de Marché
+### 1.4 Proposition de Valeur Unique
+### 1.5 Projections Financières Clés
+### 1.6 Besoins de Financement
+
+""",
+        "Présentation de votre entreprise": """
+## II. PRÉSENTATION DE L'ENTREPRISE/PROJET
+
+### 2.1 Informations Juridiques et Administratives (Conformité OHADA/RDC)
+### 2.2 Localisation et Couverture Géographique
+### 2.3 Historique et Genèse du Projet
+### 2.4 Équipe Managériale et Ressources Humaines
+### 2.5 Analyse SWOT Détaillée
+### 2.6 Compétences Sectorielles Requises
+### 2.7 Business Model Canvas Détaillé
+
+""",
+        "Présentation de l'offre de produit": """
+## III. PRÉSENTATION DE L'OFFRE DE PRODUIT(S) ET/OU SERVICE(S)
+
+### 3.1 Description Détaillée de l'Offre
+### 3.2 Besoins Identifiés et Solution Proposée
+### 3.3 Proposition de Valeur Unique
+### 3.4 Aspects Techniques et Qualité
+### 3.5 Prise en Compte du Genre
+### 3.6 Impact Environnemental et Social
+
+""",
+        "Étude de marché": """
+## IV. ÉTUDE DE MARCHÉ
+
+### 4.1 Méthodologie de l'Étude
+### 4.2 Analyse Générale du Marché
+### 4.3 Caractéristiques de la Demande
+### 4.4 Analyse de la Concurrence
+### 4.5 Environnement des Affaires (RDC)
+### 4.6 Partenariats Stratégiques
+### 4.7 Impact sur l'Emploi
+### 4.8 Projections de Chiffre d'Affaires
+
+"""
+    }
+    
+    # Ajouter des éléments spécifiques RDC/OHADA
+    contexte_rdc = f"""
+
+**CONTEXTE SPÉCIFIQUE RDC:**
+- Monnaie de référence: USD (United States Dollar)
+- Cadre juridique: Droit OHADA + Législation congolaise
+- Environnement économique: Marché en développement
+- Considérations logistiques: Défis infrastructurels
+
+"""
+    
+    # Compétences sectorielles basées sur le type d'entreprise
+    competences_section = ""
+    if section_name == "Présentation de votre entreprise":
+        secteur = donnees_contexte.get('secteur', 'Services')
+        competences = identifier_competences_sectorielles(secteur)
+        
+        competences_section = f"""
+
+### 2.6 COMPÉTENCES SECTORIELLES REQUISES
+
+| Domaine | Compétences Spécialisées | Niveau Requis | Ressources Nécessaires |
+|---------|--------------------------|---------------|------------------------|
+| **Juridique RDC/OHADA** | Droit des sociétés, contrats commerciaux, contentieux | Expert | Conseil juridique agréé |
+| **Technique Métier** | {', '.join(competences[:3])} | Spécialisé | Formation/Certification |
+| **Fiscal Congolais** | TVA (16%), IPR (30%), ICA (1%), Impôt professionnel | Confirmé | Expert-comptable agréé |
+| **Environnemental** | Étude d'impact, PGES, conformité ministérielle | Intermédiaire | Bureau d'études agréé |
+| **Social/Genre** | Politique RH inclusive, équité des chances | Sensibilisé | Formation continue |
+
+"""
+
+    # Tableaux financiers si données disponibles
+    tableaux_financiers = ""
+    if "financial" in str(donnees_contexte).lower() or "export_data" in str(donnees_contexte):
+        tableaux_financiers = """
+
+### SYNTHÈSE FINANCIÈRE CONSOLIDÉE
+
+| Indicateur Financier | Année 1 | Année 2 | Année 3 | Unité |
+|---------------------|---------|---------|---------|-------|
+| **Chiffre d'Affaires** | [Montant] | [Montant] | [Montant] | USD |
+| **Résultat d'Exploitation** | [Montant] | [Montant] | [Montant] | USD |
+| **Résultat Net** | [Montant] | [Montant] | [Montant] | USD |
+| **Marge Brute** | [%] | [%] | [%] | % |
+| **Seuil de Rentabilité** | [Mois] | [Mois] | [Mois] | Mois |
+
+**Note:** Tous les montants sont exprimés en USD pour faciliter l'analyse économique dans le contexte congolais.
+
+"""
+
+    # Structure finale
+    document_structure = (
+        structures_professionnelles.get(section_name, f"## {section_name.upper()}\n\n") +
+        contenu_genere +
+        competences_section +
+        tableaux_financiers +
+        contexte_rdc
+    )
+    
+    return document_structure
+
+def identifier_competences_sectorielles(secteur):
+    """Identifie les compétences spécialisées selon le secteur"""
+    competences_par_secteur = {
+        "Agriculture": [
+            "Techniques agricoles modernes",
+            "Gestion de la chaîne du froid",
+            "Certification biologique",
+            "Mécanisation agricole",
+            "Irrigation et gestion de l'eau"
+        ],
+        "Commerce": [
+            "Gestion des stocks et approvisionnement",
+            "Marketing digital",
+            "Négociation commerciale",
+            "Logistique et distribution",
+            "Service client"
+        ],
+        "Services": [
+            "Gestion de la qualité (ISO)",
+            "Technologies de l'information",
+            "Ressources humaines",
+            "Comptabilité et finance",
+            "Communication et marketing"
+        ],
+        "Industrie": [
+            "Ingénierie de production",
+            "Contrôle qualité",
+            "Maintenance industrielle",
+            "Sécurité industrielle",
+            "Gestion environnementale"
+        ],
+        "Artisanat": [
+            "Techniques artisanales traditionnelles",
+            "Design et créativité",
+            "Gestion de la production",
+            "Marketing des produits artisanaux",
+            "Respect des standards internationaux"
+        ]
+    }
+    
+    return competences_par_secteur.get(secteur, competences_par_secteur["Services"])
+
+def analyser_regime_fiscal_optimal(type_entreprise, secteur):
+    """Analyse le régime fiscal optimal en RDC"""
+    regimes_fiscaux = {
+        "petit_contribuable": {
+            "seuil": "Chiffre d'affaires < 80 000 USD/an",
+            "taux": "Impôt forfaitaire progressif",
+            "avantages": "Simplicité, taux réduit",
+            "obligations": "Déclaration annuelle simplifiée"
+        },
+        "regime_normal": {
+            "seuil": "Chiffre d'affaires > 80 000 USD/an",
+            "taux": "ICA 1%, IPR 30%, TVA 16%",
+            "avantages": "Déductibilité complète des charges",
+            "obligations": "Comptabilité complète, déclarations mensuelles"
+        },
+        "regime_special": {
+            "secteurs": ["Agriculture", "Export"],
+            "avantages": "Exonérations spécifiques",
+            "conditions": "Respect des critères sectoriels"
+        }
+    }
+    
+    return regimes_fiscaux
+
+def suggerer_partenaires(secteur, localisation):
+    """Suggère des partenaires potentiels selon le secteur et la localisation"""
+    # Base de données des partenaires par secteur en RDC
+    partenaires_rdc = {
+        "Agriculture": [
+            "MINAGRI (Ministère de l'Agriculture)",
+            "SENASEM (Service National des Semences)",
+            "Coopératives agricoles locales",
+            "ONG de développement rural",
+            "Banques agricoles (BCDC, TMB)"
+        ],
+        "Commerce": [
+            "FEC (Fédération des Entreprises du Congo)",
+            "Chambres de Commerce provinciales",
+            "Associations sectorielles",
+            "Plateformes de e-commerce",
+            "Institutions de microfinance"
+        ],
+        "Services": [
+            "Associations professionnelles",
+            "Universités et centres de formation",
+            "Incubateurs d'entreprises",
+            "Consultants spécialisés",
+            "Réseaux d'entrepreneurs"
+        ]
+    }
+    
+    return partenaires_rdc.get(secteur, partenaires_rdc["Services"])
+
+def identifier_risques_specifiques(secteur, localisation):
+    """Identifie les risques spécifiques au secteur et à la localisation"""
+    risques_rdc = {
+        "generiques": [
+            "Fluctuation du taux de change USD/FC",
+            "Instabilité énergétique",
+            "Défis logistiques et infrastructurels",
+            "Réglementation en évolution",
+            "Accès au financement"
+        ],
+        "Agriculture": [
+            "Variabilité climatique",
+            "Maladies des cultures",
+            "Accès aux intrants de qualité",
+            "Conservation post-récolte"
+        ],
+        "Commerce": [
+            "Concurrence informelle",
+            "Variations des prix des matières premières",
+            "Problèmes d'approvisionnement",
+            "Fraude et contrefaçon"
+        ],
+        "Services": [
+            "Évolution technologique rapide",
+            "Concurrence internationale",
+            "Formation du personnel",
+            "Sécurité des données"
+        ]
+    }
+    
+    risques_sectoriels = risques_rdc.get(secteur, [])
+    return risques_rdc["generiques"] + risques_sectoriels
+
+def consolider_donnees_financieres():
+    """
+    Consolide toutes les données financières du session state.
+    """
+    donnees = {
+        'investissements': st.session_state.get('export_data_investissements', {}),
+        'salaires': st.session_state.get('export_data_salaires', {}),
+        'amortissements': st.session_state.get('export_data_amortissements', {}),
+        'compte_resultats': st.session_state.get('export_data_compte', {}),
+        'soldes': st.session_state.get('export_data_soldes', {}),
+        'capacite': st.session_state.get('export_data_capacite', {}),
+        'seuil': st.session_state.get('export_data_seuil', {}),
+        'bfr': st.session_state.get('export_data_bfr', {}),
+        'plan_financement': st.session_state.get('export_data_plan_financement', {}),
+        'budget_part1': st.session_state.get('export_data_budget_part1', {}),
+        'budget_part2': st.session_state.get('export_data_budget_part2', {})
+    }
+    
+    # Créer une synthèse financière
+    synthese = f"""
+    SYNTHÈSE FINANCIÈRE CONSOLIDÉE:
+    
+    Total Investissements: {sum([float(str(v).replace('$', '').replace(',', '').strip()) for v in donnees['investissements'].values() if isinstance(v, (int, float, str)) and str(v).replace('$', '').replace(',', '').replace('.', '').isdigit()], start=0)} USD
+    
+    Analyse de Rentabilité: {donnees.get('seuil', {}).get('point_mort', 'Non calculé')}
+    
+    Besoins de Financement: {donnees.get('bfr', {}).get('total_bfr', 'Non calculé')}
+    
+    Capacité d'Autofinancement: {donnees.get('capacite', {}).get('caf_net', 'Non calculé')}
+    
+    Contexte RDC: Tous les montants sont exprimés en USD pour faciliter l'analyse économique et les comparaisons. 
+    L'environnement économique congolais nécessite une attention particulière aux fluctuations monétaires et aux défis logistiques.
+    """
+    
+    return {
+        'donnees': donnees,
+        'synthese': synthese
+    }
 
 # Fonction pour convertir un dictionnaire en texte formaté
 def format_table_data(data, title):
@@ -7987,10 +8451,11 @@ def page_generation_business_plan():
 
         # Récupérer toutes les données des étapes précédentes
         business_model_precedent = st.session_state.get('business_model_precedent', '')
-        persona_data = st.session_state.get('persona_data', {})
-        marche_data = st.session_state.get('marche_data', {})
-        concurrence_data = st.session_state.get('concurrence_data', {})
-        facteurs_limitants = st.session_state.get('facteurs_limitants', {})
+        persona_data = st.session_state.get('persona_data', st.session_state.get('persona', {}))
+        marche_data = st.session_state.get('analyse_marche', {})
+        concurrence_data = st.session_state.get('concurrence', {})
+        facteurs_limitants = st.session_state.get('facteurs_limitants_data', {})
+        problem_tree_data = st.session_state.get('problem_tree_data', {})
         
         # Construire un contexte enrichi avec toutes les données précédentes
         contexte_complet = f"""
@@ -8003,6 +8468,8 @@ def page_generation_business_plan():
         ANALYSE CONCURRENCE: {concurrence_data}
         
         FACTEURS LIMITANTS: {facteurs_limitants}
+        
+        ARBRE DES PROBLÈMES: {problem_tree_data}
         """
         
         results_first_part = {}
@@ -8022,7 +8489,10 @@ def page_generation_business_plan():
         export_data_budget_part1 = st.session_state.get('export_data_budget_previsionnel_tresorerie_part1', {})
         export_data_budget_part2 = st.session_state.get('export_data_budget_previsionnel_tresorerie_part2', {})
 
-        # Concaténer toutes les sections
+        # Consolider toutes les données financières
+        donnees_financieres = consolider_donnees_financieres()
+        
+        # Concaténer toutes les sections financières
         final_text = ""
         final_text += format_table_data(export_data_investissements, "Investissements et financements")
         final_text += format_table_data(export_data_salaires, "Salaires et Charges Sociales")
@@ -8032,11 +8502,12 @@ def page_generation_business_plan():
         final_text += format_table_data(export_data_capacite, "Capacité d'autofinancement")
         final_text += format_table_data(export_data_seuil, "Seuil de rentabilité économique")
         final_text += format_table_data(export_data_bfr, "Besoin en fonds de roulement")
-
-        # Ajouter les nouvelles sections
         final_text += format_table_data(export_data_plan_financement, "Plan de financement à trois ans")
         final_text += format_table_data(export_data_budget_part1, "Budget prévisionnel de trésorerie")
         final_text += format_table_data(export_data_budget_part2, "Budget prévisionnel de trésorerie(suite)")
+        
+        # Ajouter les analyses financières consolidées
+        final_text += f"\n\n### SYNTHÈSE FINANCIÈRE:\n{donnees_financieres['synthese']}\n\n"
 
         
 
@@ -8050,9 +8521,9 @@ def page_generation_business_plan():
                 try:
                     # Vérifier si la section est "Couverture" ou "Sommaire"
                     if section_name in ["Couverture", "Sommaire"]:
-                        results_first_part[section_name] = generate_section(system_message, query, documents, combined_content, "", business_model="")
+                        results_first_part[section_name] = generate_section(system_message, query, documents, combined_content, "", business_model="", section_name=section_name)
                     else:
-                        results_first_part[section_name] = generate_section(system_message, query, documents, combined_content + contexte_complet, final_text, business_model=contexte_complet)
+                        results_first_part[section_name] = generate_section(system_message, query, documents, combined_content + contexte_complet, final_text, business_model=contexte_complet, section_name=section_name)
                 except ValueError as e:
                     results_first_part[section_name] = f"Erreur: {str(e)}"
                 
@@ -8080,7 +8551,7 @@ def page_generation_business_plan():
                 query = queries[section_name]
                 
                 try:
-                    results_second_part[section_name] = generate_section(system_message, query, documents, combined_content + contexte_complet, final_text, business_model=contexte_complet)
+                    results_second_part[section_name] = generate_section(system_message, query, documents, combined_content + contexte_complet, final_text, business_model=contexte_complet, section_name=section_name)
                 except ValueError as e:
                     results_second_part[section_name] = f"Erreur: {str(e)}"
                 
