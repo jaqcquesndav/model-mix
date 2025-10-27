@@ -1025,366 +1025,213 @@ def page_chiffre_affaires():
     # Sauvegarde des données
     st.session_state.data = data
 
-def page_chiffre_affaires():
-    """Page de chiffre d'affaires - Version complète avec autofill mensuel"""
-    st.title("📈 Chiffre d'Affaires Prévisionnel")
-    st.markdown("### Saisie mensuelle avec autofill intelligent - 12 mois détaillés")
+def page_tresorerie():
+    """Page de trésorerie - Gestion des flux de trésorerie sur 5 ans"""
+    st.title("💰 Plan de Trésorerie")
+    st.markdown("### Suivi des flux de trésorerie sur 5 années")
     
     if "data" not in st.session_state:
         st.session_state.data = {}
     
     data = st.session_state.data
     
-    # Configuration du type d'activité
-    if "informations_generales" not in data:
-        data["informations_generales"] = {}
+    # Vérifier que les données financières de base sont disponibles
+    ca_disponible = any(f"total_ca_annee{i}" in data for i in range(1, 6))
+    charges_fixes_disponibles = any(f"total_charges_fixes_annee{i}" in data for i in range(1, 6))
     
-    type_vente = st.selectbox(
-        "Type d'activité :",
-        ["Marchandises", "Services", "Mixte"],
-        index=0 if not data["informations_generales"].get("type_vente") else 
-        ["Marchandises", "Services", "Mixte"].index(data["informations_generales"].get("type_vente", "Marchandises"))
+    if not ca_disponible or not charges_fixes_disponibles:
+        st.warning("⚠️ Veuillez d'abord renseigner le chiffre d'affaires et les charges fixes pour calculer la trésorerie.")
+        return
+    
+    # Initialisation des données de trésorerie
+    if "tresorerie" not in data:
+        data["tresorerie"] = {
+            "tresorerie_initiale": 0.0,
+            "annee1": {}, "annee2": {}, "annee3": {}, "annee4": {}, "annee5": {}
+        }
+    
+    tresorerie_dict = data["tresorerie"]
+    
+    # Trésorerie initiale
+    st.subheader("💵 Trésorerie de Départ")
+    tresorerie_initiale = st.number_input(
+        "Trésorerie initiale ($)",
+        value=tresorerie_dict.get("tresorerie_initiale", 0.0),
+        min_value=0.0,
+        help="Montant de trésorerie disponible au début de l'activité"
     )
-    data["informations_generales"]["type_vente"] = type_vente
+    tresorerie_dict["tresorerie_initiale"] = tresorerie_initiale
     
-    if "chiffre_affaires" not in data:
-        data["chiffre_affaires"] = {}
+    # Calculs par année
+    st.subheader("📊 Évolution de la Trésorerie")
     
-    chiffre_affaires_dict = data["chiffre_affaires"]
-    
-    # Liste des mois
-    mois = [f"Mois {i}" for i in range(1, 13)]
-    
-    # Fonctions de mise à jour avec autofill intelligent
-    def update_jours_travailles(nom_vente):
-        """Auto-remplit les jours travaillés pour les mois 2-12 avec la valeur du mois 1"""
-        key_jours_mois1 = f"{nom_vente}_Mois 1_jours"
-        new_val = st.session_state.get(key_jours_mois1, 0)
-        for mois_nom in mois[1:]:
-            key = f"{nom_vente}_{mois_nom}_jours"
-            if not st.session_state.get(f"updated_{key}", False):
-                st.session_state[key] = new_val
-                chiffre_affaires_dict[key] = new_val
-
-    def update_ca_moyen_jour(nom_vente):
-        """Auto-remplit le CA moyen/jour pour les mois 2-12 avec la valeur du mois 1"""
-        key_ca_mois1 = f"{nom_vente}_Mois 1_ca_moyen"
-        new_val = st.session_state.get(key_ca_mois1, 0.0)
-        for mois_nom in mois[1:]:
-            key = f"{nom_vente}_{mois_nom}_ca_moyen"
-            if not st.session_state.get(f"updated_{key}", False):
-                st.session_state[key] = new_val
-                chiffre_affaires_dict[key] = new_val
-
-    def mark_updated(key):
-        """Marque un champ comme modifié manuellement"""
-        st.session_state[f"updated_{key}"] = True
-
-    def calcul_chiffre_affaires(nom_vente):
-        """Interface de calcul du CA pour un type de vente donné"""
-        st.subheader(f"💼 Année 1 - {nom_vente}")
-        st.info("💡 Saisissez le Mois 1, les autres mois se rempliront automatiquement. Modifiez-les individuellement si nécessaire.")
-        
-        data_ca = []
-        
-        # Saisie mensuelle
-        for i, mois_nom in enumerate(mois):
-            col1, col2, col3 = st.columns(3)
-            
-            key_jours = f"{nom_vente}_{mois_nom}_jours"
-            key_ca_moyen = f"{nom_vente}_{mois_nom}_ca_moyen"
-            key_ca = f"{nom_vente}_{mois_nom}_ca"
-            
-            with col1:
-                if mois_nom == "Mois 1":
-                    # Premier mois : déclenche l'autofill
-                    montant_jours = st.number_input(
-                        f"{mois_nom} - Jours travaillés",
-                        min_value=0,
-                        max_value=31,
-                        key=key_jours,
-                        value=chiffre_affaires_dict.get(key_jours, 0),
-                        on_change=update_jours_travailles,
-                        args=(nom_vente,),
-                        help="Nombre de jours d'activité dans le mois"
-                    )
-                else:
-                    # Autres mois : peuvent être modifiés individuellement
-                    montant_jours = st.number_input(
-                        f"{mois_nom} - Jours travaillés",
-                        min_value=0,
-                        max_value=31,
-                        key=key_jours,
-                        value=chiffre_affaires_dict.get(key_jours, 0),
-                        on_change=lambda key=key_jours: mark_updated(key),
-                        help="Modifiable individuellement"
-                    )
-                chiffre_affaires_dict[key_jours] = montant_jours
-            
-            with col2:
-                if mois_nom == "Mois 1":
-                    # Premier mois : déclenche l'autofill
-                    montant_ca_moyen = st.number_input(
-                        f"{mois_nom} - CA moyen/jour ($)",
-                        min_value=0.0,
-                        key=key_ca_moyen,
-                        value=chiffre_affaires_dict.get(key_ca_moyen, 0.0),
-                        on_change=update_ca_moyen_jour,
-                        args=(nom_vente,),
-                        help="Chiffre d'affaires moyen par jour d'activité"
-                    )
-                else:
-                    # Autres mois : peuvent être modifiés individuellement
-                    montant_ca_moyen = st.number_input(
-                        f"{mois_nom} - CA moyen/jour ($)",
-                        min_value=0.0,
-                        key=key_ca_moyen,
-                        value=chiffre_affaires_dict.get(key_ca_moyen, 0.0),
-                        on_change=lambda key=key_ca_moyen: mark_updated(key),
-                        help="Modifiable individuellement"
-                    )
-                chiffre_affaires_dict[key_ca_moyen] = montant_ca_moyen
-            
-            # Calcul automatique du CA mensuel
-            ca_mensuel = montant_jours * montant_ca_moyen
-            chiffre_affaires_dict[key_ca] = ca_mensuel
-            
-            with col3:
-                st.metric(f"CA {mois_nom}", f"{ca_mensuel:,.2f} $")
-            
-            # Collecte des données pour le tableau récapitulatif
-            data_ca.append({
-                "mois": mois_nom,
-                "jours_travailles": montant_jours,
-                "ca_moyen_jour": montant_ca_moyen,
-                "ca_mensuel": ca_mensuel
-            })
-        
-        # Calcul du total année 1
-        total_ca_annee1 = sum(row["ca_mensuel"] for row in data_ca)
-        chiffre_affaires_dict[f"total_ca_{nom_vente}_annee1"] = total_ca_annee1
-        
-        st.write("---")
-        st.metric(f"**Total Chiffre d'Affaires Année 1 ({nom_vente})**", f"{total_ca_annee1:,.2f} $")
-        
-        # Projections années 2 à 5
-        st.subheader(f"📊 Projections Années 2 à 5 - {nom_vente}")
-        
-        col1, col2, col3, col4 = st.columns(4)
-        
-        with col1:
-            key_aug_annee2 = f"{nom_vente}_augmentation_annee2"
-            pourcentage_augmentation_annee2 = st.number_input(
-                f"Augmentation Année 1 → 2 (%) - {nom_vente}",
-                min_value=-50.0,
-                max_value=200.0,
-                value=chiffre_affaires_dict.get(key_aug_annee2, 10.0),
-                key=key_aug_annee2,
-                help="Pourcentage d'évolution du CA entre l'année 1 et 2"
-            )
-            chiffre_affaires_dict[key_aug_annee2] = pourcentage_augmentation_annee2
-        
-        with col2:
-            key_aug_annee3 = f"{nom_vente}_augmentation_annee3"
-            pourcentage_augmentation_annee3 = st.number_input(
-                f"Augmentation Année 2 → 3 (%) - {nom_vente}",
-                min_value=-50.0,
-                max_value=200.0,
-                value=chiffre_affaires_dict.get(key_aug_annee3, 15.0),
-                key=key_aug_annee3,
-                help="Pourcentage d'évolution du CA entre l'année 2 et 3"
-            )
-            chiffre_affaires_dict[key_aug_annee3] = pourcentage_augmentation_annee3
-        
-        with col3:
-            key_aug_annee4 = f"{nom_vente}_augmentation_annee4"
-            pourcentage_augmentation_annee4 = st.number_input(
-                f"Augmentation Année 3 → 4 (%) - {nom_vente}",
-                min_value=-50.0,
-                max_value=200.0,
-                value=chiffre_affaires_dict.get(key_aug_annee4, 15.0),
-                key=key_aug_annee4,
-                help="Pourcentage d'évolution du CA entre l'année 3 et 4"
-            )
-            chiffre_affaires_dict[key_aug_annee4] = pourcentage_augmentation_annee4
-        
-        with col4:
-            key_aug_annee5 = f"{nom_vente}_augmentation_annee5"
-            pourcentage_augmentation_annee5 = st.number_input(
-                f"Augmentation Année 4 → 5 (%) - {nom_vente}",
-                min_value=-50.0,
-                max_value=200.0,
-                value=chiffre_affaires_dict.get(key_aug_annee5, 15.0),
-                key=key_aug_annee5,
-                help="Pourcentage d'évolution du CA entre l'année 4 et 5"
-            )
-            chiffre_affaires_dict[key_aug_annee5] = pourcentage_augmentation_annee5
-        
-        # Calculs des totaux années 2 à 5
-        total_ca_annee2 = total_ca_annee1 * (1 + pourcentage_augmentation_annee2 / 100)
-        total_ca_annee3 = total_ca_annee2 * (1 + pourcentage_augmentation_annee3 / 100)
-        total_ca_annee4 = total_ca_annee3 * (1 + pourcentage_augmentation_annee4 / 100)
-        total_ca_annee5 = total_ca_annee4 * (1 + pourcentage_augmentation_annee5 / 100)
-        
-        chiffre_affaires_dict[f"total_ca_{nom_vente}_annee2"] = total_ca_annee2
-        chiffre_affaires_dict[f"total_ca_{nom_vente}_annee3"] = total_ca_annee3
-        chiffre_affaires_dict[f"total_ca_{nom_vente}_annee4"] = total_ca_annee4
-        chiffre_affaires_dict[f"total_ca_{nom_vente}_annee5"] = total_ca_annee5
-        
-        # Affichage des projections
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.metric(f"Total CA Année 2 ({nom_vente})", f"{total_ca_annee2:,.2f} $")
-        with col2:
-            st.metric(f"Total CA Année 3 ({nom_vente})", f"{total_ca_annee3:,.2f} $")
-        with col3:
-            st.metric(f"Total CA Année 4 ({nom_vente})", f"{total_ca_annee4:,.2f} $")
-        with col4:
-            st.metric(f"Total CA Année 5 ({nom_vente})", f"{total_ca_annee5:,.2f} $")
-        
-        return total_ca_annee1, total_ca_annee2, total_ca_annee3, total_ca_annee4, total_ca_annee5
-    
-    # Interface selon le type d'activité
-    total_marchandises = [0, 0, 0, 0, 0]
-    total_services = [0, 0, 0, 0, 0]
-    
-    if type_vente in ["Marchandises", "Mixte"]:
-        total_marchandises = calcul_chiffre_affaires("Marchandises")
-    
-    if type_vente in ["Services", "Mixte"]:
-        total_services = calcul_chiffre_affaires("Services")
-    
-    # Calcul des totaux généraux
-    st.write("---")
-    st.subheader("🎯 Récapitulatif Global du Chiffre d'Affaires")
-    
-    total_ca_annee1 = total_marchandises[0] + total_services[0]
-    total_ca_annee2 = total_marchandises[1] + total_services[1]
-    total_ca_annee3 = total_marchandises[2] + total_services[2]
-    total_ca_annee4 = total_marchandises[3] + total_services[3]
-    total_ca_annee5 = total_marchandises[4] + total_services[4]
-    
-    # Stockage des totaux généraux
-    data["total_chiffre_affaires_annee1"] = total_ca_annee1
-    data["total_chiffre_affaires_annee2"] = total_ca_annee2
-    data["total_chiffre_affaires_annee3"] = total_ca_annee3
-    data["total_chiffre_affaires_annee4"] = total_ca_annee4
-    data["total_chiffre_affaires_annee5"] = total_ca_annee5
-    
-    # Affichage des totaux
+    # Tableau récapitulatif
     col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        st.metric("Total CA Année 1", f"{total_ca_annee1:,.2f} $")
-    with col2:
-        st.metric("Total CA Année 2", f"{total_ca_annee2:,.2f} $")
-    with col3:
-        st.metric("Total CA Année 3", f"{total_ca_annee3:,.2f} $")
-    with col4:
-        st.metric("Total CA Année 4", f"{total_ca_annee4:,.2f} $")
-    with col5:
-        st.metric("Total CA Année 5", f"{total_ca_annee5:,.2f} $")
+    columns = [col1, col2, col3, col4, col5]
     
-    # Évolution du CA
-    if total_ca_annee1 > 0:
-        evolution_2 = ((total_ca_annee2 - total_ca_annee1) / total_ca_annee1) * 100
-        evolution_3 = ((total_ca_annee3 - total_ca_annee2) / total_ca_annee2) * 100 if total_ca_annee2 > 0 else 0
-        evolution_4 = ((total_ca_annee4 - total_ca_annee3) / total_ca_annee3) * 100 if total_ca_annee3 > 0 else 0
-        evolution_5 = ((total_ca_annee5 - total_ca_annee4) / total_ca_annee4) * 100 if total_ca_annee4 > 0 else 0
+    tresorerie_cumulative = tresorerie_initiale
+    resultats_tresorerie = []
+    
+    for i, col in enumerate(columns, 1):
+        annee = f"annee{i}"
         
-        st.write("**Évolution du Chiffre d'Affaires :**")
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.write(f"📈 Année 1 → 2 : {evolution_2:+.1f}%")
-        with col2:
-            st.write(f"📈 Année 2 → 3 : {evolution_3:+.1f}%")
-        with col3:
-            st.write(f"📈 Année 3 → 4 : {evolution_4:+.1f}%")
-        with col4:
-            st.write(f"📈 Année 4 → 5 : {evolution_5:+.1f}%")
-    
-    # Analyse de répartition (pour type Mixte)
-    if type_vente == "Mixte" and total_ca_annee1 > 0:
-        st.write("**Répartition par type d'activité (Année 1) :**")
-        col1, col2 = st.columns(2)
+        # Récupération des données existantes
+        ca_annuel = data.get(f"total_ca_annee{i}", 0.0)
+        charges_fixes = data.get(f"total_charges_fixes_annee{i}", 0.0)
+        charges_variables = data.get(f"total_charges_variables_annee{i}", 0.0)
+        salaires = data.get(f"total_salaires_annee{i}", 0.0)
         
-        pct_marchandises = (total_marchandises[0] / total_ca_annee1) * 100
-        pct_services = (total_services[0] / total_ca_annee1) * 100
+        # Calcul du résultat net
+        total_charges = charges_fixes + charges_variables + salaires
+        resultat_net = ca_annuel - total_charges
         
-        with col1:
-            st.write(f"🛍️ Marchandises : {pct_marchandises:.1f}% ({total_marchandises[0]:,.2f} $)")
-        with col2:
-            st.write(f"🔧 Services : {pct_services:.1f}% ({total_services[0]:,.2f} $)")
+        # Mise à jour de la trésorerie cumulative
+        tresorerie_cumulative += resultat_net
+        
+        # Stockage pour affichage
+        resultats_tresorerie.append({
+            "annee": i,
+            "ca": ca_annuel,
+            "charges_totales": total_charges,
+            "resultat_net": resultat_net,
+            "tresorerie_cumulative": tresorerie_cumulative
+        })
+        
+        # Affichage dans la colonne
+        with col:
+            st.metric(f"Année {i}", f"{tresorerie_cumulative:,.0f} $")
+            
+            # Indicateur de couleur selon le niveau
+            if tresorerie_cumulative < 0:
+                st.error("🔴 Déficit")
+            elif tresorerie_cumulative < 10000:
+                st.warning("🟡 Faible")
+            else:
+                st.success("🟢 Bonne")
     
-    # Sauvegarde des données
-    st.session_state.data = data
-
-def page_charges_variables():
-    """Page des charges variables - Version simplifiée"""
-    st.title("📊 Charges Variables")
-    st.info("⚠️ Version simplifiée - Taux unique.")
+    # Tableau détaillé
+    st.subheader("📈 Détail des Flux de Trésorerie")
     
-    if "data" not in st.session_state:
-        st.session_state.data = {}
+    # Créer un DataFrame pour l'affichage
+    import pandas as pd
     
-    if "charges_variables" not in st.session_state.data:
-        st.session_state.data["charges_variables"] = {}
+    tableau_data = []
+    tresorerie_debut = tresorerie_initiale
     
-    cv = st.session_state.data["charges_variables"]
+    for result in resultats_tresorerie:
+        tableau_data.append({
+            "Année": result["annee"],
+            "Trésorerie début": f"{tresorerie_debut:,.0f} $",
+            "Chiffre d'affaires": f"{result['ca']:,.0f} $",
+            "Charges totales": f"{result['charges_totales']:,.0f} $",
+            "Résultat net": f"{result['resultat_net']:,.0f} $",
+            "Trésorerie fin": f"{result['tresorerie_cumulative']:,.0f} $"
+        })
+        tresorerie_debut = result['tresorerie_cumulative']
     
-    cv["taux_charges_variables"] = st.slider("Taux de charges variables (% du CA)", 
-                                            min_value=0.0, max_value=100.0, 
-                                            value=cv.get("taux_charges_variables", 40.0), step=0.5)
+    df = pd.DataFrame(tableau_data)
+    st.dataframe(df, use_container_width=True)
     
-    # Calcul avec le CA
-    ca_data = st.session_state.data.get("ca_previsions", {})
-    if ca_data.get("ca_annee_1", 0) > 0:
-        ca_1 = ca_data["ca_annee_1"]
-        charges_var_1 = ca_1 * cv["taux_charges_variables"] / 100
-        st.metric("Charges variables Année 1", f"{charges_var_1:,.2f} $")
-
-def page_fonds_roulement():
-    """Page fonds de roulement - Version simplifiée"""
-    st.title("💼 Fonds de Roulement")
-    st.info("⚠️ Version simplifiée - Calcul BFR basique.")
+    # Analyse et conseils
+    st.subheader("💡 Analyse de Trésorerie")
     
-    if "data" not in st.session_state:
-        st.session_state.data = {}
-    
-    if "fonds_roulement" not in st.session_state.data:
-        st.session_state.data["fonds_roulement"] = {}
-    
-    fr = st.session_state.data["fonds_roulement"]
+    # Vérification des points critiques
+    tresorerie_minimale = min([r["tresorerie_cumulative"] for r in resultats_tresorerie])
+    annee_minimale = next(r["annee"] for r in resultats_tresorerie if r["tresorerie_cumulative"] == tresorerie_minimale)
     
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        fr["duree_credits_clients"] = st.number_input("Durée crédits clients (jours)", 
-                                                    value=fr.get("duree_credits_clients", 30), min_value=0)
-    with col2:
-        fr["duree_stock"] = st.number_input("Durée de stock (jours)", 
-                                          value=fr.get("duree_stock", 15), min_value=0)
-    with col3:
-        fr["duree_dettes_fournisseurs"] = st.number_input("Durée dettes fournisseurs (jours)", 
-                                                         value=fr.get("duree_dettes_fournisseurs", 45), min_value=0)
+        st.metric("Trésorerie minimale", f"{tresorerie_minimale:,.0f} $")
+        if tresorerie_minimale < 0:
+            st.error(f"⚠️ Déficit en année {annee_minimale}")
     
-    # Calcul BFR simplifié
-    ca_data = st.session_state.data.get("ca_previsions", {})
-    if ca_data.get("ca_annee_1", 0) > 0:
-        ca_journalier = ca_data["ca_annee_1"] / 365
+    with col2:
+        tresorerie_finale = resultats_tresorerie[-1]["tresorerie_cumulative"]
+        st.metric("Trésorerie finale (Année 5)", f"{tresorerie_finale:,.0f} $")
+    
+    with col3:
+        if tresorerie_finale > tresorerie_initiale:
+            croissance_tresorerie = ((tresorerie_finale / tresorerie_initiale) - 1) * 100 if tresorerie_initiale > 0 else 0
+            st.metric("Croissance sur 5 ans", f"{croissance_tresorerie:+.1f}%")
+        else:
+            st.metric("Évolution", "Décroissance")
+    
+    # Conseils automatiques
+    if tresorerie_minimale < 0:
+        st.error("🚨 **Alerte Trésorerie** : Votre projet présente des déficits de trésorerie. Considérez :")
+        st.write("• Augmenter la trésorerie initiale")
+        st.write("• Réduire les charges fixes")
+        st.write("• Augmenter le chiffre d'affaires")
+        st.write("• Rechercher des financements complémentaires")
+    elif tresorerie_minimale < 10000:
+        st.warning("⚠️ **Vigilance** : Trésorerie faible certaines années. Prévoyez une marge de sécurité.")
+    else:
+        st.success("✅ **Bonne santé financière** : Votre trésorerie reste positive sur toute la période.")
+    
+    # Sauvegarde des résultats
+    for i, result in enumerate(resultats_tresorerie, 1):
+        data[f"tresorerie_annee{i}"] = result["tresorerie_cumulative"]
+        data[f"resultat_net_annee{i}"] = result["resultat_net"]
+
+def page_charges_variables():
+    """Page des charges variables - Version simplifiée"""
+    st.title("📊 Charges Variables")
+    st.info("⚠️ Version simplifiée - Données sur 3 ans.")
+    
+    if "data" not in st.session_state:
+        st.session_state.data = {}
+    
+    data = st.session_state.data
+    
+    if "charges_variables" not in data:
+        data["charges_variables"] = {}
+    
+    cv = data["charges_variables"]
+    
+    st.subheader("Charges variables (en % du CA)")
+    
+    charges_types = ["Achat marchandises", "Commissions", "Transport", "Autres charges variables"]
+    
+    for charge in charges_types:
+        cv[charge] = st.number_input(f"{charge} (% du CA)", 
+                                   value=cv.get(charge, 0.0), min_value=0.0, max_value=100.0, key=f"cv_{charge}")
+    
+    # Calcul du taux total
+    taux_total = sum(cv.values())
+    st.metric("Taux total charges variables", f"{taux_total:.1f}%")
+    
+    # Sauvegarder le taux pour les autres calculs
+    data["taux_charges_variables"] = taux_total
+
+def page_fonds_roulement():
+    """Page du fonds de roulement - Version simplifiée"""
+    st.title("💼 Fonds de Roulement")
+    st.info("⚠️ Version simplifiée - Calculs automatiques.")
+    
+    if "data" not in st.session_state:
+        st.session_state.data = {}
+    
+    data = st.session_state.data
+    
+    # Calcul automatique basé sur le CA
+    ca_annuel = data.get("total_ca_annee1", 0.0)
+    
+    if ca_annuel > 0:
+        # Estimation du BFR à 10% du CA (règle simplifiée)
+        bfr_estime = ca_annuel * 0.10
         
-        creances = ca_journalier * fr["duree_credits_clients"]
-        stock = ca_journalier * fr["duree_stock"] * 0.6  # Approximation
-        dettes = ca_journalier * fr["duree_dettes_fournisseurs"] * 0.6
+        st.subheader("Estimation du Besoin en Fonds de Roulement")
+        st.metric("BFR estimé (10% du CA)", f"{bfr_estime:,.0f} $")
         
-        bfr = creances + stock - dettes
-        fr["bfr"] = bfr
-        
-        st.metric("BFR calculé", f"{bfr:,.2f} $")
+        data["fonds_roulement"] = bfr_estime
+    else:
+        st.warning("Veuillez d'abord renseigner le chiffre d'affaires.")
 
 def page_salaires():
-    """Page salaires - Version simplifiée"""
+    """Page des salaires - Version simplifiée"""
     st.title("👥 Salaires")
-    st.info("⚠️ Version simplifiée - Postes principaux.")
+    st.info("⚠️ Version simplifiée - Données sur 3 ans.")
     
     if "data" not in st.session_state:
         st.session_state.data = {}
@@ -1398,62 +1245,93 @@ def page_salaires():
     
     postes = ["Dirigeant", "Employé 1", "Employé 2"]
     
+    total_mensuel = 0
     for poste in postes:
         if poste not in salaires:
             salaires[poste] = {}
         
         col1, col2 = st.columns(2)
         with col1:
-            salaires[poste]["salaire_brut"] = st.number_input(f"Salaire {poste} ($/mois)", 
-                                                            value=salaires[poste].get("salaire_brut", 0.0), min_value=0.0)
+            salaire_brut = st.number_input(f"Salaire {poste} ($/mois)", 
+                                         value=salaires[poste].get("salaire_brut", 0.0), 
+                                         min_value=0.0,
+                                         key=f"salaire_{poste}")
+            salaires[poste]["salaire_brut"] = salaire_brut
+            total_mensuel += salaire_brut
+        
         with col2:
-            salaires[poste]["charges_sociales"] = st.number_input(f"Charges sociales {poste} (%)", 
-                                                                value=salaires[poste].get("charges_sociales", 25.0), min_value=0.0, max_value=100.0)
+            # Calcul automatique des charges sociales (approximation 45%)
+            charges_sociales = salaire_brut * 0.45
+            st.metric(f"Charges sociales {poste}", f"{charges_sociales:,.0f} $")
+            salaires[poste]["charges_sociales"] = charges_sociales
     
-    # Calcul total
-    total_salaires = 0
-    total_charges = 0
+    # Totaux
+    total_charges_sociales = sum([poste.get("charges_sociales", 0) for poste in salaires.values()])
+    cout_total_mensuel = total_mensuel + total_charges_sociales
+    cout_total_annuel = cout_total_mensuel * 12
     
-    for poste_data in salaires.values():
-        if isinstance(poste_data, dict):
-            salaire = poste_data.get("salaire_brut", 0)
-            charges = salaire * poste_data.get("charges_sociales", 0) / 100
-            total_salaires += salaire
-            total_charges += charges
+    st.subheader("Récapitulatif")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Salaires bruts/mois", f"{total_mensuel:,.0f} $")
+    with col2:
+        st.metric("Charges sociales/mois", f"{total_charges_sociales:,.0f} $")
+    with col3:
+        st.metric("Coût total annuel", f"{cout_total_annuel:,.0f} $")
     
-    total_cout = (total_salaires + total_charges) * 12
-    
-    st.metric("Coût salarial annuel", f"{total_cout:,.2f} $")
+    # Sauvegarder pour les autres calculs
+    st.session_state.data["total_salaires_annee1"] = cout_total_annuel
 
 def page_rentabilite():
-    """Page rentabilité - Version simplifiée"""
-    st.title("📊 Rentabilité")
-    st.info("⚠️ Analyse simplifiée basée sur les données saisies.")
+    """Page de rentabilité - Calculs automatiques"""
+    st.title("📊 Analyse de Rentabilité")
+    st.markdown("### Calculs automatiques basés sur vos données financières")
     
-    data = st.session_state.get("data", {})
+    if "data" not in st.session_state:
+        st.session_state.data = {}
+    
+    data = st.session_state.data
     
     # Récupération des données
-    ca_1 = data.get("ca_previsions", {}).get("ca_annee_1", 0)
-    taux_cv = data.get("charges_variables", {}).get("taux_charges_variables", 0)
-    charges_fixes = data.get("total_charges_fixes_annee1", 0)
+    ca_1 = data.get("total_ca_annee1", 0.0)
+    charges_fixes = data.get("total_charges_fixes_annee1", 0.0)
+    taux_cv = data.get("taux_charges_variables", 0.0)
+    salaires = data.get("total_salaires_annee1", 0.0)
     
-    if ca_1 > 0:
-        charges_var = ca_1 * taux_cv / 100
-        marge_brute = ca_1 - charges_var
-        resultat = marge_brute - charges_fixes
+    st.subheader("Données de base")
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("CA Année 1", f"{ca_1:,.0f} $")
+    with col2:
+        st.metric("Charges fixes", f"{charges_fixes:,.0f} $")
+    with col3:
+        st.metric("Taux CV", f"{taux_cv:.1f}%")
+    with col4:
+        st.metric("Salaires", f"{salaires:,.0f} $")
+    
+    if ca_1 > 0 and (charges_fixes > 0 or taux_cv > 0):
+        # Calculs de rentabilité
+        charges_variables_euros = ca_1 * (taux_cv / 100)
+        marge_contributive = ca_1 - charges_variables_euros
+        charges_fixes_totales = charges_fixes + salaires
+        resultat_net = marge_contributive - charges_fixes_totales
         
+        st.subheader("Résultats")
         col1, col2, col3 = st.columns(3)
-        
         with col1:
-            st.metric("Chiffre d'affaires", f"{ca_1:,.0f} $")
+            st.metric("Marge contributive", f"{marge_contributive:,.0f} $")
         with col2:
-            st.metric("Marge brute", f"{marge_brute:,.0f} $", f"{(marge_brute/ca_1*100):.1f}%")
+            st.metric("Charges fixes totales", f"{charges_fixes_totales:,.0f} $")
         with col3:
-            st.metric("Résultat", f"{resultat:,.0f} $", f"{(resultat/ca_1*100):.1f}%")
+            if resultat_net >= 0:
+                st.metric("Résultat net", f"{resultat_net:,.0f} $", delta="Bénéfice")
+            else:
+                st.metric("Résultat net", f"{resultat_net:,.0f} $", delta="Perte")
         
         # Seuil de rentabilité
         if taux_cv < 100:
-            seuil = charges_fixes / (1 - taux_cv/100)
+            seuil = charges_fixes_totales / (1 - taux_cv/100)
+            st.subheader("Seuil de rentabilité")
             st.metric("Seuil de rentabilité", f"{seuil:,.0f} $")
             
             if ca_1 >= seuil:
@@ -1461,5 +1339,42 @@ def page_rentabilite():
             else:
                 st.warning(f"⚠️ Il manque {seuil - ca_1:,.0f} $ de CA pour être rentable")
     else:
-        st.warning("Veuillez renseigner le chiffre d'affaires pour voir l'analyse de rentabilité")
+        st.warning("Veuillez renseigner le chiffre d'affaires et les charges pour voir l'analyse de rentabilité")
+
+def page_generation_business_plan():
+    """Page de génération du business plan - Version simplifiée"""
+    st.title("📄 Génération Business Plan")
+    st.info("⚠️ Version simplifiée - Fonctionnalité de base.")
+    
+    if "data" not in st.session_state:
+        st.session_state.data = {}
+    
+    data = st.session_state.data
+    
+    if st.button("Générer Business Plan"):
+        st.success("Génération en cours...")
+        
+        # Récapitulatif des données
+        st.subheader("Récapitulatif des données")
+        
+        # Informations générales
+        if "informations_generales" in data:
+            st.write("**Informations générales :**")
+            for key, value in data["informations_generales"].items():
+                st.write(f"- {key}: {value}")
+        
+        # Données financières
+        ca_1 = data.get("total_ca_annee1", 0.0)
+        charges_fixes = data.get("total_charges_fixes_annee1", 0.0)
+        salaires = data.get("total_salaires_annee1", 0.0)
+        
+        if ca_1 > 0:
+            st.write("**Données financières :**")
+            st.write(f"- Chiffre d'affaires année 1: {ca_1:,.0f} $")
+            st.write(f"- Charges fixes année 1: {charges_fixes:,.0f} $")
+            st.write(f"- Salaires année 1: {salaires:,.0f} $")
+        
+        st.info("📝 Business Plan généré avec succès ! (Version basique)")
+    else:
+        st.write("Cliquez sur le bouton pour générer votre business plan.")
 
