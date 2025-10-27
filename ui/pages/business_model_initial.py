@@ -780,62 +780,83 @@ def create_business_model_prompt(context_data):
     return prompt
 
 def generate_fallback_suggestions(context_data):
-    """Génère des suggestions basiques sans IA (fallback)"""
+    """Génère des suggestions basiques sans IA selon secteur et type d'entreprise"""
     
     if st.session_state.get('debug_ai', False):
         st.write("🔧 Génération fallback en cours...")
-        st.write(f"📋 Secteur détecté: '{context_data.get('secteur_activite', '')}'")
-        st.write(f"🏢 Type entreprise: '{context_data.get('type_entreprise', 'PME')}'")
+        st.write(f"📋 Secteur: '{context_data.get('secteur_activite', '')}'")
+        st.write(f"🏢 Type: '{context_data.get('type_entreprise', 'PME')}'")
     
     secteur = context_data.get('secteur_activite', '').lower()
     type_entreprise = context_data.get('type_entreprise', 'PME')
     
-    # Suggestions basiques selon le secteur et le type
-    if 'tech' in secteur or type_entreprise == 'Startup':
+    # Suggestions intelligentes selon secteur d'activité
+    if any(word in secteur for word in ['agriculture', 'agri', 'alimentaire', 'transformation', 'farine', 'manioc']):
         suggestions = {
-            'partenaires_cles': '• Développeurs techniques\n• Partenaires technologiques\n• Investisseurs',
-            'activites_cles': '• Développement produit\n• Marketing digital\n• Support client',
-            'ressources_cles': '• Plateforme technologique\n• Équipe de développement\n• Base de données',
-            'propositions_valeur': '• Solution innovante et accessible\n• Gain de temps et d\'efficacité\n• Prix compétitif',
-            'relations_clients': '• Support en ligne 24/7\n• Communauté d\'utilisateurs\n• Formation et onboarding',
-            'canaux_distribution': '• Site web et application\n• Réseaux sociaux\n• Partenaires distributeurs',
-            'segments_clients': '• PME locales\n• Professionnels tech-savvy\n• Entreprises en croissance',
-            'structure_couts': '• Développement technique\n• Marketing digital\n• Infrastructure cloud',
-            'sources_revenus': '• Abonnements mensuels\n• Commissions sur transactions\n• Services premium'
+            'partenaires_cles': '• Coopératives agricoles locales (3-5 coopératives, 200-500 producteurs)\n• Fournisseurs d\'équipements de transformation\n• Institutions de microfinance agricole\n• Centres de recherche agronomique',
+            'activites_cles': '• Transformation primaire des produits agricoles\n• Contrôle qualité et certification\n• Logistique et distribution\n• Formation technique des producteurs',
+            'ressources_cles': '• Équipements de transformation (capacité 2-5 tonnes/jour)\n• Réseau de producteurs contractualisés\n• Expertise technique en transformation\n• Capital de roulement saisonnier',
+            'propositions_valeur': '• Stabilité des prix et approvisionnement toute l\'année\n• Qualité standardisée et traçabilité\n• Réduction des pertes post-récolte de 30-40%\n• Prix producteur majoré de 15-25%',
+            'relations_clients': '• Contrats d\'approvisionnement à long terme\n• Formation technique continue\n• Paiements rapides (7-15 jours)\n• Support technique permanent',
+            'canaux_distribution': '• Vente directe aux transformateurs\n• Marchés de gros urbains\n• Réseaux de distribution alimentaire\n• Export régional (pays limitrophes)',
+            'segments_clients': '• Industries alimentaires (biscuiteries, boulangeries)\n• Grossistes en produits alimentaires\n• Restaurants et cantines\n• Ménages urbains via détaillants',
+            'structure_couts': '• Achat matières premières (60-70% CA)\n• Transformation et main d\'œuvre (15-20%)\n• Transport et logistique (8-12%)\n• Charges fixes et amortissements (5-8%)',
+            'sources_revenus': '• Vente produits transformés (85-90% CA)\n• Services de transformation pour tiers (5-10%)\n• Vente de sous-produits (déchets valorisés) (3-5%)'
+        }
+    elif any(word in secteur for word in ['tech', 'digital', 'logiciel', 'application', 'informatique']):
+        suggestions = {
+            'partenaires_cles': '• Développeurs locaux et freelances\n• Fournisseurs d\'infrastructure cloud\n• Partenaires d\'intégration système\n• Institutions de formation technique',
+            'activites_cles': '• Développement et maintenance logicielle\n• Support client et formation\n• Marketing digital et acquisition\n• Veille technologique et R&D',
+            'ressources_cles': '• Équipe technique qualifiée\n• Infrastructure cloud et sécurité\n• Propriété intellectuelle\n• Capital d\'amorçage technologique',
+            'propositions_valeur': '• Digitalisation des processus métier\n• Réduction des coûts opérationnels de 25-40%\n• Amélioration de l\'efficacité de 30-50%\n• Interface adaptée au contexte local',
+            'relations_clients': '• Support technique multilingue\n• Formation utilisateurs sur site\n• Communauté d\'utilisateurs\n• Maintenance préventive',
+            'canaux_distribution': '• Vente directe B2B\n• Partenaires revendeurs\n• Marketing digital ciblé\n• Prescripteurs et consultants',
+            'segments_clients': '• PME en croissance (10-100 employés)\n• Organisations publiques locales\n• Coopératives et associations\n• Filiales de groupes internationaux',
+            'structure_couts': '• Développement et maintenance (40-50%)\n• Acquisition clients et marketing (20-25%)\n• Infrastructure et outils (15-20%)\n• Support et formation (10-15%)',
+            'sources_revenus': '• Licences logicielles annuelles\n• Services d\'implémentation et formation\n• Support technique premium\n• Développements sur mesure'
+        }
+    elif any(word in secteur for word in ['commerce', 'vente', 'distribution', 'retail']):
+        suggestions = {
+            'partenaires_cles': '• Fournisseurs locaux et régionaux\n• Transporteurs et logisticiens\n• Institutions financières (mobile money)\n• Propriétaires d\'espaces commerciaux',
+            'activites_cles': '• Approvisionnement et gestion stocks\n• Vente et service client\n• Marketing et promotion\n• Gestion financière et comptable',
+            'ressources_cles': '• Points de vente stratégiques\n• Stock et système de gestion\n• Équipe commerciale formée\n• Relations fournisseurs solides',
+            'propositions_valeur': '• Proximité et accessibilité\n• Prix compétitifs (5-15% sous concurrence)\n• Qualité et fraîcheur garanties\n• Service personnalisé',
+            'relations_clients': '• Programme de fidélité\n• Service après-vente\n• Crédit clients (comptes ouverts)\n• Livraison à domicile',
+            'canaux_distribution': '• Magasins physiques\n• Vente itinérante\n• Commandes téléphoniques\n• Livraison directe',
+            'segments_clients': '• Ménages du quartier\n• Petits commerçants (revente)\n• Restaurants et cantines\n• Bureaux et entreprises locales',
+            'structure_couts': '• Achat marchandises (65-75%)\n• Loyer et charges (8-12%)\n• Personnel (8-15%)\n• Transport et divers (5-10%)',
+            'sources_revenus': '• Vente au détail (marge 20-35%)\n• Vente en gros (marge 8-15%)\n• Services complémentaires\n• Commissions sur services (mobile money)'
         }
     else:
-        # Suggestions adaptées pour MAKASI et la farine de manioc
-        nom_entreprise = context_data.get('nom_entreprise', '')
-        probleme = context_data.get('probleme_central', '')
-        
-        if 'makasi' in nom_entreprise.lower() or 'farine' in probleme.lower() or 'manioc' in probleme.lower():
+        # Suggestions génériques adaptées au type d'entreprise
+        if type_entreprise == 'Startup':
             suggestions = {
-                'partenaires_cles': '• Producteurs locaux de manioc\n• Coopératives agricoles\n• Distributeurs alimentaires',
-                'activites_cles': '• Transformation du manioc\n• Contrôle qualité\n• Distribution locale',
-                'ressources_cles': '• Équipement de transformation\n• Réseau de producteurs\n• Expertise en transformation',
-                'propositions_valeur': '• Farine de manioc à prix stable\n• Production locale de qualité\n• Réduction des pénuries saisonnières',
-                'relations_clients': '• Relation directe avec consommateurs\n• Programme de fidélité\n• Service après-vente local',
-                'canaux_distribution': '• Marchés locaux\n• Magasins de proximité\n• Vente directe à la ferme',
-                'segments_clients': '• Familles locales\n• Restaurants et cantines\n• Transformateurs alimentaires',
-                'structure_couts': '• Achat matières premières\n• Coûts de transformation\n• Transport et distribution',
-                'sources_revenus': '• Vente de farine de manioc\n• Produits dérivés\n• Services de transformation'
+                'partenaires_cles': '• Incubateurs et accélérateurs locaux\n• Investisseurs et business angels\n• Mentors sectoriels\n• Partenaires technologiques',
+                'activites_cles': '• Développement produit/service\n• Validation marché (MVP)\n• Levée de fonds\n• Construction d\'équipe',
+                'ressources_cles': '• Équipe fondatrice\n• Capital d\'amorçage\n• Propriété intellectuelle\n• Réseau professionnel',
+                'propositions_valeur': '• Innovation disruptive\n• Solution à un problème majeur\n• Scalabilité régionale\n• Avantage concurrentiel défendable',
+                'relations_clients': '• Relation directe et feedback continu\n• Support personnalisé\n• Communauté early adopters\n• Itération produit rapide',
+                'canaux_distribution': '• Digital first (réseaux sociaux, web)\n• Vente directe\n• Partenaires stratégiques\n• Bouche-à-oreille',
+                'segments_clients': '• Early adopters urbains\n• Professionnels innovants\n• Entreprises en transformation\n• Segment de niche spécialisé',
+                'structure_couts': '• Développement produit (40-50%)\n• Acquisition clients (25-30%)\n• Opérations (15-20%)\n• Administration (5-10%)',
+                'sources_revenus': '• Modèle freemium\n• Abonnements récurrents\n• Commissions sur transactions\n• Services premium'
             }
-        else:
+        else:  # PME traditionnelle
             suggestions = {
-                'partenaires_cles': '• Fournisseurs locaux\n• Distributeurs\n• Institutions financières',
-                'activites_cles': '• Production/Fabrication\n• Vente et distribution\n• Service client',
-                'ressources_cles': '• Équipements de production\n• Main d\'œuvre qualifiée\n• Réseau de distribution',
-                'propositions_valeur': '• Produits de qualité locale\n• Service personnalisé\n• Prix accessible',
-                'relations_clients': '• Relation directe\n• Service après-vente\n• Fidélisation clients',
-                'canaux_distribution': '• Magasins physiques\n• Réseau de revendeurs\n• Vente directe',
-                'segments_clients': '• Consommateurs locaux\n• Entreprises B2B\n• Particuliers',
-                'structure_couts': '• Coût des matières premières\n• Salaires et charges\n• Coûts de distribution',
-                'sources_revenus': '• Vente de produits\n• Services associés\n• Contrats de maintenance'
+                'partenaires_cles': '• Fournisseurs locaux fiables\n• Distributeurs régionaux\n• Institutions financières\n• Associations professionnelles',
+                'activites_cles': '• Production/prestation de services\n• Vente et relation client\n• Gestion qualité\n• Administration et finance',
+                'ressources_cles': '• Outils de production\n• Personnel expérimenté\n• Clientèle fidèle\n• Savoir-faire métier',
+                'propositions_valeur': '• Expertise métier reconnue\n• Service de proximité\n• Rapport qualité-prix\n• Flexibilité et réactivité',
+                'relations_clients': '• Relation de confiance long terme\n• Service personnalisé\n• Support technique\n• Garanties et SAV',
+                'canaux_distribution': '• Vente directe\n• Réseau de partenaires\n• Bouche-à-oreille\n• Présence locale',
+                'segments_clients': '• Entreprises locales\n• Particuliers du territoire\n• Collectivités publiques\n• Professionnels du secteur',
+                'structure_couts': '• Matières premières/achats (50-60%)\n• Salaires et charges (20-30%)\n• Charges fixes (10-15%)\n• Divers et investissements (5-10%)',
+                'sources_revenus': '• Vente produits/services principaux\n• Services complémentaires\n• Maintenance et formation\n• Contrats récurrents'
             }
     
     if st.session_state.get('debug_ai', False):
         valid_count = sum(1 for v in suggestions.values() if v.strip())
-        st.success(f"✅ Fallback: {valid_count} blocs générés avec succès")
+        st.success(f"✅ Fallback: {valid_count} blocs générés - Secteur {secteur}")
     
     return suggestions
 
