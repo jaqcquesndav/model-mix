@@ -242,6 +242,7 @@ def afficher_resume_graphique(tableau_data, criteres):
     
     with st.expander("📊 Résumé graphique", expanded=False):
         try:
+            # Import conditionnel de plotly
             import plotly.graph_objects as go
             
             # Créer un graphique radar pour "Votre entreprise"
@@ -270,8 +271,16 @@ def afficher_resume_graphique(tableau_data, criteres):
                 
                 st.plotly_chart(fig, use_container_width=True)
             
-        except ImportError:
+        except (ImportError, ModuleNotFoundError):
             # Fallback si plotly n'est pas disponible
+            st.info("📊 Résumé des notes moyennes :")
+            if "Votre entreprise" in tableau_data:
+                for critere in criteres:
+                    note = tableau_data["Votre entreprise"].get(critere, 3)
+                    st.write(f"• {critere}: {note}/5 {'⭐' * note}")
+        except Exception as e:
+            # Gestion d'autres erreurs potentielles
+            st.warning(f"Erreur lors de la génération du graphique : {str(e)}")
             st.info("📊 Résumé des notes moyennes :")
             if "Votre entreprise" in tableau_data:
                 for critere in criteres:
