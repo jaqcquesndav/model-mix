@@ -101,7 +101,8 @@ def create_main_navigation():
     with main_tabs_ui[1]:
         analyse_marche_subtabs = [
             "🏪 Analyse du Marché",
-            "⚔️ Analyse de la Concurrence"
+            "⚔️ Analyse de la Concurrence",
+            "🌳 Arbre à Problème"
         ]
         
         market_tabs = st.tabs(analyse_marche_subtabs)
@@ -121,6 +122,14 @@ def create_main_navigation():
             except Exception as e:
                 st.error(f"Fonction d'analyse de concurrence non encore implémentée : {str(e)}")
                 st.info("Cette section sera disponible prochainement")
+        
+        with market_tabs[2]:
+            try:
+                from ui.pages.business_model_initial import page_arbre_probleme
+                page_arbre_probleme()
+            except Exception as e:
+                st.error(f"Erreur lors du chargement de l'arbre à problème : {str(e)}")
+                st.info("Veuillez vérifier que le module arbre à problème est disponible")
     
     # 3. Business Model (simplifié, sans sous-onglets)
     with main_tabs_ui[2]:
