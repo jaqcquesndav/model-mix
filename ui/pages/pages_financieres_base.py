@@ -416,38 +416,327 @@ def page_financement():
     st.session_state.data["financements"] = fin
 
 def page_charges_fixes():
-    """Page des charges fixes - Version simplifiée"""
-    st.title("📋 Charges Fixes")
-    st.info("⚠️ Version simplifiée - Données sur 3 ans.")
+    """Page des charges fixes - Version complète avec autofill intelligent sur 5 ans"""
+    st.title("📋 Charges Fixes sur 5 Années")
+    st.markdown("### Système d'autofill intelligent - Modifiez année 1 pour auto-remplir années 2 à 5")
     
     if "data" not in st.session_state:
         st.session_state.data = {}
     
-    if "charges_fixes" not in st.session_state.data:
-        st.session_state.data["charges_fixes"] = {}
+    data = st.session_state.data
     
-    cf = st.session_state.data["charges_fixes"]
+    # Liste complète des 15 charges fixes selon l'original
+    charges_fixes_predefinies = [
+        "Assurances véhicule et RC pro", "Téléphone, internet", "Autres abonnements",
+        "Carburant", "Frais de déplacement / hébergement", "Eau, électricité, gaz",
+        "Mutuelle", "Fournitures diverses", "Entretien Moto livraison et matériel",
+        "Nettoyage des locaux", "Budget publicité et communication", "Emplacements",
+        "Expert comptable, avocats", "Frais bancaires et terminal carte bleue", "Taxes, CFE"
+    ]
     
-    charges_types = ["Loyer", "Électricité", "Eau", "Téléphone/Internet", "Assurances", "Autres charges"]
+    # Initialisation des charges fixes si non présentes
+    if "charges_fixes" not in data:
+        data["charges_fixes"] = {"annee1": {}, "annee2": {}, "annee3": {}, "annee4": {}, "annee5": {}}
+        for charge in charges_fixes_predefinies:
+            for annee in ["annee1", "annee2", "annee3", "annee4", "annee5"]:
+                data["charges_fixes"][annee][charge] = 0.0
     
-    st.subheader("Charges fixes mensuelles")
+    charges_fixes_dict = data["charges_fixes"]
     
-    for charge in charges_types:
-        cf[charge] = st.number_input(f"{charge} ($/mois)", 
-                                   value=cf.get(charge, 0.0), min_value=0.0, key=f"cf_{charge}")
+    # Fonctions d'autofill intelligent
+    def update_year1(charge):
+        """Met à jour années 2 à 5 quand année 1 change"""
+        year1_key = f"charge_{charge}_annee1"
+        year1_val = st.session_state.get(year1_key, 0.0)
+        
+        # Auto-remplir années 2 à 5 avec la valeur de l'année 1
+        for i, annee in enumerate(["annee2", "annee3", "annee4", "annee5"], 2):
+            year_key = f"charge_{charge}_annee{i}"
+            if not st.session_state.get(f"updated_{year_key}", False):
+                st.session_state[year_key] = year1_val
+                charges_fixes_dict[annee][charge] = year1_val
     
-    # Calcul totaux annuels
-    total_mensuel = sum(cf.values())
-    total_annuel = total_mensuel * 12
+    def update_year2(charge):
+        """Met à jour années 3 à 5 quand année 2 change"""
+        year2_key = f"charge_{charge}_annee2"
+        year2_val = st.session_state.get(year2_key, 0.0)
+        st.session_state[f"updated_{year2_key}"] = True
+        
+        for i, annee in enumerate(["annee3", "annee4", "annee5"], 3):
+            year_key = f"charge_{charge}_annee{i}"
+            if not st.session_state.get(f"updated_{year_key}", False):
+                st.session_state[year_key] = year2_val
+                charges_fixes_dict[annee][charge] = year2_val
     
-    col1, col2 = st.columns(2)
+    def update_year3(charge):
+        """Met à jour années 4 et 5 quand année 3 change"""
+        year3_key = f"charge_{charge}_annee3"
+        year3_val = st.session_state.get(year3_key, 0.0)
+        st.session_state[f"updated_{year3_key}"] = True
+        
+        for i, annee in enumerate(["annee4", "annee5"], 4):
+            year_key = f"charge_{charge}_annee{i}"
+            if not st.session_state.get(f"updated_{year_key}", False):
+                st.session_state[year_key] = year3_val
+                charges_fixes_dict[annee][charge] = year3_val
+    
+    def update_year4(charge):
+        """Met à jour année 5 quand année 4 change"""
+        year4_key = f"charge_{charge}_annee4"
+        year4_val = st.session_state.get(year4_key, 0.0)
+        st.session_state[f"updated_{year4_key}"] = True
+        
+        year5_key = f"charge_{charge}_annee5"
+        if not st.session_state.get(f"updated_{year5_key}", False):
+            st.session_state[year5_key] = year4_val
+            charges_fixes_dict["annee5"][charge] = year4_val
+    
+    def update_year5(charge):
+        """Marque l'année 5 comme modifiée manuellement"""
+        year5_key = f"charge_{charge}_annee5"
+        st.session_state[f"updated_{year5_key}"] = True
+    
+    # Interface pour les charges fixes prédéfinies
+    st.subheader("💼 Charges Fixes Prédéfinies")
+    st.info("💡 **Autofill intelligent** : Modifiez l'année 1 pour auto-remplir les années suivantes")
+    
+    # Affichage en format tableau avec 5 colonnes
+    for charge in charges_fixes_predefinies:
+        st.markdown(f"**{charge}**")
+        col1, col2, col3, col4, col5 = st.columns(5)
+        
+        # S'assurer que la charge existe dans toutes les années
+        for annee in ["annee1", "annee2", "annee3", "annee4", "annee5"]:
+            if charge not in charges_fixes_dict[annee]:
+                charges_fixes_dict[annee][charge] = 0.0
+        
+        with col1:
+            year1_key = f"charge_{charge}_annee1"
+            if year1_key not in st.session_state:
+                st.session_state[year1_key] = charges_fixes_dict["annee1"].get(charge, 0.0)
+            montant1 = st.number_input(
+                f"Année 1 ($)",
+                min_value=0.0,
+                key=year1_key,
+                on_change=update_year1,
+                args=(charge,),
+                value=st.session_state[year1_key]
+            )
+            charges_fixes_dict["annee1"][charge] = montant1
+        
+        with col2:
+            year2_key = f"charge_{charge}_annee2"
+            if year2_key not in st.session_state:
+                st.session_state[year2_key] = charges_fixes_dict["annee2"].get(charge, 0.0)
+            montant2 = st.number_input(
+                f"Année 2 ($)",
+                min_value=0.0,
+                key=year2_key,
+                on_change=update_year2,
+                args=(charge,),
+                value=st.session_state[year2_key]
+            )
+            charges_fixes_dict["annee2"][charge] = montant2
+        
+        with col3:
+            year3_key = f"charge_{charge}_annee3"
+            if year3_key not in st.session_state:
+                st.session_state[year3_key] = charges_fixes_dict["annee3"].get(charge, 0.0)
+            montant3 = st.number_input(
+                f"Année 3 ($)",
+                min_value=0.0,
+                key=year3_key,
+                on_change=update_year3,
+                args=(charge,),
+                value=st.session_state[year3_key]
+            )
+            charges_fixes_dict["annee3"][charge] = montant3
+        
+        with col4:
+            year4_key = f"charge_{charge}_annee4"
+            if year4_key not in st.session_state:
+                st.session_state[year4_key] = charges_fixes_dict["annee4"].get(charge, 0.0)
+            montant4 = st.number_input(
+                f"Année 4 ($)",
+                min_value=0.0,
+                key=year4_key,
+                on_change=update_year4,
+                args=(charge,),
+                value=st.session_state[year4_key]
+            )
+            charges_fixes_dict["annee4"][charge] = montant4
+        
+        with col5:
+            year5_key = f"charge_{charge}_annee5"
+            if year5_key not in st.session_state:
+                st.session_state[year5_key] = charges_fixes_dict["annee5"].get(charge, 0.0)
+            montant5 = st.number_input(
+                f"Année 5 ($)",
+                min_value=0.0,
+                key=year5_key,
+                on_change=update_year5,
+                args=(charge,),
+                value=st.session_state[year5_key]
+            )
+            charges_fixes_dict["annee5"][charge] = montant5
+    
+    # Section charges fixes personnalisées
+    st.subheader("➕ Charges Fixes Personnalisées")
+    st.info("Ajoutez vos propres charges fixes non listées ci-dessus")
+    
+    # Initialiser les charges personnalisées si nécessaire
+    if "charges_personnalisees" not in data:
+        data["charges_personnalisees"] = []
+    
+    # Interface pour ajouter une nouvelle charge personnalisée
+    with st.expander("🆕 Ajouter une nouvelle charge fixe"):
+        col_nom, col_add = st.columns([3, 1])
+        with col_nom:
+            nouvelle_charge = st.text_input("Nom de la nouvelle charge fixe")
+        with col_add:
+            st.write("")  # Espacement
+            if st.button("Ajouter"):
+                if nouvelle_charge and nouvelle_charge not in data["charges_personnalisees"]:
+                    data["charges_personnalisees"].append(nouvelle_charge)
+                    # Initialiser les valeurs pour toutes les années
+                    for annee in ["annee1", "annee2", "annee3", "annee4", "annee5"]:
+                        charges_fixes_dict[annee][nouvelle_charge] = 0.0
+                    st.success(f"Charge '{nouvelle_charge}' ajoutée !")
+                    st.rerun()
+                elif nouvelle_charge in data["charges_personnalisees"]:
+                    st.warning("Cette charge existe déjà")
+    
+    # Afficher les charges personnalisées existantes
+    if data["charges_personnalisees"]:
+        st.markdown("**Charges personnalisées :**")
+        for i, charge in enumerate(data["charges_personnalisees"]):
+            col_charge, col_delete = st.columns([10, 1])
+            
+            with col_charge:
+                st.markdown(f"**{charge}**")
+                col1, col2, col3, col4, col5 = st.columns(5)
+                
+                # S'assurer que la charge existe dans toutes les années
+                for annee in ["annee1", "annee2", "annee3", "annee4", "annee5"]:
+                    if charge not in charges_fixes_dict[annee]:
+                        charges_fixes_dict[annee][charge] = 0.0
+                
+                with col1:
+                    year1_key = f"charge_perso_{charge}_annee1"
+                    if year1_key not in st.session_state:
+                        st.session_state[year1_key] = charges_fixes_dict["annee1"].get(charge, 0.0)
+                    montant1 = st.number_input(
+                        f"Année 1 ($)",
+                        min_value=0.0,
+                        key=year1_key,
+                        on_change=update_year1,
+                        args=(charge,),
+                        value=st.session_state[year1_key]
+                    )
+                    charges_fixes_dict["annee1"][charge] = montant1
+                
+                with col2:
+                    year2_key = f"charge_perso_{charge}_annee2"
+                    if year2_key not in st.session_state:
+                        st.session_state[year2_key] = charges_fixes_dict["annee2"].get(charge, 0.0)
+                    montant2 = st.number_input(
+                        f"Année 2 ($)",
+                        min_value=0.0,
+                        key=year2_key,
+                        on_change=update_year2,
+                        args=(charge,),
+                        value=st.session_state[year2_key]
+                    )
+                    charges_fixes_dict["annee2"][charge] = montant2
+                
+                with col3:
+                    year3_key = f"charge_perso_{charge}_annee3"
+                    if year3_key not in st.session_state:
+                        st.session_state[year3_key] = charges_fixes_dict["annee3"].get(charge, 0.0)
+                    montant3 = st.number_input(
+                        f"Année 3 ($)",
+                        min_value=0.0,
+                        key=year3_key,
+                        on_change=update_year3,
+                        args=(charge,),
+                        value=st.session_state[year3_key]
+                    )
+                    charges_fixes_dict["annee3"][charge] = montant3
+                
+                with col4:
+                    year4_key = f"charge_perso_{charge}_annee4"
+                    if year4_key not in st.session_state:
+                        st.session_state[year4_key] = charges_fixes_dict["annee4"].get(charge, 0.0)
+                    montant4 = st.number_input(
+                        f"Année 4 ($)",
+                        min_value=0.0,
+                        key=year4_key,
+                        on_change=update_year4,
+                        args=(charge,),
+                        value=st.session_state[year4_key]
+                    )
+                    charges_fixes_dict["annee4"][charge] = montant4
+                
+                with col5:
+                    year5_key = f"charge_perso_{charge}_annee5"
+                    if year5_key not in st.session_state:
+                        st.session_state[year5_key] = charges_fixes_dict["annee5"].get(charge, 0.0)
+                    montant5 = st.number_input(
+                        f"Année 5 ($)",
+                        min_value=0.0,
+                        key=year5_key,
+                        on_change=update_year5,
+                        args=(charge,),
+                        value=st.session_state[year5_key]
+                    )
+                    charges_fixes_dict["annee5"][charge] = montant5
+            
+            with col_delete:
+                st.write("")  # Espacement
+                if st.button("🗑️", key=f"delete_charge_{i}", help="Supprimer cette charge"):
+                    # Supprimer la charge des listes et des données
+                    data["charges_personnalisees"].remove(charge)
+                    for annee in ["annee1", "annee2", "annee3", "annee4", "annee5"]:
+                        if charge in charges_fixes_dict[annee]:
+                            del charges_fixes_dict[annee][charge]
+                    st.success(f"Charge '{charge}' supprimée !")
+                    st.rerun()
+    
+    # Calculs et résumé
+    st.subheader("📊 Résumé des Charges Fixes")
+    
+    col1, col2, col3, col4, col5 = st.columns(5)
+    totaux_annuels = {}
+    
+    for i, (annee, col) in enumerate(zip(["annee1", "annee2", "annee3", "annee4", "annee5"], [col1, col2, col3, col4, col5]), 1):
+        total = sum(charges_fixes_dict[annee].values())
+        totaux_annuels[annee] = total
+        
+        with col:
+            st.metric(f"Année {i}", f"{total:,.0f} $")
+    
+    # Évolution et moyennes
+    st.subheader("📈 Analyse d'Évolution")
+    col1, col2, col3 = st.columns(3)
+    
     with col1:
-        st.metric("Total mensuel", f"{total_mensuel:,.2f} $")
-    with col2:
-        st.metric("Total annuel", f"{total_annuel:,.2f} $")
+        moyenne_5_ans = sum(totaux_annuels.values()) / 5
+        st.metric("Moyenne 5 ans", f"{moyenne_5_ans:,.0f} $")
     
-    # Stocker pour les autres calculs
-    st.session_state.data["total_charges_fixes_annee1"] = total_annuel
+    with col2:
+        if totaux_annuels["annee1"] > 0:
+            croissance = ((totaux_annuels["annee5"] / totaux_annuels["annee1"]) - 1) * 100
+            st.metric("Croissance totale", f"{croissance:+.1f}%")
+        else:
+            st.metric("Croissance totale", "N/A")
+    
+    with col3:
+        max_annee = max(totaux_annuels.values())
+        st.metric("Pic maximal", f"{max_annee:,.0f} $")
+    
+    # Sauvegarder les totaux pour les autres calculs
+    for i, annee in enumerate(["annee1", "annee2", "annee3", "annee4", "annee5"], 1):
+        data[f"total_charges_fixes_annee{i}"] = totaux_annuels[annee]
 
 def page_chiffre_affaires():
     """Page de chiffre d'affaires - Version complète avec autofill mensuel"""
@@ -1174,427 +1463,3 @@ def page_rentabilite():
     else:
         st.warning("Veuillez renseigner le chiffre d'affaires pour voir l'analyse de rentabilité")
 
-def page_charges_fixes():
-    """Page des charges fixes - Version complète avec autofill intelligent"""
-    st.title("📋 Charges Fixes sur 5 Années")
-    st.markdown("### Système d'autofill intelligent - Modifiez année 1 pour auto-remplir années 2 à 5")
-    
-    if "data" not in st.session_state:
-        st.session_state.data = {}
-    
-    data = st.session_state.data
-    
-    # Liste complète des 15 charges fixes selon l'original
-    charges_fixes = [
-        "Assurances véhicule et RC pro", "Téléphone, internet", "Autres abonnements",
-        "Carburant", "Frais de déplacement / hébergement", "Eau, électricité, gaz",
-        "Mutuelle", "Fournitures diverses", "Entretien Moto livraison et matériel",
-        "Nettoyage des locaux", "Budget publicité et communication", "Emplacements",
-        "Expert comptable, avocats", "Frais bancaires et terminal carte bleue", "Taxes, CFE"
-    ]
-    
-    # Initialisation des charges fixes si non présentes
-    if "charges_fixes" not in data:
-        data["charges_fixes"] = {"annee1": {}, "annee2": {}, "annee3": {}, "annee4": {}, "annee5": {}}
-        for charge in charges_fixes:
-            data["charges_fixes"]["annee1"][charge] = 0.0
-            data["charges_fixes"]["annee2"][charge] = 0.0
-            data["charges_fixes"]["annee3"][charge] = 0.0
-            data["charges_fixes"]["annee4"][charge] = 0.0
-            data["charges_fixes"]["annee5"][charge] = 0.0
-    
-    charges_fixes_dict = data["charges_fixes"]
-    
-    # Initialisation des charges supplémentaires si non présentes
-    if "charges_supplementaires" not in data:
-        data["charges_supplementaires"] = []
-    
-    # Fonctions de mise à jour avec autofill intelligent
-    def update_year1(charge):
-        """Met à jour années 2 à 5 quand année 1 change (seulement si non modifiées manuellement)"""
-        year1_key = f"charge_{charge}_annee1"
-        year2_key = f"charge_{charge}_annee2"
-        year3_key = f"charge_{charge}_annee3"
-        year4_key = f"charge_{charge}_annee4"
-        year5_key = f"charge_{charge}_annee5"
-        
-        year1_val = st.session_state.get(year1_key, 0.0)
-        
-        # Mettre à jour années 2 à 5 seulement si l'utilisateur n'a pas déjà modifié ces champs
-        if st.session_state.get(f"updated_{year2_key}", False) == False:
-            st.session_state[year2_key] = year1_val
-            charges_fixes_dict["annee2"][charge] = year1_val
-        if st.session_state.get(f"updated_{year3_key}", False) == False:
-            st.session_state[year3_key] = year1_val
-            charges_fixes_dict["annee3"][charge] = year1_val
-        if st.session_state.get(f"updated_{year4_key}", False) == False:
-            st.session_state[year4_key] = year1_val
-            charges_fixes_dict["annee4"][charge] = year1_val
-        if st.session_state.get(f"updated_{year5_key}", False) == False:
-            st.session_state[year5_key] = year1_val
-            charges_fixes_dict["annee5"][charge] = year1_val
-
-    def update_year2(charge):
-        """Met à jour années 3 à 5 quand année 2 change (seulement si non modifiées manuellement)"""
-        year2_key = f"charge_{charge}_annee2"
-        year3_key = f"charge_{charge}_annee3"
-        year4_key = f"charge_{charge}_annee4"
-        year5_key = f"charge_{charge}_annee5"
-        
-        year2_val = st.session_state.get(year2_key, 0.0)
-        
-        # Indiquer que l'année 2 a été mise à jour manuellement
-        st.session_state[f"updated_{year2_key}"] = True
-        
-        # Mettre à jour années 3 à 5 seulement si l'utilisateur n'a pas déjà modifié ces champs
-        if st.session_state.get(f"updated_{year3_key}", False) == False:
-            st.session_state[year3_key] = year2_val
-            charges_fixes_dict["annee3"][charge] = year2_val
-        if st.session_state.get(f"updated_{year4_key}", False) == False:
-            st.session_state[year4_key] = year2_val
-            charges_fixes_dict["annee4"][charge] = year2_val
-        if st.session_state.get(f"updated_{year5_key}", False) == False:
-            st.session_state[year5_key] = year2_val
-            charges_fixes_dict["annee5"][charge] = year2_val
-
-    def update_year3(charge):
-        """Met à jour années 4 et 5 quand année 3 change (seulement si non modifiées manuellement)"""
-        year3_key = f"charge_{charge}_annee3"
-        year4_key = f"charge_{charge}_annee4"
-        year5_key = f"charge_{charge}_annee5"
-        
-        year3_val = st.session_state.get(year3_key, 0.0)
-        
-        # Indiquer que l'année 3 a été mise à jour manuellement
-        st.session_state[f"updated_{year3_key}"] = True
-        
-        # Mettre à jour années 4 et 5 seulement si l'utilisateur n'a pas déjà modifié ces champs
-        if st.session_state.get(f"updated_{year4_key}", False) == False:
-            st.session_state[year4_key] = year3_val
-            charges_fixes_dict["annee4"][charge] = year3_val
-        if st.session_state.get(f"updated_{year5_key}", False) == False:
-            st.session_state[year5_key] = year3_val
-            charges_fixes_dict["annee5"][charge] = year3_val
-
-    def update_year4(charge):
-        """Met à jour année 5 quand année 4 change (seulement si non modifiée manuellement)"""
-        year4_key = f"charge_{charge}_annee4"
-        year5_key = f"charge_{charge}_annee5"
-        
-        year4_val = st.session_state.get(year4_key, 0.0)
-        
-        # Indiquer que l'année 4 a été mise à jour manuellement
-        st.session_state[f"updated_{year4_key}"] = True
-        
-        # Mettre à jour année 5 seulement si l'utilisateur n'a pas déjà modifié ce champ
-        if st.session_state.get(f"updated_{year5_key}", False) == False:
-            st.session_state[year5_key] = year4_val
-            charges_fixes_dict["annee5"][charge] = year4_val
-
-    def update_year5(charge):
-        """Marque l'année 5 comme modifiée manuellement"""
-        year5_key = f"charge_{charge}_annee5"
-        st.session_state[f"updated_{year5_key}"] = True
-    
-    # Interface pour les charges fixes par défaut
-    st.subheader("💼 Charges Fixes par Défaut")
-    st.info("💡 Astuce : Saisissez l'année 1, les années 2 à 5 se rempliront automatiquement. Modifiez-les individuellement si nécessaire.")
-    
-    for charge in charges_fixes:
-        col1, col2, col3, col4, col5 = st.columns(5)
-        
-        with col1:
-            year1_key = f"charge_{charge}_annee1"
-            if year1_key not in st.session_state:
-                st.session_state[year1_key] = charges_fixes_dict["annee1"].get(charge, 0.0)
-            montant1 = st.number_input(
-                f"{charge} - Année 1 ($)",
-                min_value=0.0,
-                key=year1_key,
-                on_change=update_year1,
-                args=(charge,),
-                value=st.session_state[year1_key]
-            )
-            charges_fixes_dict["annee1"][charge] = montant1
-        
-        with col2:
-            year2_key = f"charge_{charge}_annee2"
-            if year2_key not in st.session_state:
-                st.session_state[year2_key] = charges_fixes_dict["annee2"].get(charge, 0.0)
-            montant2 = st.number_input(
-                f"Année 2 ($)",
-                min_value=0.0,
-                key=year2_key,
-                on_change=update_year2,
-                args=(charge,),
-                value=st.session_state[year2_key]
-            )
-            charges_fixes_dict["annee2"][charge] = montant2
-        
-        with col3:
-            year3_key = f"charge_{charge}_annee3"
-            if year3_key not in st.session_state:
-                st.session_state[year3_key] = charges_fixes_dict["annee3"].get(charge, 0.0)
-            montant3 = st.number_input(
-                f"Année 3 ($)",
-                min_value=0.0,
-                key=year3_key,
-                on_change=update_year3,
-                args=(charge,),
-                value=st.session_state[year3_key]
-            )
-            charges_fixes_dict["annee3"][charge] = montant3
-        
-        with col4:
-            year4_key = f"charge_{charge}_annee4"
-            if year4_key not in st.session_state:
-                st.session_state[year4_key] = charges_fixes_dict["annee4"].get(charge, 0.0)
-            montant4 = st.number_input(
-                f"Année 4 ($)",
-                min_value=0.0,
-                key=year4_key,
-                on_change=update_year4,
-                args=(charge,),
-                value=st.session_state[year4_key]
-            )
-            charges_fixes_dict["annee4"][charge] = montant4
-        
-        with col5:
-            year5_key = f"charge_{charge}_annee5"
-            if year5_key not in st.session_state:
-                st.session_state[year5_key] = charges_fixes_dict["annee5"].get(charge, 0.0)
-            montant5 = st.number_input(
-                f"Année 5 ($)",
-                min_value=0.0,
-                key=year5_key,
-                on_change=update_year5,
-                args=(charge,),
-                value=st.session_state[year5_key]
-            )
-            charges_fixes_dict["annee5"][charge] = montant5
-        
-        with col2:
-            year2_key = f"charge_{charge}_annee2"
-            if year2_key not in st.session_state:
-                st.session_state[year2_key] = charges_fixes_dict["annee2"].get(charge, 0.0)
-                st.session_state[f"updated_{year2_key}"] = False
-            montant2 = st.number_input(
-                f"Année 2 ($)",
-                min_value=0.0,
-                key=year2_key,
-                on_change=update_year2,
-                args=(charge,),
-                value=st.session_state[year2_key]
-            )
-            charges_fixes_dict["annee2"][charge] = montant2
-        
-        with col3:
-            year3_key = f"charge_{charge}_annee3"
-            if year3_key not in st.session_state:
-                st.session_state[year3_key] = charges_fixes_dict["annee3"].get(charge, 0.0)
-                st.session_state[f"updated_{year3_key}"] = False
-            montant3 = st.number_input(
-                f"Année 3 ($)",
-                min_value=0.0,
-                key=year3_key,
-                on_change=update_year3,
-                args=(charge,),
-                value=st.session_state[year3_key]
-            )
-            charges_fixes_dict["annee3"][charge] = montant3
-        
-        with col4:
-            year4_key = f"charge_{charge}_annee4"
-            if year4_key not in st.session_state:
-                st.session_state[year4_key] = charges_fixes_dict["annee4"].get(charge, 0.0)
-                st.session_state[f"updated_{year4_key}"] = False
-            montant4 = st.number_input(
-                f"Année 4 ($)",
-                min_value=0.0,
-                key=year4_key,
-                on_change=update_year4,
-                args=(charge,),
-                value=st.session_state[year4_key]
-            )
-            charges_fixes_dict["annee4"][charge] = montant4
-        
-        with col5:
-            year5_key = f"charge_{charge}_annee5"
-            if year5_key not in st.session_state:
-                st.session_state[year5_key] = charges_fixes_dict["annee5"].get(charge, 0.0)
-                st.session_state[f"updated_{year5_key}"] = False
-            montant5 = st.number_input(
-                f"Année 5 ($)",
-                min_value=0.0,
-                key=year5_key,
-                on_change=update_year5,
-                args=(charge,),
-                value=st.session_state[year5_key]
-            )
-            charges_fixes_dict["annee5"][charge] = montant5
-    
-    # Section pour ajouter des charges supplémentaires
-    st.write("---")
-    st.subheader("➕ Ajouter des Charges Supplémentaires")
-    
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        nouvelle_charge = st.text_input("Nom de la nouvelle charge :", key="nouvelle_charge")
-    with col2:
-        if st.button("Ajouter la charge", type="primary"):
-            nouvelle_charge = nouvelle_charge.strip()
-            if nouvelle_charge and nouvelle_charge not in data["charges_supplementaires"]:
-                data["charges_supplementaires"].append(nouvelle_charge)
-                charges_fixes_dict["annee1"][nouvelle_charge] = 0.0
-                charges_fixes_dict["annee2"][nouvelle_charge] = 0.0
-                charges_fixes_dict["annee3"][nouvelle_charge] = 0.0
-                # Réinitialiser le champ de texte
-                st.session_state["nouvelle_charge"] = ""
-                st.rerun()
-            elif nouvelle_charge in data["charges_supplementaires"]:
-                st.error("Cette charge existe déjà !")
-    
-    # Affichage des charges supplémentaires
-    if data["charges_supplementaires"]:
-        st.subheader("📝 Charges Supplémentaires")
-        for charge in data["charges_supplementaires"]:
-            col1, col2, col3 = st.columns(3)
-            
-            with col1:
-                year1_key = f"charge_{charge}_supp_annee1"
-                if year1_key not in st.session_state:
-                    st.session_state[year1_key] = charges_fixes_dict["annee1"].get(charge, 0.0)
-                montant1 = st.number_input(
-                    f"{charge} - Année 1 ($)",
-                    min_value=0.0,
-                    key=year1_key,
-                    on_change=update_year1,
-                    args=(charge,),
-                    value=st.session_state[year1_key]
-                )
-                charges_fixes_dict["annee1"][charge] = montant1
-            
-            with col2:
-                year2_key = f"charge_{charge}_supp_annee2"
-                if year2_key not in st.session_state:
-                    st.session_state[year2_key] = charges_fixes_dict["annee2"].get(charge, 0.0)
-                    st.session_state[f"updated_{year2_key}"] = False
-                montant2 = st.number_input(
-                    f"{charge} - Année 2 ($)",
-                    min_value=0.0,
-                    key=year2_key,
-                    on_change=update_year2,
-                    args=(charge,),
-                    value=st.session_state[year2_key]
-                )
-                charges_fixes_dict["annee2"][charge] = montant2
-            
-            with col3:
-                year3_key = f"charge_{charge}_supp_annee3"
-                if year3_key not in st.session_state:
-                    st.session_state[year3_key] = charges_fixes_dict["annee3"].get(charge, 0.0)
-                    st.session_state[f"updated_{year3_key}"] = False
-                montant3 = st.number_input(
-                    f"{charge} - Année 3 ($)",
-                    min_value=0.0,
-                    key=year3_key,
-                    on_change=update_year3,
-                    args=(charge,),
-                    value=st.session_state[year3_key]
-                )
-                charges_fixes_dict["annee3"][charge] = montant3
-    
-    # Calcul des totaux
-    total_annee1 = sum(charges_fixes_dict["annee1"].values())
-    total_annee2 = sum(charges_fixes_dict["annee2"].values())
-    total_annee3 = sum(charges_fixes_dict["annee3"].values())
-    total_annee4 = sum(charges_fixes_dict["annee4"].values())
-    total_annee5 = sum(charges_fixes_dict["annee5"].values())
-    
-    data["total_charges_fixes_annee1"] = total_annee1
-    data["total_charges_fixes_annee2"] = total_annee2
-    data["total_charges_fixes_annee3"] = total_annee3
-    data["total_charges_fixes_annee4"] = total_annee4
-    data["total_charges_fixes_annee5"] = total_annee5
-    
-    # Affichage des totaux
-    st.write("---")
-    st.subheader("📊 Récapitulatif des Charges Fixes")
-    
-    col1, col2, col3, col4, col5 = st.columns(5)
-    with col1:
-        st.metric("Total Année 1", f"{total_annee1:,.2f} $")
-    with col2:
-        st.metric("Total Année 2", f"{total_annee2:,.2f} $")
-    with col3:
-        st.metric("Total Année 3", f"{total_annee3:,.2f} $")
-    with col4:
-        st.metric("Total Année 4", f"{total_annee4:,.2f} $")
-    with col5:
-        st.metric("Total Année 5", f"{total_annee5:,.2f} $")
-    
-    # Évolution des charges
-    if total_annee1 > 0:
-        evolution_2 = ((total_annee2 - total_annee1) / total_annee1) * 100
-        evolution_3 = ((total_annee3 - total_annee2) / total_annee2) * 100 if total_annee2 > 0 else 0
-        evolution_4 = ((total_annee4 - total_annee3) / total_annee3) * 100 if total_annee3 > 0 else 0
-        evolution_5 = ((total_annee5 - total_annee4) / total_annee4) * 100 if total_annee4 > 0 else 0
-        
-        st.write("**Évolution des charges :**")
-        col1, col2, col3, col4 = st.columns(4)
-        with col1:
-            st.write(f"📈 Année 1 → 2 : {evolution_2:+.1f}%")
-        with col2:
-            st.write(f"📈 Année 2 → 3 : {evolution_3:+.1f}%")
-        with col3:
-            st.write(f"📈 Année 3 → 4 : {evolution_4:+.1f}%")
-        with col4:
-            st.write(f"📈 Année 4 → 5 : {evolution_5:+.1f}%")
-    
-    # Sauvegarde des données
-    st.session_state.data = data
-
-def page_tresorerie():
-    """Page trésorerie - Version simplifiée"""
-    st.title("💰 Trésorerie")
-    st.info("⚠️ Analyse simplifiée de la trésorerie.")
-    
-    data = st.session_state.get("data", {})
-    
-    tresorerie_depart = data.get("besoins_demarrage", {}).get("Trésorerie de départ", 0)
-    bfr = data.get("fonds_roulement", {}).get("bfr", 0)
-    
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        st.metric("Trésorerie de départ", f"{tresorerie_depart:,.2f} $")
-    with col2:
-        st.metric("BFR", f"{bfr:,.2f} $")
-    
-    if tresorerie_depart > 0 and bfr > 0:
-        tresorerie_nette = tresorerie_depart - bfr
-        st.metric("Trésorerie nette disponible", f"{tresorerie_nette:,.2f} $")
-        
-        if tresorerie_nette > 0:
-            st.success("✅ Trésorerie suffisante")
-        else:
-            st.error("❌ Trésorerie insuffisante")
-
-def page_generation_business_plan():
-    """Page de génération du business plan - Redirection vers la nouvelle version"""
-    st.title("📄 Génération du Business Plan")
-    
-    st.warning("⚠️ Cette page utilise encore l'ancienne version. Pour une expérience complète avec tous les tableaux financiers intégrés, utilisez l'onglet:")
-    st.info("🎯 **Business Plan Complet (Nouveau)**")
-    
-    st.markdown("### Fonctionnalités de la nouvelle version:")
-    st.markdown("""
-    - ✅ **Intégration automatique** de tous les tableaux financiers
-    - ✅ **9 sections structurées** selon le canevas officiel  
-    - ✅ **Analyses détaillées** de chaque élément financier
-    - ✅ **Export Word/PDF** professionnel
-    - ✅ **Projections 5 ans** au lieu de 3 ans
-    """)
-    
-    if st.button("🚀 Aller vers Business Plan Complet", type="primary"):
-        st.info("Cliquez sur l'onglet '🎯 Business Plan Complet (Nouveau)' ci-dessus")

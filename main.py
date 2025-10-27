@@ -86,7 +86,6 @@ def create_main_navigation():
     # Onglets principaux simplifiés
     main_tabs = [
         "ℹ️ Informations Générales",
-        "📊 Analyse de Marché",
         "🎨 Business Model", 
         "💰 Financier",
         "📄 Génération Business Plan"
@@ -99,34 +98,56 @@ def create_main_navigation():
     with main_tabs_ui[0]:
         page_informations_generales()
     
-    # 2. Analyse de Marché (nouveau - combine marché + concurrence)
+    # 2. Business Model (avec sous-onglets incluant analyse de marché)
     with main_tabs_ui[1]:
-        analyse_marche_subtabs = [
-            "🏪 Analyse du Marché",
-            "⚔️ Analyse de la Concurrence"
+        business_model_subtabs = [
+            "📊 Analyse de Marché",
+            "🎨 Créativité & Business Model",
+            "🎯 Business Model Final"
         ]
         
-        market_tabs = st.tabs(analyse_marche_subtabs)
+        bm_tabs = st.tabs(business_model_subtabs)
         
-        with market_tabs[0]:
-            try:
-                # Ici on utiliserait une fonction d'analyse de marché depuis page_collecte_donnees
-                from ui.pages import afficher_analyse_marche
-                afficher_analyse_marche()
-            except Exception as e:
-                st.error(f"Fonction d'analyse de marché non encore implémentée : {str(e)}")
-                st.info("Cette section sera disponible prochainement")
+        # Analyse de Marché (combine marché + concurrence)
+        with bm_tabs[0]:
+            analyse_marche_subtabs = [
+                "🏪 Analyse du Marché",
+                "⚔️ Analyse de la Concurrence"
+            ]
+            
+            market_tabs = st.tabs(analyse_marche_subtabs)
+            
+            with market_tabs[0]:
+                try:
+                    from ui.pages import afficher_analyse_marche
+                    afficher_analyse_marche()
+                except Exception as e:
+                    st.error(f"Fonction d'analyse de marché non encore implémentée : {str(e)}")
+                    st.info("Cette section sera disponible prochainement")
+            
+            with market_tabs[1]:
+                try:
+                    from ui.pages import afficher_analyse_concurrence
+                    afficher_analyse_concurrence()
+                except Exception as e:
+                    st.error(f"Fonction d'analyse de concurrence non encore implémentée : {str(e)}")
+                    st.info("Cette section sera disponible prochainement")
         
-        with market_tabs[1]:
+        # Créativité & Business Model
+        with bm_tabs[1]:
             try:
-                # Ici on utiliserait une fonction d'analyse de concurrence depuis page_collecte_donnees  
-                from ui.pages import afficher_analyse_concurrence
-                afficher_analyse_concurrence()
+                page_collecte_donnees()
             except Exception as e:
-                st.error(f"Fonction d'analyse de concurrence non encore implémentée : {str(e)}")
-                st.info("Cette section sera disponible prochainement")
+                st.error(f"Erreur lors du chargement de la page : {str(e)}")
+        
+        # Business Model Final
+        with bm_tabs[2]:
+            try:
+                page_generer_business_model()
+            except Exception as e:
+                st.error(f"Erreur lors du chargement de la page : {str(e)}")
     
-    # 3. Business Model (avec sous-onglets)
+    # 3. Financier (avec sous-onglets pour tous les éléments financiers)
     with main_tabs_ui[2]:
         business_model_subtabs = [
             "🎨 Créativité & Business Model",
@@ -204,8 +225,8 @@ def create_main_navigation():
                     st.error(f"Erreur lors du chargement de la page financière : {str(e)}")
                     st.info("Veuillez rafraîchir la page ou contacter le support technique.")
     
-    # 5. Génération Business Plan
-    with main_tabs_ui[4]:
+    # 4. Génération Business Plan
+    with main_tabs_ui[3]:
         business_plan_subtabs = [
             "📄 Génération Business Plan",
             "🎯 Business Plan Complet (Nouveau)"
