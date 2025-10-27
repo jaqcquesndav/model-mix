@@ -30,8 +30,7 @@ try:
     from ui.pages.pages_financieres_base import (
         page_informations_generales, page_besoins_demarrage, page_financement,
         page_charges_fixes, page_chiffre_affaires, page_charges_variables,
-        page_fonds_roulement, page_salaires, page_rentabilite, page_tresorerie,
-        page_generation_business_plan
+        page_fonds_roulement, page_salaires, page_rentabilite, page_tresorerie
     )
     
     # Import des nouvelles pages refactorisées
@@ -88,7 +87,7 @@ def create_main_navigation():
         "ℹ️ Informations Générales",
         "🎨 Business Model", 
         "💰 Financier",
-        "📄 Génération Business Plan"
+        "🎯 Business Plan Complet"
     ]
     
     # Création des onglets principaux
@@ -204,28 +203,14 @@ def create_main_navigation():
                     st.error(f"Erreur lors du chargement de la page financière : {str(e)}")
                     st.info("Veuillez rafraîchir la page ou contacter le support technique.")
 
-    # 4. Génération Business Plan
+    # 4. Business Plan Complet
     with main_tabs_ui[3]:
-        business_plan_subtabs = [
-            "📄 Génération Business Plan",
-            "🎯 Business Plan Complet (Nouveau)"
-        ]
-        
-        bp_tabs = st.tabs(business_plan_subtabs)
-        
-        with bp_tabs[0]:
-            try:
-                page_generation_business_plan()
-            except Exception as e:
-                st.error(f"Erreur lors du chargement de la page : {str(e)}")
-        
-        with bp_tabs[1]:
-            try:
-                with st.expander("✨ Nouvelle fonctionnalité", expanded=False):
-                    st.success("🎯 **Business Plan Complet** - Nouvelle version qui intègre automatiquement tous les tableaux financiers dans le plan d'affaires généré!")
-                page_generation_business_plan_integree()
-            except Exception as e:
-                st.error(f"Erreur lors du chargement de la page : {str(e)}")
+        try:
+            with st.expander("✨ Nouvelle fonctionnalité", expanded=False):
+                st.success("🎯 **Business Plan Complet** - Nouvelle version qui intègre automatiquement tous les tableaux financiers dans le plan d'affaires généré!")
+            page_generation_business_plan_integree()
+        except Exception as e:
+            st.error(f"Erreur lors du chargement de la page : {str(e)}")
 
 def afficher_sidebar_info():
     """Affiche des informations complémentaires dans la sidebar"""
