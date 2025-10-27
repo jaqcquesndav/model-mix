@@ -45,16 +45,21 @@ def configurer_sidebar_principal():
     )
     st.session_state['type_entreprise'] = type_entreprise
     
-    # Secteur d'activité basé sur le template sélectionné
-    secteurs = get_secteurs(template_selectionne)
+    # Secteur d'activité basé sur le template sélectionné et le type d'entreprise
+    secteurs = get_secteurs(template_selectionne, type_entreprise)
     secteur_actuel = st.session_state.get('secteur_activite', secteurs[0] if secteurs else '')
+    
+    # Si on change de type d'entreprise, réinitialiser le secteur
+    if st.session_state.get('previous_type_entreprise') != type_entreprise:
+        secteur_actuel = secteurs[0] if secteurs else ''
+        st.session_state['previous_type_entreprise'] = type_entreprise
     
     secteur_activite = st.sidebar.selectbox(
         "Secteur d'activité",
         secteurs,
         index=secteurs.index(secteur_actuel) if secteur_actuel in secteurs else 0,
         key="secteur_activite_sidebar",
-        help="Secteurs prioritaires selon le template sélectionné"
+        help="Secteurs spécialisés selon le type d'entreprise sélectionné"
     )
     st.session_state['secteur_activite'] = secteur_activite
     

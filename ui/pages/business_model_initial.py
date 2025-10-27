@@ -96,6 +96,30 @@ def page_creation_business_model_manuel():
     
     st.subheader("✍️ Business Model Canvas - 9 Blocs")
     
+    # Bouton de pré-remplissage IA
+    col_ai, col_clear = st.columns([3, 1])
+    
+    with col_ai:
+        if st.button("🤖 Pré-remplir avec l'IA", help="Utilise les informations déjà saisies pour suggérer des contenus"):
+            with st.spinner("🧠 L'IA analyse vos données et génère des suggestions..."):
+                if prefill_with_ai():
+                    st.success("✨ Suggestions IA ajoutées ! Vous pouvez maintenant modifier/personnaliser les champs.")
+                    st.rerun()
+                else:
+                    st.warning("ℹ️ Veuillez d'abord remplir les informations générales, l'arbre à problème ou l'analyse de marché pour utiliser l'IA.")
+    
+    with col_clear:
+        if st.button("🧹 Effacer tout", help="Remet à zéro tous les champs"):
+            st.session_state['business_model_initial'] = get_empty_business_model()
+            st.success("🗑️ Champs effacés !")
+            st.rerun()
+    
+    # Information sur les données utilisées par l'IA
+    donnees_disponibles = get_available_data_summary()
+    if donnees_disponibles:
+        with st.expander("📊 Données disponibles pour l'IA", expanded=False):
+            st.write(donnees_disponibles)
+    
     # Récupération des données existantes
     business_model = st.session_state.get('business_model_initial', get_empty_business_model())
     
@@ -108,7 +132,7 @@ def page_creation_business_model_manuel():
             "Qui sont vos partenaires stratégiques ?",
             value=business_model.get('partenaires_cles', ''),
             height=120,
-            help="Fournisseurs clés, partenaires stratégiques, alliances...",
+            help="Fournisseurs clés, partenaires stratégiques, alliances... (Suggestions IA disponibles)",
             placeholder="Ex: Fournisseurs matières premières, distributeurs, partenaires technologiques..."
         )
         
@@ -117,7 +141,7 @@ def page_creation_business_model_manuel():
             "Quelles sont vos activités principales ?",
             value=business_model.get('activites_cles', ''),
             height=120,
-            help="Production, résolution de problèmes, plateforme/réseau...",
+            help="Production, résolution de problèmes, plateforme/réseau... (Suggestions IA disponibles)",
             placeholder="Ex: Production, marketing, R&D, logistique..."
         )
         
@@ -126,7 +150,7 @@ def page_creation_business_model_manuel():
             "Quelles ressources sont essentielles ?",
             value=business_model.get('ressources_cles', ''),
             height=120,
-            help="Physiques, intellectuelles, humaines, financières...",
+            help="Physiques, intellectuelles, humaines, financières... (Suggestions IA disponibles)",
             placeholder="Ex: Équipements, brevets, équipe qualifiée, capital..."
         )
     
@@ -136,7 +160,7 @@ def page_creation_business_model_manuel():
             "Quelle valeur créez-vous pour vos clients ?",
             value=business_model.get('propositions_valeur', ''),
             height=180,
-            help="Produits/services qui créent de la valeur pour un segment client",
+            help="Produits/services qui créent de la valeur pour un segment client (Suggestions IA disponibles)",
             placeholder="Ex: Résout le problème X, améliore la performance Y, réduit les coûts..."
         )
         
@@ -145,7 +169,7 @@ def page_creation_business_model_manuel():
             "Comment maintenez-vous vos relations clients ?",
             value=business_model.get('relations_clients', ''),
             height=120,
-            help="Assistance personnelle, self-service, communautés...",
+            help="Assistance personnelle, self-service, communautés... (Suggestions IA disponibles)",
             placeholder="Ex: Service client personnalisé, assistance en ligne, communauté..."
         )
         
@@ -154,7 +178,7 @@ def page_creation_business_model_manuel():
             "Comment atteignez-vous vos clients ?",
             value=business_model.get('canaux_distribution', ''),
             height=120,
-            help="Vente directe, partenaires, web, magasins...",
+            help="Vente directe, partenaires, web, magasins... (Suggestions IA disponibles)",
             placeholder="Ex: Boutique physique, site web, revendeurs, réseaux sociaux..."
         )
     
@@ -164,7 +188,7 @@ def page_creation_business_model_manuel():
             "Qui sont vos clients cibles ?",
             value=business_model.get('segments_clients', ''),
             height=120,
-            help="Groupes de personnes/organisations que vous visez",
+            help="Groupes de personnes/organisations que vous visez (Suggestions IA disponibles)",
             placeholder="Ex: PME locales, particuliers 25-45 ans, entreprises industrielles..."
         )
         
@@ -173,7 +197,7 @@ def page_creation_business_model_manuel():
             "Quels sont vos principaux coûts ?",
             value=business_model.get('structure_couts', ''),
             height=120,
-            help="Coûts fixes, variables, économies d'échelle...",
+            help="Coûts fixes, variables, économies d'échelle... (Suggestions IA disponibles)",
             placeholder="Ex: Matières premières, salaires, loyer, marketing..."
         )
         
@@ -182,7 +206,7 @@ def page_creation_business_model_manuel():
             "Comment générez-vous des revenus ?",
             value=business_model.get('sources_revenus', ''),
             height=120,
-            help="Vente, abonnement, commission, licence...",
+            help="Vente, abonnement, commission, licence... (Suggestions IA disponibles)",
             placeholder="Ex: Vente de produits, services mensuels, commissions..."
         )
     
@@ -418,3 +442,228 @@ def export_business_model_json(business_model):
         file_name=f"business_model_{datetime.now().strftime('%Y%m%d_%H%M')}.json",
         mime="application/json"
     )
+
+def get_available_data_summary():
+    """Retourne un résumé des données disponibles pour l'IA"""
+    summary = []
+    
+    # Informations générales
+    nom_entreprise = st.session_state.get('nom_entreprise', '')
+    secteur_activite = st.session_state.get('secteur_activite', '')
+    type_entreprise = st.session_state.get('type_entreprise', '')
+    localisation = st.session_state.get('localisation', '')
+    
+    if nom_entreprise:
+        summary.append(f"✅ **Entreprise:** {nom_entreprise}")
+    if secteur_activite:
+        summary.append(f"✅ **Secteur:** {secteur_activite}")
+    if type_entreprise:
+        summary.append(f"✅ **Type:** {type_entreprise}")
+    if localisation:
+        summary.append(f"✅ **Localisation:** {localisation}")
+    
+    # Arbre à problème
+    arbre_probleme = st.session_state.get('arbre_probleme', {})
+    if arbre_probleme.get('probleme_central'):
+        summary.append(f"✅ **Problème identifié:** {arbre_probleme['probleme_central'][:100]}...")
+    if arbre_probleme.get('solution'):
+        summary.append(f"✅ **Solution proposée:** {arbre_probleme['solution'][:100]}...")
+    
+    # Analyse de marché
+    analyse_marche = st.session_state.get('analyse_marche', {})
+    if analyse_marche.get('taille_marche'):
+        summary.append(f"✅ **Marché:** {analyse_marche['taille_marche']}")
+    if analyse_marche.get('type_clients'):
+        summary.append(f"✅ **Clients:** {analyse_marche['type_clients']}")
+    
+    # Analyse de concurrence
+    concurrence = st.session_state.get('concurrence', {})
+    if concurrence.get('concurrents_directs'):
+        nb_concurrents = len([c for c in concurrence['concurrents_directs'] if c.strip()])
+        if nb_concurrents > 0:
+            summary.append(f"✅ **Concurrence:** {nb_concurrents} concurrents identifiés")
+    
+    return "\n".join(summary) if summary else "Aucune donnée disponible. Remplissez d'abord les informations générales, l'arbre à problème ou l'analyse de marché."
+
+def prefill_with_ai():
+    """Pré-remplit les champs du business model avec l'IA"""
+    try:
+        # Vérifier qu'on a des données suffisantes
+        if not has_sufficient_data():
+            return False
+        
+        # Rassembler toutes les données disponibles
+        context_data = gather_context_data()
+        
+        # Générer les suggestions avec l'IA
+        suggestions = generate_business_model_suggestions(context_data)
+        
+        if suggestions:
+            # Mettre à jour le business model avec les suggestions
+            current_model = st.session_state.get('business_model_initial', get_empty_business_model())
+            
+            # Ne remplacer que les champs vides ou presque vides
+            for key, value in suggestions.items():
+                if len(current_model.get(key, '').strip()) < 10:  # Seulement si le champ est vide ou très court
+                    current_model[key] = value
+            
+            st.session_state['business_model_initial'] = current_model
+            return True
+        
+        return False
+        
+    except Exception as e:
+        st.error(f"Erreur lors de la génération IA : {str(e)}")
+        return False
+
+def has_sufficient_data():
+    """Vérifie si on a suffisamment de données pour utiliser l'IA"""
+    # Au minimum, il faut le nom de l'entreprise et soit l'arbre à problème, soit l'analyse de marché
+    nom_entreprise = st.session_state.get('nom_entreprise', '')
+    arbre_probleme = st.session_state.get('arbre_probleme', {})
+    analyse_marche = st.session_state.get('analyse_marche', {})
+    
+    has_entreprise = bool(nom_entreprise.strip())
+    has_probleme = bool(arbre_probleme.get('probleme_central', '').strip())
+    has_marche = bool(analyse_marche.get('besoin_principal', '').strip())
+    
+    return has_entreprise and (has_probleme or has_marche)
+
+def gather_context_data():
+    """Rassemble toutes les données de contexte disponibles"""
+    context = {}
+    
+    # Informations générales
+    context['nom_entreprise'] = st.session_state.get('nom_entreprise', '')
+    context['secteur_activite'] = st.session_state.get('secteur_activite', '')
+    context['type_entreprise'] = st.session_state.get('type_entreprise', 'PME')
+    context['localisation'] = st.session_state.get('localisation', '')
+    
+    # Arbre à problème
+    arbre_probleme = st.session_state.get('arbre_probleme', {})
+    context['probleme_central'] = arbre_probleme.get('probleme_central', '')
+    context['solution'] = arbre_probleme.get('solution', '')
+    context['causes'] = arbre_probleme.get('causes', '')
+    context['consequences'] = arbre_probleme.get('consequences', '')
+    
+    # Analyse de marché
+    analyse_marche = st.session_state.get('analyse_marche', {})
+    context['taille_marche'] = analyse_marche.get('taille_marche', '')
+    context['type_clients'] = analyse_marche.get('type_clients', '')
+    context['budget_moyen'] = analyse_marche.get('budget_moyen', '')
+    context['besoin_principal'] = analyse_marche.get('besoin_principal', '')
+    context['tendances'] = analyse_marche.get('tendances', [])
+    
+    # Analyse de concurrence
+    concurrence = st.session_state.get('concurrence', {})
+    context['concurrents_directs'] = concurrence.get('concurrents_directs', [])
+    context['strategie'] = concurrence.get('strategie', '')
+    context['forces'] = concurrence.get('forces', '')
+    
+    return context
+
+def generate_business_model_suggestions(context_data):
+    """Génère les suggestions de business model avec l'IA"""
+    try:
+        from services.ai.content_generation import generer_suggestions_intelligentes
+        
+        # Générer des suggestions pour chaque bloc du business model
+        suggestions = {}
+        
+        blocs = [
+            'partenaires_cles', 'activites_cles', 'ressources_cles',
+            'propositions_valeur', 'relations_clients', 'canaux_distribution',
+            'segments_clients', 'structure_couts', 'sources_revenus'
+        ]
+        
+        for bloc in blocs:
+            suggestions_bloc = generer_suggestions_intelligentes(
+                donnees_existantes=context_data,
+                section=bloc.replace('_', ' ').title(),
+                template_nom="COPA TRANSFORME"
+            )
+            # Joindre les suggestions avec des puces
+            suggestions[bloc] = '\n'.join([f"• {s}" for s in suggestions_bloc[:3]]) if suggestions_bloc else ""
+        
+        return suggestions
+        
+    except (ImportError, ModuleNotFoundError):
+        # Fallback si le service IA n'est pas disponible
+        return generate_fallback_suggestions(context_data)
+    except Exception as e:
+        st.warning(f"Erreur IA : {str(e)}")
+        return generate_fallback_suggestions(context_data)
+
+def create_business_model_prompt(context_data):
+    """Crée un prompt contextualisé pour l'IA"""
+    
+    prompt = f"""
+    Analysez les informations suivantes et générez des suggestions pour chacun des 9 blocs du Business Model Canvas.
+    
+    **CONTEXTE ENTREPRISE:**
+    - Nom: {context_data.get('nom_entreprise', 'Non spécifié')}
+    - Secteur: {context_data.get('secteur_activite', 'Non spécifié')}
+    - Type: {context_data.get('type_entreprise', 'PME')}
+    - Localisation: {context_data.get('localisation', 'Non spécifiée')}
+    
+    **PROBLÉMATIQUE:**
+    - Problème central: {context_data.get('probleme_central', 'Non spécifié')}
+    - Solution proposée: {context_data.get('solution', 'Non spécifiée')}
+    
+    **MARCHÉ:**
+    - Taille du marché: {context_data.get('taille_marche', 'Non spécifiée')}
+    - Type de clients: {context_data.get('type_clients', 'Non spécifié')}
+    - Budget moyen: {context_data.get('budget_moyen', 'Non spécifié')}
+    - Besoin principal: {context_data.get('besoin_principal', 'Non spécifié')}
+    
+    **CONCURRENCE:**
+    - Stratégie: {context_data.get('strategie', 'Non spécifiée')}
+    - Forces: {context_data.get('forces', 'Non spécifiées')}
+    
+    Générez des suggestions courtes et précises (2-3 lignes max par bloc) pour:
+    1. Partenaires clés
+    2. Activités clés  
+    3. Ressources clés
+    4. Propositions de valeur
+    5. Relations clients
+    6. Canaux de distribution
+    7. Segments clients
+    8. Structure de coûts
+    9. Sources de revenus
+    
+    Adaptez les suggestions au contexte africain/RDC et au type d'entreprise ({context_data.get('type_entreprise', 'PME')}).
+    """
+    
+    return prompt
+
+def generate_fallback_suggestions(context_data):
+    """Génère des suggestions basiques sans IA (fallback)"""
+    
+    secteur = context_data.get('secteur_activite', '').lower()
+    type_entreprise = context_data.get('type_entreprise', 'PME')
+    
+    # Suggestions basiques selon le secteur et le type
+    if 'tech' in secteur or type_entreprise == 'Startup':
+        return {
+            'partenaires_cles': '• Développeurs techniques\n• Partenaires technologiques\n• Investisseurs',
+            'activites_cles': '• Développement produit\n• Marketing digital\n• Support client',
+            'ressources_cles': '• Plateforme technologique\n• Équipe de développement\n• Base de données',
+            'propositions_valeur': '• Solution innovante et accessible\n• Gain de temps et d\'efficacité\n• Prix compétitif',
+            'relations_clients': '• Support en ligne 24/7\n• Communauté d\'utilisateurs\n• Formation et onboarding',
+            'canaux_distribution': '• Site web et application\n• Réseaux sociaux\n• Partenaires distributeurs',
+            'segments_clients': '• PME locales\n• Professionnels tech-savvy\n• Entreprises en croissance',
+            'structure_couts': '• Développement technique\n• Marketing digital\n• Infrastructure cloud',
+            'sources_revenus': '• Abonnements mensuels\n• Commissions sur transactions\n• Services premium'
+        }
+    else:
+        return {
+            'partenaires_cles': '• Fournisseurs locaux\n• Distributeurs\n• Institutions financières',
+            'activites_cles': '• Production/Fabrication\n• Vente et distribution\n• Service client',
+            'ressources_cles': '• Équipements de production\n• Main d\'œuvre qualifiée\n• Réseau de distribution',
+            'propositions_valeur': '• Produits de qualité locale\n• Service personnalisé\n• Prix accessible',
+            'relations_clients': '• Relation directe\n• Service après-vente\n• Fidélisation clients',
+            'canaux_distribution': '• Magasins physiques\n• Réseau de revendeurs\n• Vente directe',
+            'segments_clients': '• Consommateurs locaux\n• Entreprises B2B\n• Particuliers',
+            'structure_couts': '• Coût des matières premières\n• Salaires et charges\n• Coûts de distribution',
+            'sources_revenus': '• Vente de produits\n• Services associés\n• Contrats de maintenance'
+        }

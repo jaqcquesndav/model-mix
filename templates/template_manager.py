@@ -24,6 +24,35 @@ from templates.ip_femme import (
     ORGANISATION_TYPE as IP_FEMME_ORG
 )
 
+# Secteurs spécialisés pour les startups (basé sur YC, Afrilab, Digital Africa)
+SECTEURS_STARTUP = [
+    "FinTech & Services Financiers",
+    "HealthTech & MedTech",
+    "EdTech & Formation",
+    "AgriTech & FoodTech",
+    "CleanTech & Énergie",
+    "MobilityTech & Logistique",
+    "E-Commerce & MarketPlace",
+    "PropTech & Immobilier",
+    "InsurTech & Assurance",
+    "LegalTech & Juridique",
+    "HRTech & Ressources Humaines",
+    "MediaTech & Divertissement",
+    "GameTech & Gaming",
+    "SportTech & Fitness",
+    "TravelTech & Tourisme",
+    "RetailTech & Commerce",
+    "B2B SaaS & Entreprise",
+    "Deep Tech & IA",
+    "Blockchain & Web3",
+    "IoT & Hardware",
+    "Cybersecurity & Sécurité",
+    "Social Impact & Développement",
+    "Consumer Apps & Mobile",
+    "Data & Analytics",
+    "API & Infrastructure"
+]
+
 # Dictionnaire des templates disponibles
 TEMPLATES_DISPONIBLES = {
     "COPA TRANSFORME": {
@@ -73,16 +102,22 @@ def get_metaprompt(nom_template):
         return template["metaprompt"]
     return METAPROMPT_COPA_TRANSFORME  # Par défaut
 
-def get_secteurs(nom_template):
+def get_secteurs(nom_template, type_entreprise="PME"):
     """
     Récupère la liste des secteurs prioritaires d'un template
     
     Args:
         nom_template (str): Nom du template
+        type_entreprise (str): Type d'entreprise ("PME" ou "Startup")
     
     Returns:
         list: Liste des secteurs prioritaires
     """
+    # Si c'est une startup, retourner les secteurs startup peu importe le template
+    if type_entreprise == "Startup":
+        return SECTEURS_STARTUP
+    
+    # Sinon, retourner les secteurs du template sélectionné
     template = get_template(nom_template)
     if template:
         return template["secteurs"]
