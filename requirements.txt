@@ -19,3 +19,4 @@ langchain_experimental>=0.3.0
 langchain-openai>=0.2.0
 weasyprint>=60.0
 markdown2>=2.4.0
+plotly>=5.0.0
