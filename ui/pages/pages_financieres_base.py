@@ -3,6 +3,7 @@ Pages financières de base - Version simplifiée pour préserver le workflow
 """
 
 import streamlit as st
+import pandas as pd
 from datetime import date
 
 def page_informations_generales():
@@ -1206,28 +1207,179 @@ def page_charges_variables():
     data["taux_charges_variables"] = taux_total
 
 def page_fonds_roulement():
-    """Page du fonds de roulement - Version simplifiée"""
-    st.title("💼 Fonds de Roulement")
-    st.info("⚠️ Version simplifiée - Calculs automatiques.")
+    """Page du fonds de roulement - Version complète avec calculs détaillés"""
+    st.title("💼 Votre Besoin en Fonds de Roulement")
     
     if "data" not in st.session_state:
         st.session_state.data = {}
     
     data = st.session_state.data
     
-    # Calcul automatique basé sur le CA
-    ca_annuel = data.get("total_ca_annee1", 0.0)
+    st.markdown("""
+    ### Déterminez votre besoin en fonds de roulement
+    Le fonds de roulement représente le montant nécessaire pour financer le cycle d'exploitation de votre entreprise.
+    Il se calcule en tenant compte des délais de paiement de vos clients et fournisseurs.
+    """)
     
-    if ca_annuel > 0:
-        # Estimation du BFR à 10% du CA (règle simplifiée)
-        bfr_estime = ca_annuel * 0.10
+    # Initialisation des données fonds de roulement
+    if "fonds_roulement" not in data:
+        data["fonds_roulement"] = {}
+    fonds_roulement = data["fonds_roulement"]
+    
+    # Saisie des délais
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        duree_credits_clients = st.number_input(
+            "Durée moyenne des crédits accordés aux clients (en jours) :",
+            min_value=0,
+            max_value=365,
+            help="Temps moyen qu'un client met pour vous payer.",
+            key="duree_credits_clients",
+            value=fonds_roulement.get("duree_credits_clients", 30)
+        )
+        fonds_roulement["duree_credits_clients"] = duree_credits_clients
+    
+    with col2:
+        duree_dettes_fournisseurs = st.number_input(
+            "Durée moyenne des dettes fournisseurs (en jours) :",
+            min_value=0,
+            max_value=365,
+            help="Temps moyen que vous mettez pour payer vos fournisseurs.",
+            key="duree_dettes_fournisseurs",
+            value=fonds_roulement.get("duree_dettes_fournisseurs", 30)
+        )
+        fonds_roulement["duree_dettes_fournisseurs"] = duree_dettes_fournisseurs
+    
+    st.markdown("---")
+    
+    # Récupération des données nécessaires pour le calcul
+    total_ca_annee1 = data.get("total_ca_annee1", 0.0)
+    total_charges_variables_annee1 = data.get("total_charges_variables_annee1", 0.0)
+    
+    # Calculs pour les 3 années (simulation croissance)
+    if total_ca_annee1 > 0:
+        # Simulation croissance 5% par an
+        ca_annees = [total_ca_annee1, total_ca_annee1 * 1.05, total_ca_annee1 * 1.10]
+        charges_var_annees = [total_charges_variables_annee1, 
+                              total_charges_variables_annee1 * 1.05, 
+                              total_charges_variables_annee1 * 1.10]
         
-        st.subheader("Estimation du Besoin en Fonds de Roulement")
-        st.metric("BFR estimé (10% du CA)", f"{bfr_estime:,.0f} $")
+        # Calculs détaillés
+        volume_credit_client_ht = []
+        volume_dettes_fournisseurs_ht = []
+        bfr = []
         
-        data["fonds_roulement"] = bfr_estime
+        for i in range(3):
+            # Volume crédit client HT = CA * délai clients / 365
+            vcc_ht = (ca_annees[i] * duree_credits_clients) / 365
+            volume_credit_client_ht.append(vcc_ht)
+            
+            # Volume dettes fournisseurs HT = Charges variables * délai fournisseurs / 365
+            vdf_ht = (charges_var_annees[i] * duree_dettes_fournisseurs) / 365
+            volume_dettes_fournisseurs_ht.append(vdf_ht)
+            
+            # BFR = Volume crédit client - Volume dettes fournisseurs
+            bfr_annee = vcc_ht - vdf_ht
+            bfr.append(bfr_annee)
+        
+        # Affichage des résultats
+        st.subheader("📊 Résultats des Calculs")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("BFR Année 1", f"{bfr[0]:,.0f} $")
+            st.caption(f"Crédit clients: {volume_credit_client_ht[0]:,.0f} $")
+            st.caption(f"Dettes fournisseurs: {volume_dettes_fournisseurs_ht[0]:,.0f} $")
+        
+        with col2:
+            st.metric("BFR Année 2", f"{bfr[1]:,.0f} $")
+            st.caption(f"Crédit clients: {volume_credit_client_ht[1]:,.0f} $")
+            st.caption(f"Dettes fournisseurs: {volume_dettes_fournisseurs_ht[1]:,.0f} $")
+        
+        with col3:
+            st.metric("BFR Année 3", f"{bfr[2]:,.0f} $")
+            st.caption(f"Crédit clients: {volume_credit_client_ht[2]:,.0f} $")
+            st.caption(f"Dettes fournisseurs: {volume_dettes_fournisseurs_ht[2]:,.0f} $")
+        
+        st.markdown("---")
+        
+        # Tableau détaillé
+        st.subheader("📋 Tableau du Besoin en Fonds de Roulement")
+        
+        data_table = {
+            "Analyse clients / fournisseurs": [
+                "**BESOINS**",
+                "Volume crédit client HT",
+                "**RESSOURCES**", 
+                "Volume dettes fournisseurs HT",
+                "**BESOIN EN FONDS DE ROULEMENT**"
+            ],
+            "Délai (jours)": [
+                "",
+                f"{duree_credits_clients}",
+                "",
+                f"{duree_dettes_fournisseurs}",
+                ""
+            ],
+            "Année 1": [
+                "",
+                f"{volume_credit_client_ht[0]:,.0f} $",
+                "",
+                f"{volume_dettes_fournisseurs_ht[0]:,.0f} $",
+                f"**{bfr[0]:,.0f} $**"
+            ],
+            "Année 2": [
+                "",
+                f"{volume_credit_client_ht[1]:,.0f} $",
+                "",
+                f"{volume_dettes_fournisseurs_ht[1]:,.0f} $",
+                f"**{bfr[1]:,.0f} $**"
+            ],
+            "Année 3": [
+                "",
+                f"{volume_credit_client_ht[2]:,.0f} $",
+                "",
+                f"{volume_dettes_fournisseurs_ht[2]:,.0f} $",
+                f"**{bfr[2]:,.0f} $**"
+            ]
+        }
+        
+        df = pd.DataFrame(data_table)
+        st.table(df)
+        
+        # Sauvegarde des résultats
+        fonds_roulement.update({
+            "volume_credit_client_ht": volume_credit_client_ht,
+            "volume_dettes_fournisseurs_ht": volume_dettes_fournisseurs_ht,
+            "bfr": bfr,
+            "bfr_annee1": bfr[0],
+            "bfr_annee2": bfr[1],
+            "bfr_annee3": bfr[2]
+        })
+        
+        # Conseils
+        st.markdown("---")
+        st.subheader("💡 Conseils")
+        
+        if bfr[0] > 0:
+            st.warning(f"**Attention**: Votre BFR est positif ({bfr[0]:,.0f} $). Vous devrez financer ce montant.")
+            st.info("💡 **Conseils pour réduire votre BFR :**")
+            st.markdown("- Négocier des délais de paiement plus courts avec vos clients")
+            st.markdown("- Négocier des délais plus longs avec vos fournisseurs") 
+            st.markdown("- Mettre en place des acomptes ou paiements à la commande")
+        else:
+            st.success(f"**Excellent**: Votre BFR est négatif ({bfr[0]:,.0f} $). Vos fournisseurs financent votre activité!")
+        
     else:
-        st.warning("Veuillez d'abord renseigner le chiffre d'affaires.")
+        st.warning("⚠️ **Données manquantes**")
+        st.info("Veuillez d'abord renseigner :")
+        st.markdown("- **Chiffre d'affaires** (onglet Chiffre d'Affaires)")
+        st.markdown("- **Charges variables** (onglet Charges Variables)")
+    
+    # Sauvegarde
+    st.session_state.data = data
 
 def page_salaires():
     """Page des salaires - Version simplifiée"""
