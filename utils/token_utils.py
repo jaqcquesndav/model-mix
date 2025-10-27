@@ -168,6 +168,15 @@ def obtenir_statistiques_tokens() -> Dict[str, Any]:
     init_token_counter()
     usage = st.session_state['token_usage']
     
+    # Calcul de la durée de session
+    try:
+        from datetime import datetime
+        session_start = datetime.fromisoformat(usage['session_start'])
+        session_duration = datetime.now() - session_start
+        duration_str = str(session_duration).split('.')[0]  # Sans microsecondes
+    except Exception:
+        duration_str = "00:00:00"
+    
     return {
         'total_tokens': usage['total_input_tokens'] + usage['total_output_tokens'],
         'input_tokens': usage['total_input_tokens'],
@@ -175,6 +184,8 @@ def obtenir_statistiques_tokens() -> Dict[str, Any]:
         'total_cost': usage['total_cost_usd'],
         'requests_count': usage['requests_count'],
         'session_start': usage['session_start'],
+        'session_duration': duration_str,
+        'model_used': 'gpt-4',  # Modèle par défaut
         'user_limit': 50000,  # Limite par défaut
         'limit_enabled': True
     }
