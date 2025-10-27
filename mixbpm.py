@@ -1804,6 +1804,16 @@ def page_collecte_donnees():
     st.header("Étape 1 : Collecte des Données")
     st.write("Veuillez remplir les informations initiales pour générer le Business Model Canvas.")
     
+    # Affichage de la configuration actuelle
+    type_entreprise = st.session_state.get('type_entreprise', '')
+    secteur = st.session_state.get('secteur_activite', '')
+    localisation = st.session_state.get('localisation', '')
+    
+    if type_entreprise and secteur:
+        st.info(f"🏢 **Configuration :** {type_entreprise} - {secteur} ({localisation})")
+    else:
+        st.error("⚠️ **Configuration incomplète** - Veuillez compléter la barre latérale ⬅️")
+    
     # Système de suggestions intelligentes
     if st.button("🤖 Générer Suggestions Intelligentes", help="Utilise l'IA pour préremplir certains champs basés sur votre contexte"):
         with st.spinner("Génération des suggestions basées sur votre contexte..."):
@@ -1829,7 +1839,13 @@ def page_collecte_donnees():
                         for comp in competences:
                             st.write(f"• {comp}")
             else:
-                st.warning("Veuillez d'abord sélectionner le type d'entreprise et le secteur dans la barre latérale.")
+                message_erreur = "Veuillez d'abord sélectionner :"
+                if not type_entreprise:
+                    message_erreur += "\n• Le type d'entreprise"
+                if not secteur:
+                    message_erreur += "\n• Le secteur d'activité"
+                message_erreur += "\n\nDans la barre latérale ⬅️"
+                st.warning(message_erreur)
     
     # Créer des sous-onglets pour chaque section de collecte
     collecte_tabs = st.tabs([
@@ -8804,10 +8820,81 @@ def page_generation_business_plan():
 st.title('Business Plan')
 st.sidebar.header("Configuration Initiale pour le business model")
 type_entreprise = st.sidebar.selectbox("Type d'entreprise", ["PME", "Startup"], key="type_entreprise")
+
+# Secteurs selon le type d'entreprise
+secteurs_pme = [
+    "Agroalimentaire (Agrotransformation)",
+    "Artisanat", 
+    "Services à Valeur ajoutée",
+    "Industrie légère",
+    "Commerce de détail",
+    "Agriculture",
+    "Élevage",
+    "Pêche",
+    "Transport et logistique",
+    "BTP (Bâtiment et Travaux Publics)",
+    "Tourisme et hôtellerie"
+]
+
+secteurs_startup = [
+    "Fintech",
+    "LogTech", 
+    "E-commerce",
+    "Clean Tech",
+    "Energy",
+    "Agritech",
+    "Électronique",
+    "LoisirTech",
+    "HealthTech",
+    "EdTech",
+    "IoT (Internet des objets)",
+    "IA et Data Science",
+    "Blockchain",
+    "Mobile Apps",
+    "SaaS (Software as a Service)"
+]
+
+# Sélection du secteur selon le type d'entreprise
+if type_entreprise == "PME":
+    secteur_activite = st.sidebar.selectbox(
+        "Secteur d'activité", 
+        secteurs_pme, 
+        key="secteur_activite",
+        help="Choisissez le secteur principal de votre PME"
+    )
+else:  # Startup
+    secteur_activite = st.sidebar.selectbox(
+        "Secteur d'activité", 
+        secteurs_startup, 
+        key="secteur_activite",
+        help="Choisissez le domaine technologique de votre startup"
+    )
+
 nom_entreprise = st.sidebar.text_input("Nom de l'entreprise", value="", key="nom_entreprise")
+
+# Localisation (optionnel pour suggestions)
+localisation = st.sidebar.selectbox(
+    "Localisation principale",
+    [
+        "Kinshasa",
+        "Lubumbashi", 
+        "Goma",
+        "Mbuji-Mayi",
+        "Kisangani",
+        "Bukavu",
+        "Matadi",
+        "Kolwezi",
+        "Autre ville RDC"
+    ],
+    key="localisation",
+    help="Ville principale d'implantation (pour suggestions personnalisées)"
+)
 
 if not nom_entreprise:
     st.sidebar.warning("Veuillez entrer le nom de votre entreprise.")
+
+if not secteur_activite:
+    st.sidebar.warning("Veuillez sélectionner votre secteur d'activité.")
 
 
 # Initialiser les variables dans la session si ce n'est pas déjà fait
