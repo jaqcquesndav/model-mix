@@ -86,6 +86,7 @@ def create_main_navigation():
     # Onglets principaux simplifiés
     main_tabs = [
         "ℹ️ Informations Générales",
+        "📊 Analyse de Marché",
         "🎨 Business Model", 
         "💰 Financier",
         "📄 Génération Business Plan"
@@ -98,8 +99,35 @@ def create_main_navigation():
     with main_tabs_ui[0]:
         page_informations_generales()
     
-    # 2. Business Model (avec sous-onglets)
+    # 2. Analyse de Marché (nouveau - combine marché + concurrence)
     with main_tabs_ui[1]:
+        analyse_marche_subtabs = [
+            "🏪 Analyse du Marché",
+            "⚔️ Analyse de la Concurrence"
+        ]
+        
+        market_tabs = st.tabs(analyse_marche_subtabs)
+        
+        with market_tabs[0]:
+            try:
+                # Ici on utiliserait une fonction d'analyse de marché depuis page_collecte_donnees
+                from ui.pages import afficher_analyse_marche
+                afficher_analyse_marche()
+            except Exception as e:
+                st.error(f"Fonction d'analyse de marché non encore implémentée : {str(e)}")
+                st.info("Cette section sera disponible prochainement")
+        
+        with market_tabs[1]:
+            try:
+                # Ici on utiliserait une fonction d'analyse de concurrence depuis page_collecte_donnees  
+                from ui.pages import afficher_analyse_concurrence
+                afficher_analyse_concurrence()
+            except Exception as e:
+                st.error(f"Fonction d'analyse de concurrence non encore implémentée : {str(e)}")
+                st.info("Cette section sera disponible prochainement")
+    
+    # 3. Business Model (avec sous-onglets)
+    with main_tabs_ui[2]:
         business_model_subtabs = [
             "🎨 Créativité & Business Model",
             "🎯 Business Model Final"
@@ -119,8 +147,8 @@ def create_main_navigation():
             except Exception as e:
                 st.error(f"Erreur lors du chargement de la page : {str(e)}")
     
-    # 3. Financier (avec sous-onglets pour tous les éléments financiers)
-    with main_tabs_ui[2]:
+    # 4. Financier (avec sous-onglets pour tous les éléments financiers)
+    with main_tabs_ui[3]:
         financial_subtabs = [
             "💰 Besoins de Démarrage",
             "🏦 Financement", 
@@ -176,8 +204,8 @@ def create_main_navigation():
                     st.error(f"Erreur lors du chargement de la page financière : {str(e)}")
                     st.info("Veuillez rafraîchir la page ou contacter le support technique.")
     
-    # 4. Génération Business Plan
-    with main_tabs_ui[3]:
+    # 5. Génération Business Plan
+    with main_tabs_ui[4]:
         business_plan_subtabs = [
             "📄 Génération Business Plan",
             "🎯 Business Plan Complet (Nouveau)"
