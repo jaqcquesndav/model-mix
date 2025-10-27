@@ -115,6 +115,30 @@ def page_creation_business_model_manuel():
                     st.rerun()
                 else:
                     st.warning("ℹ️ Ajoutez plus d'informations (informations générales, arbre à problème, analyse de marché) pour de meilleures suggestions.")
+        
+        # Bouton de test pour forcer le pré-remplissage
+        if st.button("🧪 Test Pré-remplissage", help="Force le pré-remplissage même avec des données minimales"):
+            st.session_state['auto_prefill_done'] = False  # Reset le flag
+            with st.spinner("🔧 Test du pré-remplissage..."):
+                if prefill_with_ai():
+                    st.success("✅ Test réussi ! Business model pré-rempli.")
+                    st.rerun()
+                else:
+                    st.error("❌ Échec du test. Vérifiez les données d'entrée.")
+        
+        # Bouton de données de test
+        if st.button("📋 Données de test", help="Ajoute des données minimales pour tester l'IA"):
+            # Ajouter des données minimales pour tester
+            st.session_state['nom_entreprise'] = "MonEntreprise Test"
+            st.session_state['secteur_activite'] = "Commerce"
+            st.session_state['arbre_probleme'] = {
+                'probleme_central': 'Les clients ont du mal à trouver des produits de qualité',
+                'solution': 'Boutique en ligne avec sélection curatée',
+                'causes': 'Manque d\'information, prix élevés',
+                'consequences': 'Perte de temps, frustration'
+            }
+            st.success("✅ Données de test ajoutées ! Essayez maintenant l'actualisation IA.")
+            st.rerun()
     
     with col_clear:
         if st.button("🧹 Effacer tout", help="Remet à zéro tous les champs"):
@@ -539,14 +563,30 @@ def auto_prefill_on_load():
     # Compter les champs remplis
     filled_fields = sum(1 for value in current_model.values() if isinstance(value, str) and len(value.strip()) > 10)
     
+    # Debug info
+    debug_enabled = st.session_state.get('debug_ai', False)
+    if debug_enabled:
+        st.write(f"🔍 Champs remplis: {filled_fields}/9")
+        st.write(f"🔍 Données suffisantes: {has_sufficient_data()}")
+        st.write(f"🔍 Auto-remplissage déjà fait: {st.session_state.get('auto_prefill_done', False)}")
+    
     # Si moins de 3 champs remplis ET qu'on a des données suffisantes → auto-remplissage
     if filled_fields < 3 and has_sufficient_data():
         # Marquer qu'on a fait un auto-remplissage pour éviter les boucles
         if not st.session_state.get('auto_prefill_done', False):
+            if debug_enabled:
+                st.write("🚀 Déclenchement auto-remplissage...")
             if prefill_with_ai():
                 st.session_state['auto_prefill_done'] = True
                 # Info subtile pour l'utilisateur
                 st.info("💡 **Suggestions IA ajoutées automatiquement** basées sur vos informations. Modifiez-les selon vos besoins !")
+            elif debug_enabled:
+                st.error("❌ Échec du pré-remplissage IA")
+    elif debug_enabled:
+        if filled_fields >= 3:
+            st.info("ℹ️ Business model déjà rempli (3+ champs)")
+        elif not has_sufficient_data():
+            st.warning("⚠️ Données insuffisantes pour l'auto-remplissage")
 
 def has_sufficient_data():
     """Vérifie si on a suffisamment de données pour utiliser l'IA"""
@@ -555,9 +595,29 @@ def has_sufficient_data():
     arbre_probleme = st.session_state.get('arbre_probleme', {})
     analyse_marche = st.session_state.get('analyse_marche', {})
     
-    has_entreprise = bool(nom_entreprise.strip())
+    # Informations générales depuis les données
+    data = st.session_state.get('data', {})
+    info_gen = data.get('informations_generales', {})
+    nom_entreprise_alt = info_gen.get('nom_entreprise', '')
+    
+    has_entreprise = bool(nom_entreprise.strip()) or bool(nom_entreprise_alt.strip())
     has_probleme = bool(arbre_probleme.get('probleme_central', '').strip())
     has_marche = bool(analyse_marche.get('besoin_principal', '').strip())
+    
+    # Debug - affichage temporaire
+    debug_checkbox = st.checkbox("🔍 Debug IA", help="Affiche les données disponibles pour l'IA", value=True)  # Activé par défaut pour diagnostic
+    st.session_state['debug_ai'] = debug_checkbox
+    
+    if debug_checkbox:
+        st.write("**Données détectées:**")
+        st.write(f"- Nom entreprise (session): '{nom_entreprise}'")
+        st.write(f"- Nom entreprise (data): '{nom_entreprise_alt}'")
+        st.write(f"- Has entreprise: {has_entreprise}")
+        st.write(f"- Arbre problème: {arbre_probleme}")
+        st.write(f"- Has problème: {has_probleme}")
+        st.write(f"- Analyse marché: {analyse_marche}")
+        st.write(f"- Has marché: {has_marche}")
+        st.write(f"- Données suffisantes: {has_entreprise and (has_probleme or has_marche)}")
     
     return has_entreprise and (has_probleme or has_marche)
 
@@ -565,11 +625,19 @@ def gather_context_data():
     """Rassemble toutes les données de contexte disponibles"""
     context = {}
     
-    # Informations générales
+    # Informations générales - plusieurs sources possibles
     context['nom_entreprise'] = st.session_state.get('nom_entreprise', '')
     context['secteur_activite'] = st.session_state.get('secteur_activite', '')
     context['type_entreprise'] = st.session_state.get('type_entreprise', 'PME')
     context['localisation'] = st.session_state.get('localisation', '')
+    
+    # Essayer aussi depuis les données financières
+    data = st.session_state.get('data', {})
+    info_gen = data.get('informations_generales', {})
+    if not context['nom_entreprise'] and info_gen.get('nom_entreprise'):
+        context['nom_entreprise'] = info_gen.get('nom_entreprise', '')
+    if not context['secteur_activite'] and info_gen.get('secteur_activite'):
+        context['secteur_activite'] = info_gen.get('secteur_activite', '')
     
     # Arbre à problème
     arbre_probleme = st.session_state.get('arbre_probleme', {})
@@ -608,6 +676,10 @@ def generate_business_model_suggestions(context_data):
             'segments_clients', 'structure_couts', 'sources_revenus'
         ]
         
+        # Debug info
+        if st.session_state.get('debug_ai', False):
+            st.write("🔄 Tentative génération IA...")
+        
         for bloc in blocs:
             suggestions_bloc = generer_suggestions_intelligentes(
                 donnees_existantes=context_data,
@@ -617,13 +689,25 @@ def generate_business_model_suggestions(context_data):
             # Joindre les suggestions avec des puces
             suggestions[bloc] = '\n'.join([f"• {s}" for s in suggestions_bloc[:3]]) if suggestions_bloc else ""
         
-        return suggestions
+        # Vérifier si on a au moins quelques suggestions
+        valid_suggestions = sum(1 for v in suggestions.values() if v.strip())
         
-    except (ImportError, ModuleNotFoundError):
-        # Fallback si le service IA n'est pas disponible
+        if valid_suggestions > 0:
+            if st.session_state.get('debug_ai', False):
+                st.success(f"✅ IA: {valid_suggestions} blocs générés")
+            return suggestions
+        else:
+            if st.session_state.get('debug_ai', False):
+                st.warning("⚠️ IA: Aucune suggestion générée, utilisation du fallback")
+            return generate_fallback_suggestions(context_data)
+        
+    except (ImportError, ModuleNotFoundError) as e:
+        if st.session_state.get('debug_ai', False):
+            st.warning(f"⚠️ Module IA non trouvé: {str(e)}, utilisation du fallback")
         return generate_fallback_suggestions(context_data)
     except Exception as e:
-        st.warning(f"Erreur IA : {str(e)}")
+        if st.session_state.get('debug_ai', False):
+            st.error(f"❌ Erreur IA: {str(e)}, utilisation du fallback")
         return generate_fallback_suggestions(context_data)
 
 def create_business_model_prompt(context_data):
