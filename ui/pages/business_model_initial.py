@@ -92,122 +92,137 @@ def page_import_business_model():
         st.json(template_json)
 
 def page_creation_business_model_manuel():
-    """Création manuelle du business model selon les 9 blocs"""
+    """Création manuelle du business model selon les 9 blocs avec suggestions IA automatiques"""
     
     st.subheader("✍️ Business Model Canvas - 9 Blocs")
+    st.markdown("Remplissez les 9 blocs de votre modèle d'affaires. L'IA vous suggère du contenu automatiquement basé sur vos informations.")
     
-    # Bouton de pré-remplissage IA
-    col_ai, col_clear = st.columns([3, 1])
+    # Initialisation et pré-remplissage automatique intelligent
+    if 'business_model_initial' not in st.session_state:
+        st.session_state['business_model_initial'] = get_empty_business_model()
+        
+    # Pré-remplissage automatique au premier chargement avec données disponibles
+    auto_prefill_on_load()
+    
+    # Bouton de pré-remplissage IA amélioré
+    col_ai, col_clear, col_info = st.columns([2, 1, 1])
     
     with col_ai:
-        if st.button("🤖 Pré-remplir avec l'IA", help="Utilise les informations déjà saisies pour suggérer des contenus"):
-            with st.spinner("🧠 L'IA analyse vos données et génère des suggestions..."):
-                if prefill_with_ai():
-                    st.success("✨ Suggestions IA ajoutées ! Vous pouvez maintenant modifier/personnaliser les champs.")
+        if st.button("🔄 Actualiser les suggestions IA", help="Met à jour les suggestions basées sur vos dernières données"):
+            with st.spinner("🧠 L'IA actualise les suggestions..."):
+                if prefill_with_ai(force_update=True):
+                    st.success("✨ Suggestions mises à jour ! Modifiez-les selon vos besoins.")
                     st.rerun()
                 else:
-                    st.warning("ℹ️ Veuillez d'abord remplir les informations générales, l'arbre à problème ou l'analyse de marché pour utiliser l'IA.")
+                    st.warning("ℹ️ Ajoutez plus d'informations (informations générales, arbre à problème, analyse de marché) pour de meilleures suggestions.")
     
     with col_clear:
         if st.button("🧹 Effacer tout", help="Remet à zéro tous les champs"):
             st.session_state['business_model_initial'] = get_empty_business_model()
+            st.session_state['auto_prefill_done'] = False  # Permettre un nouveau auto-remplissage
             st.success("🗑️ Champs effacés !")
             st.rerun()
     
-    # Information sur les données utilisées par l'IA
-    donnees_disponibles = get_available_data_summary()
-    if donnees_disponibles:
-        with st.expander("📊 Données disponibles pour l'IA", expanded=False):
-            st.write(donnees_disponibles)
+    with col_info:
+        donnees_disponibles = get_available_data_summary()
+        if donnees_disponibles:
+            with st.expander("📊 Données IA", expanded=False):
+                st.write(donnees_disponibles)
+                st.caption("💡 Plus vous remplissez d'informations, meilleures sont les suggestions IA.")
     
     # Récupération des données existantes
     business_model = st.session_state.get('business_model_initial', get_empty_business_model())
+    
+    # Indicateur de suggestions IA actives
+    has_ai_data = has_sufficient_data()
+    ai_indicator = "🤖 " if has_ai_data else ""
+    ai_help_suffix = " (Suggestions IA disponibles)" if has_ai_data else " (Complétez d'abord vos informations pour l'aide IA)"
     
     # Organisation en colonnes pour une meilleure présentation
     col1, col2, col3 = st.columns([1, 1, 1])
     
     with col1:
-        st.markdown("#### 🤝 Partenaires Clés")
+        st.markdown(f"#### {ai_indicator}🤝 Partenaires Clés")
         business_model['partenaires_cles'] = st.text_area(
             "Qui sont vos partenaires stratégiques ?",
             value=business_model.get('partenaires_cles', ''),
             height=120,
-            help="Fournisseurs clés, partenaires stratégiques, alliances... (Suggestions IA disponibles)",
-            placeholder="Ex: Fournisseurs matières premières, distributeurs, partenaires technologiques..."
+            help=f"Fournisseurs clés, partenaires stratégiques, alliances...{ai_help_suffix}",
+            placeholder="Ex: Fournisseurs matières premières, distributeurs, partenaires technologiques..." + (" [IA peut suggérer]" if has_ai_data else "")
         )
         
-        st.markdown("#### 🔧 Activités Clés")
+        st.markdown(f"#### {ai_indicator}🔧 Activités Clés")
         business_model['activites_cles'] = st.text_area(
             "Quelles sont vos activités principales ?",
             value=business_model.get('activites_cles', ''),
             height=120,
-            help="Production, résolution de problèmes, plateforme/réseau... (Suggestions IA disponibles)",
-            placeholder="Ex: Production, marketing, R&D, logistique..."
+            help=f"Production, résolution de problèmes, plateforme/réseau...{ai_help_suffix}",
+            placeholder="Ex: Production, marketing, R&D, logistique..." + (" [IA peut suggérer]" if has_ai_data else "")
         )
         
-        st.markdown("#### 🛠️ Ressources Clés")
+        st.markdown(f"#### {ai_indicator}🛠️ Ressources Clés")
         business_model['ressources_cles'] = st.text_area(
             "Quelles ressources sont essentielles ?",
             value=business_model.get('ressources_cles', ''),
             height=120,
-            help="Physiques, intellectuelles, humaines, financières... (Suggestions IA disponibles)",
-            placeholder="Ex: Équipements, brevets, équipe qualifiée, capital..."
+            help=f"Physiques, intellectuelles, humaines, financières...{ai_help_suffix}",
+            placeholder="Ex: Équipements, brevets, équipe qualifiée, capital..." + (" [IA peut suggérer]" if has_ai_data else "")
         )
     
     with col2:
-        st.markdown("#### 💡 Propositions de Valeur")
+        st.markdown(f"#### {ai_indicator}💡 Propositions de Valeur")
         business_model['propositions_valeur'] = st.text_area(
             "Quelle valeur créez-vous pour vos clients ?",
             value=business_model.get('propositions_valeur', ''),
             height=180,
-            help="Produits/services qui créent de la valeur pour un segment client (Suggestions IA disponibles)",
-            placeholder="Ex: Résout le problème X, améliore la performance Y, réduit les coûts..."
+            help=f"Produits/services qui créent de la valeur pour un segment client{ai_help_suffix}",
+            placeholder="Ex: Résout le problème X, améliore la performance Y, réduit les coûts..." + (" [IA peut suggérer]" if has_ai_data else "")
         )
         
-        st.markdown("#### 🤝 Relations Clients")
+        st.markdown(f"#### {ai_indicator}🤝 Relations Clients")
         business_model['relations_clients'] = st.text_area(
             "Comment maintenez-vous vos relations clients ?",
             value=business_model.get('relations_clients', ''),
             height=120,
-            help="Assistance personnelle, self-service, communautés... (Suggestions IA disponibles)",
-            placeholder="Ex: Service client personnalisé, assistance en ligne, communauté..."
+            help=f"Assistance personnelle, self-service, communautés...{ai_help_suffix}",
+            placeholder="Ex: Service client personnalisé, assistance en ligne, communauté..." + (" [IA peut suggérer]" if has_ai_data else "")
         )
         
-        st.markdown("#### 📢 Canaux de Distribution")
+        st.markdown(f"#### {ai_indicator}📢 Canaux de Distribution")
         business_model['canaux_distribution'] = st.text_area(
             "Comment atteignez-vous vos clients ?",
             value=business_model.get('canaux_distribution', ''),
             height=120,
-            help="Vente directe, partenaires, web, magasins... (Suggestions IA disponibles)",
-            placeholder="Ex: Boutique physique, site web, revendeurs, réseaux sociaux..."
+            help=f"Vente directe, partenaires, web, magasins...{ai_help_suffix}",
+            placeholder="Ex: Boutique physique, site web, revendeurs, réseaux sociaux..." + (" [IA peut suggérer]" if has_ai_data else "")
         )
     
     with col3:
-        st.markdown("#### 👥 Segments Clients")
+        st.markdown(f"#### {ai_indicator}👥 Segments Clients")
         business_model['segments_clients'] = st.text_area(
             "Qui sont vos clients cibles ?",
             value=business_model.get('segments_clients', ''),
             height=120,
-            help="Groupes de personnes/organisations que vous visez (Suggestions IA disponibles)",
-            placeholder="Ex: PME locales, particuliers 25-45 ans, entreprises industrielles..."
+            help=f"Groupes de personnes/organisations que vous visez{ai_help_suffix}",
+            placeholder="Ex: PME locales, particuliers 25-45 ans, entreprises industrielles..." + (" [IA peut suggérer]" if has_ai_data else "")
         )
         
-        st.markdown("#### 💰 Structure de Coûts")
+        st.markdown(f"#### {ai_indicator}💰 Structure de Coûts")
         business_model['structure_couts'] = st.text_area(
             "Quels sont vos principaux coûts ?",
             value=business_model.get('structure_couts', ''),
             height=120,
-            help="Coûts fixes, variables, économies d'échelle... (Suggestions IA disponibles)",
-            placeholder="Ex: Matières premières, salaires, loyer, marketing..."
+            help=f"Coûts fixes, variables, économies d'échelle...{ai_help_suffix}",
+            placeholder="Ex: Matières premières, salaires, loyer, marketing..." + (" [IA peut suggérer]" if has_ai_data else "")
         )
         
-        st.markdown("#### 💵 Sources de Revenus")
+        st.markdown(f"#### {ai_indicator}💵 Sources de Revenus")
         business_model['sources_revenus'] = st.text_area(
             "Comment générez-vous des revenus ?",
             value=business_model.get('sources_revenus', ''),
             height=120,
-            help="Vente, abonnement, commission, licence... (Suggestions IA disponibles)",
-            placeholder="Ex: Vente de produits, services mensuels, commissions..."
+            help=f"Vente, abonnement, commission, licence...{ai_help_suffix}",
+            placeholder="Ex: Vente de produits, services mensuels, commissions..." + (" [IA peut suggérer]" if has_ai_data else "")
         )
     
     # Métadonnées
@@ -485,7 +500,7 @@ def get_available_data_summary():
     
     return "\n".join(summary) if summary else "Aucune donnée disponible. Remplissez d'abord les informations générales, l'arbre à problème ou l'analyse de marché."
 
-def prefill_with_ai():
+def prefill_with_ai(force_update=False):
     """Pré-remplit les champs du business model avec l'IA"""
     try:
         # Vérifier qu'on a des données suffisantes
@@ -502,9 +517,9 @@ def prefill_with_ai():
             # Mettre à jour le business model avec les suggestions
             current_model = st.session_state.get('business_model_initial', get_empty_business_model())
             
-            # Ne remplacer que les champs vides ou presque vides
+            # Logique de remplacement : remplacer si vide OU si force_update=True
             for key, value in suggestions.items():
-                if len(current_model.get(key, '').strip()) < 10:  # Seulement si le champ est vide ou très court
+                if force_update or len(current_model.get(key, '').strip()) < 10:  # Seulement si le champ est vide ou très court, ou si force
                     current_model[key] = value
             
             st.session_state['business_model_initial'] = current_model
@@ -515,6 +530,23 @@ def prefill_with_ai():
     except Exception as e:
         st.error(f"Erreur lors de la génération IA : {str(e)}")
         return False
+
+def auto_prefill_on_load():
+    """Pré-remplissage automatique intelligent au chargement de la page"""
+    # Vérifier si on a des données et si le business model est vide ou presque
+    current_model = st.session_state.get('business_model_initial', get_empty_business_model())
+    
+    # Compter les champs remplis
+    filled_fields = sum(1 for value in current_model.values() if isinstance(value, str) and len(value.strip()) > 10)
+    
+    # Si moins de 3 champs remplis ET qu'on a des données suffisantes → auto-remplissage
+    if filled_fields < 3 and has_sufficient_data():
+        # Marquer qu'on a fait un auto-remplissage pour éviter les boucles
+        if not st.session_state.get('auto_prefill_done', False):
+            if prefill_with_ai():
+                st.session_state['auto_prefill_done'] = True
+                # Info subtile pour l'utilisateur
+                st.info("💡 **Suggestions IA ajoutées automatiquement** basées sur vos informations. Modifiez-les selon vos besoins !")
 
 def has_sufficient_data():
     """Vérifie si on a suffisamment de données pour utiliser l'IA"""
