@@ -105,6 +105,28 @@ def page_creation_business_model_manuel():
     # Pré-remplissage automatique au premier chargement avec données disponibles
     auto_prefill_on_load()
     
+    # Contrôles debug et aide
+    with st.expander("🔧 Debug & Tests", expanded=False):
+        debug_col1, debug_col2 = st.columns(2)
+        
+        with debug_col1:
+            st.session_state['debug_ai'] = st.checkbox(
+                "🐛 Mode debug IA", 
+                value=st.session_state.get('debug_ai', False),
+                help="Affiche les informations de debug pour l'IA"
+            )
+            
+            # Test de configuration IA
+            api_key = os.getenv("API_KEY")
+            if api_key:
+                st.success("✅ Variable API_KEY configurée")
+            else:
+                st.error("❌ Variable API_KEY manquante")
+                
+        with debug_col2:
+            if st.button("🧪 Test IA", help="Test rapide de l'IA"):
+                test_ai_connection()
+    
     # Bouton de pré-remplissage IA amélioré
     col_ai, col_clear, col_info = st.columns([2, 1, 1])
     
@@ -714,55 +736,6 @@ def generate_business_model_suggestions(context_data):
         if st.session_state.get('debug_ai', False):
             st.error(f"❌ Erreur IA: {str(e)}")
         return generate_fallback_suggestions(context_data)
-    
-    # Code IA désactivé temporairement
-    """
-    try:
-        from services.ai.content_generation import generer_suggestions_intelligentes
-        
-        # Générer des suggestions pour chaque bloc du business model
-        suggestions = {}
-        
-        blocs = [
-            'partenaires_cles', 'activites_cles', 'ressources_cles',
-            'propositions_valeur', 'relations_clients', 'canaux_distribution',
-            'segments_clients', 'structure_couts', 'sources_revenus'
-        ]
-        
-        # Debug info
-        if st.session_state.get('debug_ai', False):
-            st.write("🔄 Tentative génération IA...")
-        
-        for bloc in blocs:
-            suggestions_bloc = generer_suggestions_intelligentes(
-                donnees_existantes=context_data,
-                section=bloc.replace('_', ' ').title(),
-                template_nom="COPA TRANSFORME"
-            )
-            # Joindre les suggestions avec des puces
-            suggestions[bloc] = '\n'.join([f"• {s}" for s in suggestions_bloc[:3]]) if suggestions_bloc else ""
-        
-        # Vérifier si on a au moins quelques suggestions
-        valid_suggestions = sum(1 for v in suggestions.values() if v.strip())
-        
-        if valid_suggestions > 0:
-            if st.session_state.get('debug_ai', False):
-                st.success(f"✅ IA: {valid_suggestions} blocs générés")
-            return suggestions
-        else:
-            if st.session_state.get('debug_ai', False):
-                st.warning("⚠️ IA: Aucune suggestion générée, utilisation du fallback")
-            return generate_fallback_suggestions(context_data)
-        
-    except (ImportError, ModuleNotFoundError) as e:
-        if st.session_state.get('debug_ai', False):
-            st.warning(f"⚠️ Module IA non trouvé: {str(e)}, utilisation du fallback")
-        return generate_fallback_suggestions(context_data)
-    except Exception as e:
-        if st.session_state.get('debug_ai', False):
-            st.error(f"❌ Erreur IA: {str(e)}, utilisation du fallback")
-        return generate_fallback_suggestions(context_data)
-    """
 
 def create_business_model_prompt(context_data):
     """Crée un prompt contextualisé pour l'IA"""
@@ -865,3 +838,31 @@ def generate_fallback_suggestions(context_data):
         st.success(f"✅ Fallback: {valid_count} blocs générés avec succès")
     
     return suggestions
+
+def test_ai_connection():
+    """Test rapide de la connexion IA"""
+    try:
+        api_key = os.getenv("API_KEY")
+        if not api_key:
+            st.error("❌ Variable d'environnement API_KEY non configurée")
+            return False
+            
+        st.info("🔄 Test de la connexion OpenAI...")
+        
+        from openai import OpenAI
+        client = OpenAI(api_key=api_key)
+        
+        # Test simple avec une requête minimale
+        response = client.chat.completions.create(
+            model="gpt-4",
+            messages=[{"role": "user", "content": "Bonjour, répondez juste 'Test réussi'"}],
+            max_tokens=10
+        )
+        
+        result = response.choices[0].message.content
+        st.success(f"✅ Test IA réussi! Réponse: {result}")
+        return True
+        
+    except Exception as e:
+        st.error(f"❌ Erreur test IA: {str(e)}")
+        return False
