@@ -20,10 +20,18 @@ from utils.token_utils import (
 
 # Configuration OpenAI
 def initialiser_openai():
-    """Initialise la configuration OpenAI"""
-    api_key = st.secrets.get("OPENAI_API_KEY") or os.getenv("OPENAI_API_KEY")
-    if api_key:
-        # Nouvelle structure OpenAI v1+
+    """Initialise la configuration OpenAI selon Origin.txt"""
+    # Configuration prioritaire: st.secrets["API_KEY"] (comme dans Origin.txt)
+    try:
+        api_key = st.secrets["API_KEY"]
+    except:
+        # Fallback: variable d'environnement (comme dans Origin.txt)
+        api_key = os.getenv("API_KEY")
+    
+    if api_key and api_key != "sk-your-actual-openai-api-key-here":
+        # Configuration OpenAI legacy (comme dans Origin.txt)
+        openai.api_key = api_key
+        # Nouvelle structure OpenAI v1+ pour client
         client = OpenAI(api_key=api_key)
         return client
     return None
@@ -96,16 +104,19 @@ def search_similar_content(vectorstore: FAISS, query: str, k: int = 3) -> List[s
         st.error(f"Erreur lors de la recherche : {str(e)}")
         return []
 
-def generate_section(system_message, query, combined_content, business_model="", section_name=""):
+def generate_section(system_message, user_query=None, query=None, additional_context=None, combined_content=None, business_model="", section_name="", max_tokens=2000):
     """
     Génère une section du business plan en utilisant l'IA
     
     Args:
         system_message (str): Message système pour guider l'IA
-        query (str): Requête spécifique
-        combined_content (str): Contenu combiné des données
+        user_query (str): Requête spécifique (nouvelle interface)
+        query (str): Requête spécifique (ancienne interface)
+        additional_context (str): Contexte additionnel (nouvelle interface)
+        combined_content (str): Contenu combiné des données (ancienne interface)
         business_model (str): Business model existant
         section_name (str): Nom de la section générée
+        max_tokens (int): Nombre maximum de tokens
     
     Returns:
         str: Contenu généré par l'IA
@@ -113,6 +124,10 @@ def generate_section(system_message, query, combined_content, business_model="",
     try:
         # Initialisation du compteur de tokens
         init_token_counter()
+        
+        # Compatibilité avec les deux interfaces
+        final_query = user_query or query
+        final_content = additional_context or combined_content or ""
         
         # Construction des messages
         messages = [
@@ -122,13 +137,13 @@ def generate_section(system_message, query, combined_content, business_model="",
         # Construction du prompt utilisateur
         user_prompt = f"""
 Contexte des données collectées:
-{combined_content}
+{final_content}
 
 Business Model existant (si disponible):
 {business_model}
 
 Requête spécifique pour {section_name}:
-{query}
+{final_query}
 """
         
         messages.append({"role": "user", "content": user_prompt})
@@ -142,10 +157,14 @@ Requête spécifique pour {section_name}:
             st.error(f"Limite de tokens dépassée: {limit_message}")
             return f"Erreur: {limit_message}"
         
-        # Configuration du client OpenAI
-        api_key = st.secrets.get("API_KEY") or st.secrets.get("OPENAI_API_KEY")
-        if not api_key:
-            st.error("Clé API OpenAI non configurée")
+        # Configuration du client OpenAI (selon Origin.txt)
+        try:
+            api_key = st.secrets["API_KEY"]
+        except:
+            api_key = os.getenv("API_KEY")
+            
+        if not api_key or api_key == "sk-your-actual-openai-api-key-here":
+            st.error("Clé API OpenAI non configurée dans .streamlit/secrets.toml")
             return "Erreur: Clé API manquante"
         
         client = OpenAI(api_key=api_key)
@@ -155,7 +174,7 @@ Requête spécifique pour {section_name}:
             response = client.chat.completions.create(
                 model="gpt-4",
                 messages=messages,
-                max_tokens=2000,
+                max_tokens=max_tokens,
                 temperature=0.7
             )
         

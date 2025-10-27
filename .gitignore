@@ -128,8 +128,8 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Streamlit
-.streamlit/
+# Streamlit secrets (ne pas exposer les clés API)
+.streamlit/secrets.toml
 
 # Temporary files
 *.tmp

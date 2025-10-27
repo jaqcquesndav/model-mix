@@ -5,6 +5,7 @@ Remplace la collecte persona/marché/concurrence par les 9 blocs du Business Mod
 
 import streamlit as st
 import json
+import os
 from datetime import datetime
 from services.business import sauvegarder_donnees_session
 from ui.components import afficher_template_info, bouton_sauvegarder_avec_confirmation
@@ -605,7 +606,7 @@ def has_sufficient_data():
     has_marche = bool(analyse_marche.get('besoin_principal', '').strip())
     
     # Debug - affichage temporaire
-    debug_checkbox = st.checkbox("🔍 Debug IA", help="Affiche les données disponibles pour l'IA", value=True)  # Activé par défaut pour diagnostic
+    debug_checkbox = st.checkbox("🔍 Debug IA", help="Affiche les données disponibles pour l'IA", value=True, key="debug_ai_checkbox")  # Activé par défaut pour diagnostic
     st.session_state['debug_ai'] = debug_checkbox
     
     if debug_checkbox:
@@ -667,6 +668,61 @@ def generate_business_model_suggestions(context_data):
     try:
         from services.ai.content_generation import generer_suggestions_intelligentes
         
+        # Debug info
+        if st.session_state.get('debug_ai', False):
+            st.write("🔄 Tentative génération IA...")
+            
+        # Test de la configuration API
+        try:
+            api_key = st.secrets["API_KEY"]
+        except:
+            api_key = os.getenv("API_KEY")
+            
+        if not api_key or api_key == "sk-your-actual-openai-api-key-here":
+            if st.session_state.get('debug_ai', False):
+                st.warning("⚠️ Clé API non configurée, utilisation du fallback")
+            return generate_fallback_suggestions(context_data)
+        
+        # Générer des suggestions pour chaque bloc du business model
+        suggestions = {}
+        
+        blocs = [
+            'partenaires_cles', 'activites_cles', 'ressources_cles',
+            'propositions_valeur', 'relations_clients', 'canaux_distribution',
+            'segments_clients', 'structure_couts', 'sources_revenus'
+        ]
+        
+        for bloc in blocs:
+            suggestions_bloc = generer_suggestions_intelligentes(
+                donnees_existantes=context_data,
+                section=bloc.replace('_', ' ').title(),
+                template_nom="COPA TRANSFORME"
+            )
+            # Joindre les suggestions avec des puces
+            suggestions[bloc] = '\n'.join([f"• {s}" for s in suggestions_bloc[:3]]) if suggestions_bloc else ""
+        
+        # Vérifier si on a au moins quelques suggestions
+        valid_suggestions = sum(1 for v in suggestions.values() if v.strip())
+        
+        if valid_suggestions > 0:
+            if st.session_state.get('debug_ai', False):
+                st.success(f"✅ IA: {valid_suggestions} blocs générés")
+            return suggestions
+        else:
+            if st.session_state.get('debug_ai', False):
+                st.warning("⚠️ IA: Aucune suggestion générée, utilisation du fallback")
+            return generate_fallback_suggestions(context_data)
+            
+    except Exception as e:
+        if st.session_state.get('debug_ai', False):
+            st.error(f"❌ Erreur IA: {str(e)}")
+        return generate_fallback_suggestions(context_data)
+    
+    # Code IA désactivé temporairement
+    """
+    try:
+        from services.ai.content_generation import generer_suggestions_intelligentes
+        
         # Générer des suggestions pour chaque bloc du business model
         suggestions = {}
         
@@ -709,6 +765,7 @@ def generate_business_model_suggestions(context_data):
         if st.session_state.get('debug_ai', False):
             st.error(f"❌ Erreur IA: {str(e)}, utilisation du fallback")
         return generate_fallback_suggestions(context_data)
+    """
 
 def create_business_model_prompt(context_data):
     """Crée un prompt contextualisé pour l'IA"""
@@ -755,12 +812,17 @@ def create_business_model_prompt(context_data):
 def generate_fallback_suggestions(context_data):
     """Génère des suggestions basiques sans IA (fallback)"""
     
+    if st.session_state.get('debug_ai', False):
+        st.write("🔧 Génération fallback en cours...")
+        st.write(f"📋 Secteur détecté: '{context_data.get('secteur_activite', '')}'")
+        st.write(f"🏢 Type entreprise: '{context_data.get('type_entreprise', 'PME')}'")
+    
     secteur = context_data.get('secteur_activite', '').lower()
     type_entreprise = context_data.get('type_entreprise', 'PME')
     
     # Suggestions basiques selon le secteur et le type
     if 'tech' in secteur or type_entreprise == 'Startup':
-        return {
+        suggestions = {
             'partenaires_cles': '• Développeurs techniques\n• Partenaires technologiques\n• Investisseurs',
             'activites_cles': '• Développement produit\n• Marketing digital\n• Support client',
             'ressources_cles': '• Plateforme technologique\n• Équipe de développement\n• Base de données',
@@ -772,14 +834,37 @@ def generate_fallback_suggestions(context_data):
             'sources_revenus': '• Abonnements mensuels\n• Commissions sur transactions\n• Services premium'
         }
     else:
-        return {
-            'partenaires_cles': '• Fournisseurs locaux\n• Distributeurs\n• Institutions financières',
-            'activites_cles': '• Production/Fabrication\n• Vente et distribution\n• Service client',
-            'ressources_cles': '• Équipements de production\n• Main d\'œuvre qualifiée\n• Réseau de distribution',
-            'propositions_valeur': '• Produits de qualité locale\n• Service personnalisé\n• Prix accessible',
-            'relations_clients': '• Relation directe\n• Service après-vente\n• Fidélisation clients',
-            'canaux_distribution': '• Magasins physiques\n• Réseau de revendeurs\n• Vente directe',
-            'segments_clients': '• Consommateurs locaux\n• Entreprises B2B\n• Particuliers',
-            'structure_couts': '• Coût des matières premières\n• Salaires et charges\n• Coûts de distribution',
-            'sources_revenus': '• Vente de produits\n• Services associés\n• Contrats de maintenance'
-        }
+        # Suggestions adaptées pour MAKASI et la farine de manioc
+        nom_entreprise = context_data.get('nom_entreprise', '')
+        probleme = context_data.get('probleme_central', '')
+        
+        if 'makasi' in nom_entreprise.lower() or 'farine' in probleme.lower() or 'manioc' in probleme.lower():
+            suggestions = {
+                'partenaires_cles': '• Producteurs locaux de manioc\n• Coopératives agricoles\n• Distributeurs alimentaires',
+                'activites_cles': '• Transformation du manioc\n• Contrôle qualité\n• Distribution locale',
+                'ressources_cles': '• Équipement de transformation\n• Réseau de producteurs\n• Expertise en transformation',
+                'propositions_valeur': '• Farine de manioc à prix stable\n• Production locale de qualité\n• Réduction des pénuries saisonnières',
+                'relations_clients': '• Relation directe avec consommateurs\n• Programme de fidélité\n• Service après-vente local',
+                'canaux_distribution': '• Marchés locaux\n• Magasins de proximité\n• Vente directe à la ferme',
+                'segments_clients': '• Familles locales\n• Restaurants et cantines\n• Transformateurs alimentaires',
+                'structure_couts': '• Achat matières premières\n• Coûts de transformation\n• Transport et distribution',
+                'sources_revenus': '• Vente de farine de manioc\n• Produits dérivés\n• Services de transformation'
+            }
+        else:
+            suggestions = {
+                'partenaires_cles': '• Fournisseurs locaux\n• Distributeurs\n• Institutions financières',
+                'activites_cles': '• Production/Fabrication\n• Vente et distribution\n• Service client',
+                'ressources_cles': '• Équipements de production\n• Main d\'œuvre qualifiée\n• Réseau de distribution',
+                'propositions_valeur': '• Produits de qualité locale\n• Service personnalisé\n• Prix accessible',
+                'relations_clients': '• Relation directe\n• Service après-vente\n• Fidélisation clients',
+                'canaux_distribution': '• Magasins physiques\n• Réseau de revendeurs\n• Vente directe',
+                'segments_clients': '• Consommateurs locaux\n• Entreprises B2B\n• Particuliers',
+                'structure_couts': '• Coût des matières premières\n• Salaires et charges\n• Coûts de distribution',
+                'sources_revenus': '• Vente de produits\n• Services associés\n• Contrats de maintenance'
+            }
+    
+    if st.session_state.get('debug_ai', False):
+        valid_count = sum(1 for v in suggestions.values() if v.strip())
+        st.success(f"✅ Fallback: {valid_count} blocs générés avec succès")
+    
+    return suggestions
