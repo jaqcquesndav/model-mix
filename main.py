@@ -149,27 +149,6 @@ def create_main_navigation():
     
     # 3. Financier (avec sous-onglets pour tous les éléments financiers)
     with main_tabs_ui[2]:
-        business_model_subtabs = [
-            "🎨 Créativité & Business Model",
-            "🎯 Business Model Final"
-        ]
-        
-        bm_tabs = st.tabs(business_model_subtabs)
-        
-        with bm_tabs[0]:
-            try:
-                page_collecte_donnees()
-            except Exception as e:
-                st.error(f"Erreur lors du chargement de la page : {str(e)}")
-        
-        with bm_tabs[1]:
-            try:
-                page_generer_business_model()
-            except Exception as e:
-                st.error(f"Erreur lors du chargement de la page : {str(e)}")
-    
-    # 4. Financier (avec sous-onglets pour tous les éléments financiers)
-    with main_tabs_ui[3]:
         financial_subtabs = [
             "💰 Besoins de Démarrage",
             "🏦 Financement", 
@@ -224,7 +203,7 @@ def create_main_navigation():
                 except Exception as e:
                     st.error(f"Erreur lors du chargement de la page financière : {str(e)}")
                     st.info("Veuillez rafraîchir la page ou contacter le support technique.")
-    
+
     # 4. Génération Business Plan
     with main_tabs_ui[3]:
         business_plan_subtabs = [
