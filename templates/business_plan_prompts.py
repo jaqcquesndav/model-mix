@@ -1,15 +1,390 @@
 """
-Prompts système EXACTS copiés de la stratégie Origin.txt
-Adaptés pour les templates RDC avec contenu professionnel direct
+Système de prompts EXACTEMENT basé sur Origin.txt
+Adapté pour les templates RDC (COPA TRANSFORME, Virunga, IP Femme)
 """
 
 from typing import Dict, Any
 
-def get_business_plan_sections() -> Dict[str, str]:
+def get_system_messages_origin_style(template_name: str = "COPA TRANSFORME") -> Dict[str, str]:
     """
-    Retourne la liste des sections du business plan dans l'ordre de génération
+    Messages système EXACTS de Origin.txt adaptés pour templates RDC
+    """
+    
+    # Contexte spécifique selon le template
+    template_context = get_template_context(template_name)
+    
+    return {
+        "Couverture": f"""
+            Générer cette section du business plan pour le template {template_name}:
+            Voici les textes à afficher sous forme :
+            
+            # Canevas de Plans d'Affaires
+            ## Template {template_name}
+
+            Nom du projet ou entreprise
+            Secteur d'activité
+            République Démocratique du Congo
+            
+            {template_context}
+        """,
+        
+        "Sommaire": f"""
+            Générer cette section du business plan pour le template {template_name}:
+            Voici les textes à afficher sous forme de liste:
+            ## Sommaire
+            I. Résumé Exécutif « Executive Summary » / Pitch
+            II. Présentation de votre entreprise/projet
+            III. Présentation de l'offre de produit(s) et/ou service(s)  
+            IV. Étude de marché
+            V. Stratégie marketing, communication et politique commerciale
+            VI. Moyens de production et organisation 
+            VII. Étude des risques/hypothèses  
+            VIII. Plan financier 
+            IX. Annexes
+        """,
+        
+        "Résumé Exécutif": f"""
+            Générer cette section du business plan pour le template {template_name}:
+            
+            ## I. Résumé Exécutif « Executive Summary » / Pitch
+            
+            Générer deux grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
+            - Attirer l'attention du lecteur en 5 minutes et lui donner envie d'en savoir plus.
+            - Décrire le projet en quelques phrases simples et impactantes.
+            - Ne pas essayer de tout couvrir, soyez concis et précis.
+            
+            Les éléments clés à générer et qui doivent être contenus dans les paragraphes :
+            - **Présentation de la PME** : Nom de l'entreprise et brève description du service/produit fourni.
+            - **Présentation des porteurs de projet** : Profil des entrepreneurs, formation, expérience.
+            - **Potentiel en termes de taille et de profit** : Démontrez par des calculs simples comment votre PME fera du profit.
+            - **Votre besoin financier** : Montant recherché et utilisation.
+            
+            Contexte spécifique {template_name} : {template_context}
+            
+            Rédigez directement les paragraphes sans explications additionnelles.
+        """,
+        
+        "Présentation de votre entreprise": f"""
+            Générer cette section du business plan pour le template {template_name}:
+
+            ## II. Présentation de votre entreprise/projet
+
+            Générer 6 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
+            - Parler de votre entreprise/projet de manière plus détaillée.
+            - Présenter l'équipe managériale clé.
+
+            Les éléments clés à générer et qui doivent être contenus dans les paragraphes :
+            
+            **1. Informations générales sur la PME** :
+            - Forme juridique : Ets, Sarlu, Sarl, SAS, SA
+            - Siège social : Adresse juridique de l'entreprise en RDC
+            - Coordonnées bancaires : Numéro de compte de l'entreprise
+            - Couverture géographique : lieu d'implantation et zones couvertes
+            
+            **2. Description détaillée de la PME et objectifs** :
+            - Présentez l'entreprise, son origine, ses atouts/opportunités
+            - Décrivez le projet spécifique à {template_name}
+            
+            **3. Stade d'avancement de l'entreprise** :
+            - Ce qui a été fait et projets futurs
+            - Niveau de maturité de la PME
+            - Financements déjà acquis
+            
+            **4. Présentation de l'équipe managériale** :
+            - Organigramme et organisation RH
+            - Associés et parts sociales
+            
+            **5. Analyse SWOT** (à présenter sous forme de tableau) :
+            - Forces, faiblesses, opportunités, contraintes/menaces
+            
+            **6. Business Model Canvas** :
+            - Les 9 rubriques bien remplies selon {template_name}
+            
+            Contexte {template_name} : {template_context}
+            
+            Rédigez directement les paragraphes sans explications.
+        """,
+        
+        "Présentation de l'offre de produit": f"""
+            Générer cette section du business plan pour le template {template_name} :
+
+            ## III. Présentation de l'offre de produit(s) et/ou service(s)
+            
+            Générer 6 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
+            - Parler de l'offre de produits/services de manière détaillée.
+            - Présenter la proposition de valeur différenciante selon {template_name}.
+
+            Les éléments clés à générer et qui doivent être contenus dans les paragraphes :
+            
+            **1. Noms du/des produit(s) ou service(s)** adaptés au contexte {template_name}
+            
+            **2. Besoins identifiés** sur le marché auxquels répond votre offre
+            
+            **3. Description du/des produit(s) ou service(s)** répondant à ces besoins
+            
+            **4. Proposition de valeur unique** selon les spécificités {template_name}
+            
+            **5. Prise en compte de l'aspect genre** dans le fonctionnement de la PME
+            
+            **6. Prise en compte de l'environnement** :
+            - Identification des impacts environnementaux et sociaux
+            - Mesures d'atténuation mises en place
+            - Plan de Gestion Environnemental et Social
+            
+            Contexte {template_name} : {template_context}
+            
+            Rédigez directement les paragraphes détaillés sans explications.
+        """,
+        
+        "Étude de marché": f"""
+            Générer cette section du business plan pour le template {template_name} :
+
+            ## IV. Étude de marché
+
+            Générer 8 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
+            - Expliquer la méthode utilisée pour la conduite de l'étude de marché.
+            - Présenter les résultats de l'étude de marché.
+
+            Les éléments clés à générer et qui doivent être contenus dans les paragraphes, les numéros doivent être respectés :
+            
+            **1. Description des hypothèses et méthodes de l'étude de marché** :
+            - Citer le produit ou service pré-ciblé
+            - Préciser le marché pré-ciblé : secteur d'activité 
+            - Présenter les méthodes : questionnaire, étude documentaire, etc.
+
+            **2. Approche générale du marché** (précisez les sources) :
+            - Décrire le marché, caractéristiques, historique, perspectives
+            - Présenter les résultats : marché cible, potentiel, réel
+            - Menaces et opportunités du marché
+
+            **3. Caractéristiques de la demande** :
+            - Volume et évolution de la demande
+            - Tendances de consommation en RDC
+            - Types de clientèle (segmentation)
+            - Prescripteurs et partenaires
+
+            **4. Caractéristiques de l'offre** :
+            - Concurrence directe et indirecte
+            - Points forts/faibles de la concurrence
+            - Différenciation par rapport aux concurrents
+
+            **5. Caractéristiques de l'environnement** :
+            - Environnement des affaires en RDC
+            - Cadre légal, réglementaire
+            - Évolution des technologies
+            - Menaces et opportunités
+
+            **6. Partenariats** :
+            - Partenariats stratégiques selon {template_name}
+            - Fournisseurs, distributeurs, partenaires commerciaux
+
+            **7. Création d'emplois** :
+            - Impact en emplois directs créés ou à créer
+            - Spécificités {template_name} en matière d'emploi
+
+            **8. Chiffre d'affaires** :
+            - Part de marché visée
+            - Volume de CA prévisible à 1, 2, 3 ans
+            
+            Contexte {template_name} : {template_context}
+            
+            Rédigez directement les paragraphes détaillés avec données chiffrées.
+        """,
+        
+        "Stratégie Marketing": f"""
+            Générer cette section du business plan pour le template {template_name} :
+
+            ## V. Stratégie Marketing, Communication et Politique Commerciale
+
+            Générer cette section complète, l'objectif est de :
+            - Présenter la stratégie marketing et commerciale à court et moyen terme selon {template_name}.
+
+            Les éléments clés à générer, les numéros doivent être respectés :
+            
+            **1. Choix de segments de clientèle** :
+            - Segments de clientèle cibles pour {template_name}
+            - Justification de ce choix
+            - Positionnement stratégique
+
+            **2. Marketing-mix (4P : Produit – Prix – Place – Promotion)** :
+            - Politique marketing générale :
+                - Choix du nom, logo, couleurs
+                - Message et slogan adaptés à {template_name}
+            
+            - Tableau synthétique des segments :
+
+            | Segment de clientèle | Produit proposé | Positionnement prix | Lieu de distribution | Communication |
+            |---------------------|-----------------|--------------------|--------------------|---------------|
+            | Segment 1           | [À remplir]     | [À remplir]        | [À remplir]        | [À remplir]   |
+            | Segment 2           | [À remplir]     | [À remplir]        | [À remplir]        | [À remplir]   |
+            | Segment 3           | [À remplir]     | [À remplir]        | [À remplir]        | [À remplir]   |
+
+            **3. Plan Marketing et actions commerciales** :
+            - Lister les actions commerciales et communication prévues avec coûts
+
+            | Types d'actions | Jan | Fév | Mar | Avr | Mai | Jun | Jul | Aoû | Sep | Oct | Nov | Déc |
+            |-----------------|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|-----|
+            | Action 1        |     |     |     |     |     |     |     |     |     |     |     |     |
+            | Action 2        |     |     |     |     |     |     |     |     |     |     |     |     |
+
+            **4. Moyens et partenaires sollicités** :
+            - Moyens à mettre en œuvre
+            - Partenaires sollicités pour actions commerciales
+            
+            Contexte {template_name} : {template_context}
+            
+            Rédigez directement le contenu avec tableaux remplis.
+        """,
+        
+        "Moyens de production et organisation": f"""
+            Générer cette section du business plan pour le template {template_name}:
+
+            ## VI. Moyens de production et organisation
+
+            Générer 4 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
+            - Spécifier les moyens humains et matériels à disposition de la PME selon {template_name}.
+
+            Les éléments clés à générer et qui doivent être contenus dans les paragraphes :
+            
+            **1. Locaux** :
+            - Liste des locaux nécessaires
+            - Bail de location, conditions négociées, coût
+            - Utilité et aménagements spécifiques à {template_name}
+
+            **2. Matériel** :
+            - Liste détaillée du matériel
+            - Mode d'acquisition ou location, coût
+            - Utilité pour les activités {template_name}
+            - Plan de renouvellement
+
+            **3. Moyens humains** :
+            - Personnel nécessaire, plannings, horaires
+            - Coût salarial et charges sociales en RDC
+            - Répartition claire des tâches selon {template_name}
+
+            **4. Fournisseurs et sous-traitants** :
+            - Liste des fournisseurs principaux
+            - Devis obtenus, tarifs, conditions négociées
+            - Spécificités d'approvisionnement pour {template_name}
+            
+            Contexte {template_name} : {template_context}
+            
+            Rédigez directement les paragraphes détaillés avec coûts estimés.
+        """,
+        
+        "Étude des risques": f"""
+            Générer cette section du business plan pour le template {template_name}:
+
+            ## VII. Étude des risques/hypothèses
+
+            Générer cette section complète, l'objectif pour cette section est de :
+            - Présenter la synthèse des risques et mesures d'atténuation identifiés pour le développement de la PME selon {template_name}.
+
+            Les éléments clés à générer :
+            
+            **Tableau des risques** détaillé :
+
+            | Nature de risque | Description détaillée | Stratégie de traitement |
+            |------------------|----------------------|-------------------------|
+            | Risques liés à l'environnement général | Instabilité politique RDC, inflation, change | [Stratégies spécifiques] |
+            | Risques liés au marché | Concurrence, évolution demande, saisonnalité | [Stratégies spécifiques] |
+            | Risques liés aux outils | Pannes équipement, obsolescence technologique | [Stratégies spécifiques] |
+            | Risques liés aux personnes | Départ personnel clé, formation insuffisante | [Stratégies spécifiques] |
+            | Risques liés aux tiers | Défaillance fournisseurs, impayés clients | [Stratégies spécifiques] |
+            | Risques spécifiques {template_name} | [Risques particuliers au template] | [Stratégies adaptées] |
+
+            **Analyse détaillée des risques** avec :
+            - Probabilité d'occurrence (Faible/Moyenne/Élevée)
+            - Impact sur l'activité (Faible/Moyen/Élevé)
+            - Mesures préventives et correctives
+            - Plan de contingence pour chaque risque majeur
+            
+            Contexte {template_name} : {template_context}
+            
+            Rédigez directement l'analyse complète avec tableau rempli.
+        """,
+        
+        "Annexes": f"""
+            Générer cette section du business plan pour le template {template_name}:
+            
+            ## VIII. ANNEXES
+
+            Renvoyer en annexe les documents trop volumineux ou difficiles à lire :
+            - Étude de marché complète
+            - Contrats et conventions
+            - Conditions générales
+            - CV détaillés de l'équipe dirigeante
+            - Études techniques spécialisées
+            - Autorisations et licences
+            - Documents financiers détaillés
+            - Références et recommandations
+            
+            **Documents spécifiques {template_name}** :
+            {template_context}
+            
+            **Liste des annexes jointes** :
+            1. [Document 1]
+            2. [Document 2]
+            3. [Document 3]
+            
+            Rédigez directement la liste des annexes pertinentes.
+        """
+    }
+
+def get_queries_origin_style() -> Dict[str, str]:
+    """
+    Requêtes EXACTES de Origin.txt
     """
     return {
+        "Couverture": "Afficher seulement le texte fourni",
+        "Sommaire": "Afficher seulement le texte fourni",
+        "Résumé Exécutif": "Décrire brièvement le projet, son potentiel de profit et les qualifications de l'équipe.",
+        "Présentation de votre entreprise": "Fournir une analyse détaillée de l'entreprise, incluant son origine, ses objectifs et son organisation.",
+        "Présentation de l'offre de produit": "Décrire les produits ou services, leur proposition de valeur unique, et les besoins du marché qu'ils adressent.",
+        "Étude de marché": "Analyser le marché cible, les tendances de consommation, et la concurrence directe et indirecte.",
+        "Stratégie Marketing": "Décrire la stratégie marketing, y compris les segments cibles, le positionnement, le mix marketing et les actions commerciales prévues.",
+        "Moyens de production et organisation": "Décrire les moyens humains et matériels, ainsi que l'organisation opérationnelle de l'entreprise.",
+        "Étude des risques": "Identifier les risques potentiels et proposer des stratégies pour les atténuer.",
+        "Annexes": "Inclure tous les documents annexes pertinents pour étayer le plan d'affaires."
+    }
+
+def get_template_context(template_name: str) -> str:
+    """
+    Contexte spécifique pour chaque template
+    """
+    contexts = {
+        "COPA TRANSFORME": """
+            Secteurs prioritaires : Agroalimentaire, transformation agricole, chaînes de valeur
+            Focus : Autonomisation des femmes, développement rural, sécurité alimentaire
+            Zone géographique : Provinces agricoles de la RDC
+            Partenaires : Coopératives agricoles, institutions de microfinance rurales
+        """,
+        
+        "Virunga": """
+            Secteurs prioritaires : Écotourisme, conservation, énergies renouvelables
+            Focus : Développement durable, protection environnementale, paix
+            Zone géographique : Région des Grands Lacs, Nord-Kivu
+            Partenaires : ONG de conservation, communautés locales, autorités parcs
+        """,
+        
+        "IP Femme": """
+            Secteurs prioritaires : Services, commerce, artisanat, microfinance
+            Focus : Autonomisation économique des femmes, leadership féminin
+            Zone géographique : Zones urbaines et péri-urbaines de la RDC
+            Partenaires : Associations féminines, institutions de microfinance, centres de formation
+        """
+    }
+    
+    return contexts.get(template_name, contexts["COPA TRANSFORME"])
+
+def get_sections_configuration_origin_style(template_name: str) -> Dict[str, Dict[str, str]]:
+    """
+    Configuration complète Origin.txt pour un template donné
+    """
+    system_messages = get_system_messages_origin_style(template_name)
+    queries = get_queries_origin_style()
+    
+    sections = {
         "Couverture": "Page de couverture du business plan",
         "Sommaire": "Table des matières structurée", 
         "Résumé Exécutif": "Executive summary professionnel",
@@ -19,403 +394,16 @@ def get_business_plan_sections() -> Dict[str, str]:
         "Stratégie Marketing": "Plan marketing et commercial détaillé",
         "Moyens de production et organisation": "Ressources et organisation opérationnelle",
         "Étude des risques": "Analyse des risques et mesures d'atténuation",
-        "Plan financier": "Projections financières détaillées",
         "Annexes": "Documents complémentaires"
     }
-
-def get_system_prompts_origin() -> Dict[str, str]:
-    """
-    Prompts système EXACTS copiés de Origin.txt avec adaptations pour templates RDC
-    """
-    return {
-        "Couverture": """
-Générer cette section du business plan:
-Voici les textes à afficher sous forme :
-
-# Canevas de Plans d'Affaires
-
-Nom du projet ou entreprise
-
-République Démocratique du Congo
-
-Date: [Date actuelle]
-
-Contact: [Informations de contact de l'entreprise]
-
-Document confidentiel
-        """,
-
-        "Sommaire": """
-Générer cette section du business plan:
-Voici les textes à afficher sous forme de liste:
-
-## Sommaire
-I. Résumé Exécutif « Executive Summary » / Pitch
-II. Présentation de votre entreprise/projet
-III. Présentation de l'offre de produit(s) et/ou service(s)  
-IV. Étude de marché
-V. Stratégie marketing, communication et politique commerciale
-VI. Moyens de production et organisation 
-VII. Étude des risques/hypothèses  
-VIII. Plan financier 
-IX. Annexes
-        """,
-
-        "Résumé Exécutif": """
-Générer cette section du business plan:
-
-## I. Résumé Exécutif « Executive Summary » / Pitch
-
-Générer deux grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
-- Attirer l'attention du lecteur en 5 minutes et lui donner envie d'en savoir plus.
-- Décrire le projet en quelques phrases simples et impactantes.
-- Ne pas essayer de tout couvrir, soyez concis et précis.
-
-Les éléments clés à générer et qui doivent être contenus dans les paragraphes:
-- **Présentation de la PME** : Nom de l'entreprise et brève description du service/produit fourni.
-- **Présentation des porteurs de projet** : Nom, prénom, coordonnées, situation de famille, formation et diplômes, expérience professionnelle, activités extra ou para-professionnelles.
-- **Potentiel en termes de taille et de profit** : Démontrez par des calculs simples comment votre PME fera du profit.
-- **Votre besoin financier**.
-        """,
-
-        "Présentation de votre entreprise": """
-Générer cette section du business plan:
-
-## II. Présentation de votre entreprise/projet
-
-Générer 6 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
-- Parler de votre entreprise/projet de manière plus détaillée.
-- Présenter l'équipe managériale clé.
-
-Les éléments clés à générer et qui doivent être contenus dans les paragraphes:
-- **Informations générales sur la PME** :
-  - Forme juridique : Ets, Sarlu, Sarl, SAS, SA.
-  - Siège social : Adresse juridique de l'entreprise.
-  - Coordonnées bancaires : Numéro de compte de l'entreprise ainsi que la banque.
-  - Couverture géographique de l'entreprise et ses activités : lieu d'implantation de l'entreprise et différentes zones couvertes.
-- **Description détaillée de la PME et objectifs de son projet** : Présentez l'entreprise, son origine, introduisez ses atouts/opportunités et enfin décrivez le projet de l'entreprise.
-- **Stade d'avancement de l'entreprise ou du projet** :
-  - Décrivez ce qui a été fait et les projets à mener dans le futur.
-  - Parlez du niveau de maturité de la PME ou du projet.
-  - Listez éventuellement les financements déjà acquis.
-- **Présentation de l'équipe managériale** : Décrivez l'organigramme et l'organisation des ressources humaines, présentez les associés de la PME ainsi que leurs parts sociales.
-- **Analyse SWOT** : Forces, faiblesses, opportunités, contraintes/menaces. De préférence cela doit être présenté sous forme de tableau.
-- **Business Modèle Canvas** : Insérez votre business modèle canvas avec les 9 rubriques bien remplies.
-        """,
-
-        "Présentation de l'offre de produit": """
-Générer cette section du business plan :
-
-## III. Présentation de l'offre de produit(s) et/ou service(s)
-
-Générer 6 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
-- Parler de l'offre de produits/services de manière détaillée.
-- Présenter la proposition de valeur différenciante de la PME ou de son offre.
-
-Les éléments clés à générer et qui doivent être contenus dans les paragraphes:
-- **Noms du/des produit(s) ou service(s)**.
-- **Besoins identifiés** sur le marché auxquels répond votre offre.
-- **Description du/des produit(s) ou service(s)** répondant à ces besoins.
-- **Proposition de valeur unique**.
-- **Prise en compte de l'aspect genre** dans le fonctionnement de la PME ou du projet de l'entreprise.
-- **Prise en compte de l'environnement** :
-  - Identification des impacts environnementaux et sociaux des activités de la PME.
-  - Mise en place de mesures d'atténuation.
-  - Existence d'un Plan de Gestion Environnemental et Social.
-        """,
-
-        "Étude de marché": """
-Générer cette section du business plan :
-
-## IV. Étude de marché
-
-Générer 8 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
-- Expliquer la méthode utilisée pour la conduite de l'étude de marché.
-- Présenter les résultats de l'étude de marché.
-
-Les éléments clés à générer et qui doivent être contenus dans les paragraphes, les numéros doivent être respectés:
-1. **Description des hypothèses et méthodes de l'étude de marché** :
-   - Produit/service pré-ciblé.
-   - Marché pré-ciblé.
-   - Secteur d'activité concerné.
-   - Méthodologie de recherche adoptée (questionnaires, études documentaires, etc.).
-
-2. **Approche générale du marché** :
-   - Description du marché et ses caractéristiques.
-   - Historique et évolution du marché/secteur.
-   - Taille du marché (marché cible, marché potentiel, marché réel).
-
-3. **Caractéristiques de la demande** :
-   - Volume et évolution de la demande.
-   - Identification et analyse des prescripteurs.
-
-4. **Caractéristiques de l'offre** :
-   - Concurrence directe et indirecte.
-   - Forces et faiblesses de la concurrence.
-
-5. **Environnement des affaires** :
-   - Cadre légal et réglementaire.
-   - Facteurs économiques exogènes.
-
-6. **Partenariats et autres** :
-   - Fournisseurs.
-   - Partenaires de distribution.
-   - Autres partenaires.
-
-7. **Création d'emplois** :
-   - Emplois directs créés/à créer.
-   - Emplois indirects.
-
-8. **Projections du chiffre d'affaires** :
-   - Estimation du chiffre d'affaires.
-   - Hypothèses de calcul.
-        """,
-
-        "Stratégie Marketing": """
-Générer cette section du business plan :
-
-## V. Stratégie marketing, communication et politique commerciale
-
-Générer 4 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
-- Définir la stratégie marketing de la PME.
-- Présenter la politique commerciale de la PME.
-
-Les éléments clés à générer et qui doivent être contenus dans les paragraphes:
-1. **Choix de segments de clientèle** :
-   - Segments retenus.
-   - Critères de segmentation.
-   - Justification du ciblage.
-
-2. **Marketing-mix (4P)** :
-   - **Politique de Produit** : Gamme, niveau de qualité et de service.
-   - **Politique de Prix** : Méthode de fixation, niveau de prix.
-   - **Politique de Place** : Circuit de distribution.
-   - **Politique de Promotion** : Actions de communication.
-
-3. **Plan marketing et actions commerciales** :
-   - Planning des actions marketing.
-   - Budget et calendrier.
-
-4. **Moyens et partenaires sollicités** :
-   - Ressources nécessaires.
-   - Partenaires identifiés.
-        """,
-
-        "Moyens de production et organisation": """
-Générer cette section du business plan :
-
-## VI. Moyens de production et organisation
-
-Générer 4 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
-- Décrire les moyens de production nécessaires.
-- Présenter l'organisation de la PME.
-
-Les éléments clés à générer et qui doivent être contenus dans les paragraphes:
-1. **Locaux et infrastructure** :
-   - Description des locaux.
-   - Localisation et justification.
-   - Coûts d'installation.
-
-2. **Équipements et matériel** :
-   - Liste des équipements nécessaires.
-   - Coûts d'acquisition.
-   - Mode de financement.
-
-3. **Ressources humaines et organisation** :
-   - Organigramme.
-   - Profils de postes.
-   - Coûts salariaux.
-
-4. **Fournisseurs et sous-traitants** :
-   - Identification des fournisseurs.
-   - Conditions négociées.
-   - Plan d'approvisionnement.
-        """,
-
-        "Étude des risques": """
-Générer cette section du business plan :
-
-## VII. Étude des risques et hypothèses
-
-Générer un tableau complet des risques suivi de 2 paragraphes, l'objectif pour cette section est de :
-- Identifier tous les risques liés au projet.
-- Proposer des mesures d'atténuation.
-
-Générer un tableau avec les colonnes suivantes:
-| Nature du risque | Description | Probabilité | Impact | Mesures d'atténuation |
-
-Inclure au minimum ces catégories de risques:
-- Risques liés à l'environnement général
-- Risques liés au marché
-- Risques liés aux outils de production
-- Risques liés aux personnes
-- Risques liés aux tiers
-- Autres risques spécifiques
-
-Puis générer 2 paragraphes sur :
-1. **Plan de gestion des risques** : Procédures de suivi et de contrôle.
-2. **Mesures préventives** : Actions proactives pour réduire les risques.
-        """,
-
-        "Plan financier": """
-Générer cette section du business plan :
-
-## VIII. Plan financier
-
-Générer 4 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
-- Présenter les projections financières.
-- Démontrer la viabilité financière du projet.
-
-Les éléments clés à générer et qui doivent être contenus dans les paragraphes:
-1. **Hypothèses financières** :
-   - Hypothèses de chiffre d'affaires.
-   - Hypothèses de coûts.
-   - Hypothèses de financement.
-
-2. **Compte de résultat prévisionnel** :
-   - Chiffre d'affaires prévisionnel sur 3-5 ans.
-   - Charges variables et fixes.
-   - Résultat net prévisionnel.
-
-3. **Plan de financement** :
-   - Besoins de financement.
-   - Sources de financement.
-   - Échéancier de remboursement.
-
-4. **Indicateurs de rentabilité** :
-   - Seuil de rentabilité.
-   - Retour sur investissement.
-   - Capacité d'autofinancement.
-
-[Insérer ici les tableaux financiers détaillés générés par le système]
-        """,
-
-        "Annexes": """
-Générer cette section du business plan :
-
-## IX. Annexes
-
-Générer une liste structurée des documents annexes, l'objectif pour cette section est de :
-- Lister tous les documents justificatifs.
-- Organiser les annexes de manière professionnelle.
-
-Les éléments à inclure dans la liste:
-- CV détaillés des dirigeants
-- Études de marché complémentaires
-- Devis d'équipements et de travaux
-- Lettres d'intention de clients
-- Contrats de partenariat
-- Autorisations et licences
-- États financiers
-- Projections financières détaillées
-- Business Model Canvas
-- Analyse SWOT détaillée
-- Photos et plans des locaux
-- Références et attestations
-        """
-    }
-
-def get_user_queries() -> Dict[str, str]:
-    """
-    Requêtes utilisateur exactes d'Origin.txt
-    """
-    return {
-        "Couverture": "Créer une page de couverture professionnelle",
-        "Sommaire": "Afficher le sommaire structuré du business plan",
-        "Résumé Exécutif": "Décrire le projet, son potentiel et l'équipe dirigeante", 
-        "Présentation de votre entreprise": "Présenter l'entreprise de façon complète et structurée",
-        "Présentation de l'offre de produit": "Décrire l'offre de produits/services et sa valeur ajoutée",
-        "Étude de marché": "Analyser le marché cible, la concurrence et les opportunités",
-        "Stratégie Marketing": "Développer la stratégie marketing et commerciale", 
-        "Moyens de production et organisation": "Décrire l'organisation opérationnelle et les ressources",
-        "Étude des risques": "Identifier et analyser les risques avec mesures d'atténuation",
-        "Plan financier": "Présenter les projections financières et besoins de financement",
-        "Annexes": "Lister les documents complémentaires et références"
-    }
-
-def get_business_plan_context_template(template_name: str) -> str:
-    """
-    Contexte spécifique selon le template sélectionné - VERSION ORIGIN
-    """
-    contexts = {
-        "COPA TRANSFORME": """
-CONTEXTE COPA TRANSFORMÉ:
-Vous travaillez dans le cadre du programme COPA TRANSFORMÉ pour l'autonomisation des femmes entrepreneures et la mise à niveau des PME en RDC.
-
-Secteurs prioritaires: Agroalimentaire, Industrie légère, Artisanat, Services à valeur ajoutée
-Objectifs: Création d'emplois, autonomisation des femmes, transformation économique
-Approche: Développement inclusif, partenariats locaux, innovation sociale
-
-INSTRUCTIONS SPÉCIALES COPA TRANSFORMÉ:
-- Mettez l'accent sur l'autonomisation des femmes dans chaque section
-- Intégrez les aspects de développement durable et d'impact social
-- Valorisez les chaînes de valeur agricoles et agroalimentaires
-- Considérez les partenariats avec les coopératives et organisations locales
-        """,
-        
-        "Virunga": """
-CONTEXTE VIRUNGA:
-Vous travaillez dans le cadre des initiatives de conservation et développement durable du Parc National des Virunga.
-
-Secteurs prioritaires: Écotourisme, Agriculture durable, Énergies renouvelables, Conservation
-Objectifs: Conservation environnementale, développement communautaire, paix et sécurité
-Approche: Développement durable, protection environnementale, engagement communautaire
-
-INSTRUCTIONS SPÉCIALES VIRUNGA:
-- Priorisez les aspects de conservation environnementale
-- Intégrez les enjeux de paix et sécurité dans la région
-- Valorisez l'écotourisme et les activités respectueuses de l'environnement
-- Considérez l'impact sur les communautés locales et la biodiversité
-        """,
-        
-        "IP Femme": """
-CONTEXTE IP FEMME:
-Vous travaillez dans le cadre d'initiatives d'autonomisation économique des femmes en RDC.
-
-Secteurs prioritaires: Commerce, Services, Artisanat, Agriculture, Microfinance
-Objectifs: Égalité de genre, autonomisation économique, leadership féminin
-Approche: Empowerment des femmes, inclusion financière, renforcement de capacités
-
-INSTRUCTIONS SPÉCIALES IP FEMME:
-- Placez les femmes au centre de toutes les analyses
-- Intégrez systématiquement la perspective genre
-- Valorisez le leadership féminin et l'inclusion financière
-- Considérez les défis spécifiques aux entrepreneures en RDC
-        """
-    }
-    
-    return contexts.get(template_name, contexts["COPA TRANSFORME"])
-
-# Fonctions de compatibilité avec le nouveau système
-def get_business_plan_system_messages(template_name: str) -> Dict[str, str]:
-    """Version adaptée pour un template spécifique avec contexte intégré"""
-    base_prompts = get_system_prompts_origin()
-    context_template = get_business_plan_context_template(template_name)
-    
-    adapted_prompts = {}
-    for section, prompt in base_prompts.items():
-        # Intégrer le contexte du template dans chaque prompt
-        adapted_prompts[section] = f"{context_template}\n\n{prompt}"
-    
-    return adapted_prompts
-
-def get_business_plan_user_queries(template_name: str) -> Dict[str, str]:
-    """Version adaptée pour un template spécifique"""
-    return get_user_queries()
-
-def get_sections_configuration(template_name: str) -> Dict[str, Dict[str, str]]:
-    """Configuration complète des sections pour un template donné - VERSION ORIGIN"""
-    sections = get_business_plan_sections()
-    system_prompts = get_business_plan_system_messages(template_name)
-    user_queries = get_business_plan_user_queries(template_name)
     
     configuration = {}
     for section_name, description in sections.items():
         configuration[section_name] = {
             "description": description,
-            "system_message": system_prompts.get(section_name, "Prompt système non disponible"),
-            "user_query": user_queries.get(section_name, "Requête non disponible"),
-            "template_context": get_business_plan_context_template(template_name)
+            "system_message": system_messages.get(section_name, "Message système non disponible"),
+            "query": queries.get(section_name, "Requête non disponible"),
+            "template_context": get_template_context(template_name)
         }
     
     return configuration
