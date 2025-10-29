@@ -12,8 +12,7 @@ from templates.business_plan_prompts import (
     get_sections_configuration, 
     get_business_plan_sections, 
     get_business_plan_system_messages,
-    get_business_plan_user_queries,
-    export_template_configuration
+    get_business_plan_user_queries
 )
 from templates import get_metaprompt, get_system_messages  # Ancien système pour compatibilité
 import pandas as pd
@@ -253,30 +252,34 @@ def generate_section_cyclique(section_name, section_config, documents, combined_
             system_message = section_config.get("system_message", "")
             query = section_config.get("query", section_config.get("user_query", ""))
         
-        # Adaptation du contexte selon la section (comme Origin.txt)
+        # Éviter les doublons en préparant un contexte limité et ciblé
         if section_name in ["Couverture", "Sommaire"]:
-            # Sections simples sans contexte complexe
+            # Sections simples - contexte minimal pour éviter confusion
+            context_info = f"Entreprise: {business_data.get('informations_generales', {}).get('nom_entreprise', 'Non spécifiée')}"
+            context_info += f"\nSecteur: {business_data.get('informations_generales', {}).get('secteur_activite', 'Non spécifié')}"
+            
             content = generate_section(
                 system_message=system_message,
                 user_query=query,
-                additional_context=combined_content[:1000],  # Limiter pour les sections simples
+                additional_context=context_info,
                 section_name=section_name
             )
         else:
-            # Sections avec contexte business model et financier
-            business_model = business_data.get('business_model', st.session_state.get('business_model_precedent', ''))
+            # Sections détaillées - contexte plus riche mais contrôlé
+            business_model = str(business_data.get('business_model', ''))[:500]  # Limiter la taille
             
-            # Préparer le contexte complet avec données spécifiques au template
+            # Préparer un contexte structuré sans redondance
             full_context = f"""
-CONTEXTE TEMPLATE: {template_nom}
+INFORMATIONS ENTREPRISE:
+- Nom: {business_data.get('informations_generales', {}).get('nom_entreprise', 'Non spécifiée')}
+- Secteur: {business_data.get('informations_generales', {}).get('secteur_activite', 'Non spécifié')}
+- Template: {template_nom}
 
-BUSINESS MODEL: {str(business_model)[:500]}
+DONNÉES BUSINESS:
+{business_model}
 
-DONNÉES COLLECTÉES: {str(business_data)[:1000]}
-
-CONTENU PRÉCÉDENT: {combined_content[-1500:] if combined_content else ""}
-
-DONNÉES FINANCIÈRES: {financial_tables_text[:1000] if financial_tables_text else ""}
+DONNÉES FINANCIÈRES:
+{financial_tables_text[:800] if financial_tables_text else 'Aucune donnée financière disponible'}
 """
             
             content = generate_section(
@@ -285,6 +288,9 @@ DONNÉES FINANCIÈRES: {financial_tables_text[:1000] if financial_tables_text el
                 additional_context=full_context,
                 section_name=section_name
             )
+        
+        # Nettoyer le contenu généré pour éviter les doublons internes
+        content = clean_generated_content(content, section_name)
         
         results[section_name] = content
         
@@ -300,6 +306,54 @@ DONNÉES FINANCIÈRES: {financial_tables_text[:1000] if financial_tables_text el
         
         if placeholders and section_name in placeholders:
             placeholders[section_name].error(error_msg)
+
+def clean_generated_content(content: str, section_name: str) -> str:
+    """Nettoie le contenu généré pour éviter les doublons et améliorer le formatage"""
+    
+    # Supprimer les phrases explicatives communes de l'IA
+    phrases_to_remove = [
+        "Voici un exemple",
+        "Créer une page de couverture professionnelle est essentiel",
+        "Assurez-vous de personnaliser",
+        "Ce document est un business plan",
+        "Voici une structure",
+        "Pour analyser le marché",
+        "Il est important de",
+        "Dans le cadre de",
+        "Voici comment"
+    ]
+    
+    for phrase in phrases_to_remove:
+        if phrase in content:
+            # Supprimer le paragraphe entier qui contient cette phrase explicative
+            lines = content.split('\n')
+            cleaned_lines = []
+            skip_paragraph = False
+            
+            for line in lines:
+                if phrase in line:
+                    skip_paragraph = True
+                    continue
+                if skip_paragraph and line.strip() == "":
+                    skip_paragraph = False
+                    continue
+                if not skip_paragraph:
+                    cleaned_lines.append(line)
+            
+            content = '\n'.join(cleaned_lines)
+    
+    # Supprimer les répétitions de sections entières
+    if section_name in content:
+        # Si le nom de la section apparaît plusieurs fois, garder seulement la première occurrence
+        parts = content.split(f"## {section_name}")
+        if len(parts) > 2:
+            content = parts[0] + "## " + section_name + parts[1]
+    
+    # Nettoyer les espaces multiples et retours à la ligne excessifs
+    content = '\n'.join(line.rstrip() for line in content.split('\n'))
+    content = '\n'.join(line for line in content.split('\n') if line.strip() or content.split('\n').index(line) == 0)
+    
+    return content.strip()
 
 def collect_all_business_data() -> Dict[str, Any]:
     """Collecte toutes les données business de l'application avec logique cyclique"""
@@ -580,70 +634,100 @@ def get_fallback_sections_configuration(template_nom: str) -> Dict[str, Dict[str
 
 
 def create_export_files_cyclique(results: Dict[str, str], business_data: Dict[str, Any], template_nom: str):
-    """Crée les fichiers d'export avec style cyclique Origin.txt"""
+    """Crée les fichiers d'export avec style cyclique Origin.txt - VERSION CORRIGÉE"""
+    
+    if not results:
+        st.warning("⚠️ Aucun contenu à exporter. Générez d'abord le business plan.")
+        return
     
     st.subheader("📥 Téléchargements")
     
-    # Créer le contenu complet avec métadonnées du template
+    # Créer le contenu complet sans doublons
     complete_content = f"""# Business Plan Complet - Template {template_nom}
-**Date de génération :** {pd.Timestamp.now().strftime('%d/%m/%Y %H:%M')}
-**Entreprise :** {business_data.get('informations_generales', {}).get('nom_entreprise', 'Non spécifiée')}
-**Template utilisé :** {template_nom}
+
+**Date de génération :** {pd.Timestamp.now().strftime('%d/%m/%Y %H:%M')}  
+**Entreprise :** {business_data.get('informations_generales', {}).get('nom_entreprise', 'Non spécifiée')}  
+**Template utilisé :** {template_nom}  
 
 ---
 
 """
     
-    # Ajouter toutes les sections générées
-    for section_name, content in results.items():
-        complete_content += f"\n\n## {section_name}\n\n{content}"
+    # Ajouter toutes les sections générées SANS duplication
+    sections_order = ["Couverture", "Sommaire", "Résumé Exécutif", "Présentation de votre entreprise", 
+                     "Présentation de l'offre de produit", "Étude de marché", "Stratégie Marketing",
+                     "Moyens de production et organisation", "Étude des risques", "Plan financier", "Annexes"]
     
-    # Options d'export
+    for section_name in sections_order:
+        if section_name in results and results[section_name]:
+            # Nettoyer le contenu avant ajout
+            clean_content = clean_generated_content(results[section_name], section_name)
+            complete_content += f"\n\n{clean_content}\n\n---\n"
+    
+    # Options d'export en colonnes
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("📄 Télécharger Word"):
+        st.markdown("### 📄 Format Word")
+        if st.button("📄 Générer Word", key="btn_word"):
             try:
                 word_buffer = generate_word_document_cyclique(results, business_data, template_nom)
                 st.download_button(
-                    label="⬇️ Business Plan.docx",
+                    label="⬇️ Télécharger Business Plan.docx",
                     data=word_buffer,
                     file_name=f"business_plan_{template_nom.lower().replace(' ', '_')}.docx",
-                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    key="download_word"
                 )
+                st.success("✅ Document Word généré")
             except Exception as e:
-                st.error(f"Erreur génération Word : {str(e)}")
+                st.error(f"❌ Erreur génération Word : {str(e)}")
     
     with col2:
-        if st.button("📑 Télécharger Markdown"):
+        st.markdown("### 📑 Format Markdown")
+        if st.button("📑 Générer MD", key="btn_md"):
             st.download_button(
-                label="⬇️ Business Plan.md",
+                label="⬇️ Télécharger Business Plan.md",
                 data=complete_content,
                 file_name=f"business_plan_{template_nom.lower().replace(' ', '_')}.md",
-                mime="text/markdown"
+                mime="text/markdown",
+                key="download_md"
             )
+            st.success("✅ Document Markdown prêt")
     
     with col3:
-        if st.button("📊 Données JSON"):
+        st.markdown("### 📊 Données JSON")
+        if st.button("📊 Générer JSON", key="btn_json"):
             try:
                 export_data = {
                     "template": template_nom,
                     "timestamp": pd.Timestamp.now().isoformat(),
                     "business_data": business_data,
-                    "sections": results
+                    "sections": {k: clean_generated_content(v, k) for k, v in results.items()},
+                    "metadata": {
+                        "total_sections": len(results),
+                        "enterprise_name": business_data.get('informations_generales', {}).get('nom_entreprise', 'Non spécifiée')
+                    }
                 }
                 
                 import json
                 json_data = json.dumps(export_data, indent=2, ensure_ascii=False, default=str)
                 
                 st.download_button(
-                    label="⬇️ Données.json",
+                    label="⬇️ Télécharger Données.json",
                     data=json_data,
                     file_name=f"business_data_{template_nom.lower().replace(' ', '_')}.json",
-                    mime="application/json"
+                    mime="application/json",
+                    key="download_json"
                 )
+                st.success("✅ Données JSON prêtes")
             except Exception as e:
-                st.error(f"Erreur export JSON : {str(e)}")
+                st.error(f"❌ Erreur export JSON : {str(e)}")
+    
+    # Aperçu du contenu
+    st.markdown("### 📋 Aperçu du contenu généré")
+    with st.expander("Voir le contenu complet", expanded=False):
+        st.markdown(complete_content)
 
 def generate_word_document_cyclique(results: Dict[str, str], business_data: Dict[str, Any], template_nom: str):
     """Génère un document Word avec style cyclique et template"""
