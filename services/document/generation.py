@@ -214,6 +214,50 @@ def ajouter_tableau_financier(doc: Document, donnees: Dict[str, Any], headers: L
     doc.add_paragraph()
     doc.add_paragraph("Les résultats sont calculés selon les données fournies.")
 
+def format_table_to_markdown(table_data: List[Dict[str, Any]], title: str = "") -> str:
+    """
+    Formate des données de tableau en Markdown
+    
+    Args:
+        table_data (list): Liste de dictionnaires représentant les lignes du tableau
+        title (str): Titre optionnel du tableau
+    
+    Returns:
+        str: Tableau formaté en Markdown
+    """
+    if not table_data:
+        return f"### {title}\n\nAucune donnée disponible.\n\n" if title else "Aucune donnée disponible.\n\n"
+    
+    markdown = ""
+    if title:
+        markdown += f"### {title}\n\n"
+    
+    # Récupérer les en-têtes (clés du premier dictionnaire)
+    headers = list(table_data[0].keys())
+    
+    # Ligne d'en-têtes
+    markdown += "| " + " | ".join(headers) + " |\n"
+    
+    # Ligne de séparation
+    markdown += "| " + " | ".join(["---"] * len(headers)) + " |\n"
+    
+    # Lignes de données
+    for row in table_data:
+        values = []
+        for header in headers:
+            value = row.get(header, "")
+            # Formater les valeurs numériques
+            if isinstance(value, (int, float)):
+                if abs(value) >= 1000:
+                    value = f"{value:,.0f}".replace(",", " ")
+                else:
+                    value = f"{value:.2f}"
+            values.append(str(value))
+        markdown += "| " + " | ".join(values) + " |\n"
+    
+    markdown += "\n"
+    return markdown
+
 def generer_markdown(resultats: Dict[str, str]) -> str:
     """
     Génère le contenu Markdown à partir des résultats
