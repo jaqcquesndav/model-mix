@@ -1,6 +1,6 @@
 """
 Service de génération de business plan avec intégration des tableaux financiers
-Version cyclique adaptée d'Origin.txt avec système de templates
+Version cyclique adaptée d'Origin.txt avec système de templates professionnels
 """
 
 import streamlit as st
@@ -8,7 +8,14 @@ from typing import Dict, Any, List
 from services.ai.content_generation import generate_section, tester_connexion_openai
 from services.financial.calculations import calculer_tableaux_financiers_5_ans
 from services.document.generation import format_table_to_markdown
-from templates import get_metaprompt, get_system_messages
+from templates.business_plan_prompts import (
+    get_sections_configuration, 
+    get_business_plan_sections, 
+    get_business_plan_system_messages,
+    get_business_plan_user_queries,
+    export_template_configuration
+)
+from templates import get_metaprompt, get_system_messages  # Ancien système pour compatibilité
 import pandas as pd
 import tempfile
 import os
@@ -234,11 +241,17 @@ def generate_complete_business_plan_cyclique(uploaded_file=None, user_text_input
 
 def generate_section_cyclique(section_name, section_config, documents, combined_content, 
                             financial_tables_text, business_data, results, placeholders, template_nom):
-    """Génère une section individuelle avec la logique cyclique"""
+    """Génère une section individuelle avec la logique cyclique et le nouveau système de templates"""
     
     try:
-        system_message = section_config["system_message"]
-        query = section_config["query"]
+        # Utiliser la nouvelle configuration si disponible
+        if "system_message" in section_config and "user_query" in section_config:
+            system_message = section_config["system_message"]
+            query = section_config["user_query"]
+        else:
+            # Fallback vers l'ancienne structure
+            system_message = section_config.get("system_message", "")
+            query = section_config.get("query", section_config.get("user_query", ""))
         
         # Adaptation du contexte selon la section (comme Origin.txt)
         if section_name in ["Couverture", "Sommaire"]:
@@ -246,17 +259,30 @@ def generate_section_cyclique(section_name, section_config, documents, combined_
             content = generate_section(
                 system_message=system_message,
                 user_query=query,
-                additional_context=combined_content,
+                additional_context=combined_content[:1000],  # Limiter pour les sections simples
                 section_name=section_name
             )
         else:
             # Sections avec contexte business model et financier
             business_model = business_data.get('business_model', st.session_state.get('business_model_precedent', ''))
             
+            # Préparer le contexte complet avec données spécifiques au template
+            full_context = f"""
+CONTEXTE TEMPLATE: {template_nom}
+
+BUSINESS MODEL: {str(business_model)[:500]}
+
+DONNÉES COLLECTÉES: {str(business_data)[:1000]}
+
+CONTENU PRÉCÉDENT: {combined_content[-1500:] if combined_content else ""}
+
+DONNÉES FINANCIÈRES: {financial_tables_text[:1000] if financial_tables_text else ""}
+"""
+            
             content = generate_section(
                 system_message=system_message,
                 user_query=query,
-                additional_context=combined_content + "\n\n" + financial_tables_text,
+                additional_context=full_context,
                 section_name=section_name
             )
         
@@ -268,6 +294,8 @@ def generate_section_cyclique(section_name, section_config, documents, combined_
             
     except Exception as e:
         error_msg = f"❌ Erreur lors de la génération de {section_name}: {str(e)}"
+        st.error(f"Erreur détaillée: {str(e)}")
+        
         results[section_name] = error_msg
         
         if placeholders and section_name in placeholders:
@@ -506,191 +534,50 @@ CONCURRENCE: {business_data.get('concurrence', {})}
         return base_context
 
 def get_business_plan_sections_by_template(template_nom="COPA TRANSFORME") -> Dict[str, Dict[str, str]]:
-    """Définit les sections du business plan selon le template sélectionné avec style Origin.txt"""
+    """
+    Définit les sections du business plan selon le template sélectionné avec système professionnel
+    Utilise le nouveau système business_plan_prompts.py
+    """
+    try:
+        # Utiliser le nouveau système professionnel
+        sections_config = get_sections_configuration(template_nom)
+        return sections_config
+        
+    except Exception as e:
+        st.warning(f"Erreur lors du chargement de la configuration du template {template_nom}: {str(e)}")
+        
+        # Fallback vers l'ancien système
+        return get_fallback_sections_configuration(template_nom)
+
+def get_fallback_sections_configuration(template_nom: str) -> Dict[str, Dict[str, str]]:
+    """
+    Configuration de fallback utilisant l'ancien système template_manager
+    """
+    # Récupérer les messages système de l'ancien template
+    old_system_messages = get_system_messages(template_nom)
     
-    # Récupérer les messages système spécialisés du template
-    template_system_messages = get_system_messages(template_nom)
-    
-    # Structure de base adaptée d'Origin.txt
+    # Structure de base des sections
     base_sections = {
         "Couverture": {
-            "system_message": f"""
-            Générer cette section du business plan selon le template {template_nom}:
-            
-            # Canevas de Plans d'Affaires
-            **Template :** {template_nom}
-            
-            Nom du projet ou entreprise
-            Secteur d'activité
-            Date de création du plan
-            
-            Générer une couverture professionnelle adaptée au contexte.
-            """,
-            "query": "Créer une page de couverture professionnelle"
+            "system_message": f"Générer une couverture professionnelle pour le template {template_nom}",
+            "user_query": "Créer une page de couverture professionnelle"
         },
-        
         "Sommaire": {
-            "system_message": f"""
-            Générer cette section du business plan selon le template {template_nom}:
-            
-            ## Sommaire
-            I. Résumé Exécutif « Executive Summary » / Pitch
-            II. Présentation de votre entreprise/projet
-            III. Présentation de l'offre de produit(s) et/ou service(s)  
-            IV. Étude de marché
-            V. Stratégie marketing, communication et politique commerciale
-            VI. Moyens de production et organisation 
-            VII. Étude des risques/hypothèses  
-            VIII. Plan financier 
-            IX. Annexes
-            
-            Afficher le sommaire structuré sous forme de liste numérotée.
-            """,
-            "query": "Afficher le sommaire du business plan"
+            "system_message": f"Générer un sommaire structuré pour le template {template_nom}",
+            "user_query": "Afficher le sommaire du business plan"
         },
-        
         "Résumé Exécutif": {
-            "system_message": template_system_messages.get("business_plan", f"""
-            Vous êtes un expert en développement économique spécialisé dans le template {template_nom}.
-            
-            Générer cette section du business plan:
-            
-            ## I. Résumé Exécutif « Executive Summary » / Pitch
-            
-            Générer deux grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
-            - Attirer l'attention du lecteur en 5 minutes et lui donner envie d'en savoir plus
-            - Décrire le projet en quelques phrases simples et impactantes
-            - Ne pas essayer de tout couvrir, soyez concis et précis
-            
-            Les éléments clés à générer et qui doivent être contenus dans les paragraphes :
-            - **Présentation de la PME** : Nom de l'entreprise et brève description du service/produit fourni
-            - **Présentation des porteurs de projet** : Profil des entrepreneurs
-            - **Potentiel en termes de taille et de profit** : Démontrez comment l'entreprise fera du profit
-            - **Besoin financier** : Montant nécessaire et utilisation prévue
-            
-            Adaptez le contenu au contexte et aux spécificités du template {template_nom}.
-            """),
-            "query": "Décrire brièvement le projet, son potentiel de profit et les qualifications de l'équipe."
+            "system_message": old_system_messages.get("business_plan", f"Générer un résumé exécutif pour {template_nom}"),
+            "user_query": "Décrire brièvement le projet et son potentiel"
         },
-        
         "Présentation de votre entreprise": {
-            "system_message": template_system_messages.get("business_plan", f"""
-            Vous êtes un expert en développement économique spécialisé dans le template {template_nom}.
-            
-            Générer cette section du business plan:
-
-            ## II. Présentation de votre entreprise/projet
-
-            Générer 6 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
-            - Parler de votre entreprise/projet de manière plus détaillée
-            - Présenter l'équipe managériale clé
-
-            Les éléments clés à générer et qui doivent être contenus dans les paragraphes :
-            - **Informations générales sur la PME** : Forme juridique, siège social, coordonnées, couverture géographique
-            - **Description détaillée de la PME et objectifs** : Origine, atouts/opportunités, description du projet
-            - **Stade d'avancement** : Ce qui a été fait, projets futurs, niveau de maturité, financements acquis
-            - **Équipe managériale** : Organigramme, ressources humaines, associés et parts sociales
-            - **Analyse SWOT** : Forces, faiblesses, opportunités, contraintes/menaces (de préférence sous forme de tableau)
-            - **Business Model Canvas** : Les 9 rubriques bien remplies selon le template {template_nom}
-            
-            Adaptez le contenu aux spécificités du template {template_nom}.
-            """),
-            "query": "Présenter l'entreprise de façon complète et structurée selon le template"
+            "system_message": old_system_messages.get("business_plan", f"Présenter l'entreprise selon {template_nom}"),
+            "user_query": "Présenter l'entreprise de façon complète"
         }
     }
-    
-    # Ajouter les sections spécialisées selon le template
-    if template_nom == "COPA TRANSFORME":
-        base_sections.update(get_copa_specialized_sections())
-    elif template_nom == "Virunga":
-        base_sections.update(get_virunga_specialized_sections())
-    elif template_nom == "IP Femme":
-        base_sections.update(get_ip_femme_specialized_sections())
     
     return base_sections
 
-def get_copa_specialized_sections():
-    """Sections spécialisées pour COPA TRANSFORMÉ"""
-    return {
-        "Présentation de l'offre de produit": {
-            "system_message": """
-            Vous êtes un expert COPA TRANSFORMÉ spécialisé dans l'agrotransformation et l'autonomisation des femmes en RDC.
-            
-            ## III. Présentation de l'offre de produit(s) et/ou service(s)
-            
-            Générer 5 grands paragraphes focalisés sur :
-            - **Produits/services agroalimentaires** : Transformation locale, chaînes de valeur
-            - **Besoins identifiés** : Sécurité alimentaire, création de valeur ajoutée locale
-            - **Description détaillée** : Processus de transformation, qualité, traçabilité
-            - **Proposition de valeur unique** : Autonomisation des femmes, développement rural
-            - **Aspect genre et environnement** : Impact social, durabilité environnementale
-            
-            Intégrez les spécificités COPA TRANSFORMÉ : développement économique rural, chaînes de valeur agricoles.
-            """,
-            "query": "Décrire l'offre dans le contexte COPA TRANSFORMÉ agroalimentaire"
-        },
-        
-        "Étude de marché": {
-            "system_message": """
-            Expert COPA TRANSFORMÉ - Analyse de marché agroalimentaire RDC.
-            
-            ## IV. Étude de marché
-            
-            Analyser selon 8 axes COPA spécialisés :
-            1. **Méthodologie** : Étude des chaînes de valeur agricoles, marchés ruraux/urbains
-            2. **Marché général** : Secteur agroalimentaire RDC, sécurité alimentaire, import/export
-            3. **Demande** : Consommation locale, préférences alimentaires, pouvoir d'achat rural/urbain
-            4. **Offre concurrentielle** : Transformateurs locaux, importations, circuits informels
-            5. **Environnement** : Politique agricole, réglementation sanitaire, infrastructures rurales
-            6. **Partenariats** : Coopératives agricoles, organismes de développement, institutions de financement agricole
-            7. **Emplois** : Impact sur l'emploi rural, autonomisation des femmes, jeunes agriculteurs
-            8. **CA prévisionnel** : Saisonnalité agricole, circuits de commercialisation
-            
-            Focalisez sur le contexte rural congolais et la transformation agricole.
-            """,
-            "query": "Analyser le marché agroalimentaire selon les spécificités COPA TRANSFORMÉ"
-        }
-    }
-
-def get_virunga_specialized_sections():
-    """Sections spécialisées pour Virunga"""
-    return {
-        "Présentation de l'offre de produit": {
-            "system_message": """
-            Expert Virunga - Conservation et développement durable.
-            
-            ## III. Présentation de l'offre de produit(s) et/ou service(s)
-            
-            Générer selon l'approche Virunga :
-            - **Produits/services éco-responsables** : Écotourisme, produits forestiers durables
-            - **Besoins environnementaux** : Conservation biodiversité, développement communautaire
-            - **Description écologique** : Impact environnemental positif, durabilité
-            - **Valeur conservation** : Protection écosystème, revenus communautaires
-            - **Approche genre et environnement** : Femmes dans la conservation, éducation environnementale
-            """,
-            "query": "Décrire l'offre dans le contexte conservation Virunga"
-        }
-    }
-
-def get_ip_femme_specialized_sections():
-    """Sections spécialisées pour IP Femme"""
-    return {
-        "Présentation de l'offre de produit": {
-            "system_message": """
-            Expert IP Femme - Autonomisation économique des femmes.
-            
-            ## III. Présentation de l'offre de produit(s) et/ou service(s)
-            
-            Générer selon l'approche IP Femme :
-            - **Produits/services par les femmes** : Artisanat, services, technologies adaptées
-            - **Besoins d'autonomisation** : Indépendance économique, compétences entrepreneuriales
-            - **Description inclusive** : Accessibilité, formation, accompagnement
-            - **Valeur sociale** : Empowerment, équité genre, impact communautaire
-            - **Genre et innovation** : Leadership féminin, innovations sociales
-            """,
-            "query": "Décrire l'offre dans le contexte autonomisation IP Femme"
-        }
-    }
 
 def create_export_files_cyclique(results: Dict[str, str], business_data: Dict[str, Any], template_nom: str):
     """Crée les fichiers d'export avec style cyclique Origin.txt"""
