@@ -10,6 +10,7 @@ from datetime import datetime
 # Modèles et leurs coûts (USD par 1000 tokens)
 TOKEN_COSTS = {
     "gpt-4": {"input": 0.03, "output": 0.06},
+    "gpt-4o": {"input": 0.005, "output": 0.015},  # Tarifs actuels gpt-4o
     "gpt-4-turbo": {"input": 0.01, "output": 0.03}, 
     "gpt-3.5-turbo": {"input": 0.001, "output": 0.002}
 }

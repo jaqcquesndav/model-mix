@@ -219,60 +219,10 @@ def create_main_navigation():
         except Exception as e:
             st.error(f"Erreur lors du chargement de la page : {str(e)}")
 
-def afficher_sidebar_info():
-    """Affiche des informations complémentaires dans la sidebar"""
-    
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 📈 Progression")
-    
-    # Calcul de la progression basé sur les données complétées
-    etapes_completees = []
-    
-    if st.session_state.get('persona_data'):
-        etapes_completees.append("Persona")
-    if st.session_state.get('analyse_marche'):
-        etapes_completees.append("Analyse Marché")
-    if st.session_state.get('business_model_precedent'):
-        etapes_completees.append("Business Model")
-    if st.session_state.get('export_data_investissements'):
-        etapes_completees.append("Données Financières")
-    
-    progression = len(etapes_completees) / 4  # 4 étapes principales
-    st.sidebar.progress(progression)
-    st.sidebar.markdown(f"{len(etapes_completees)}/4 sections complétées")
-    
-    # Affichage des étapes complétées
-    for etape in etapes_completees:
-        st.sidebar.markdown(f"✅ {etape}")
-    
-    # Version et informations
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### ℹ️ Informations")
-    st.sidebar.markdown("**Version:** 2.0 (Refactorisée)")
-    st.sidebar.markdown("**Dernière mise à jour:** " + datetime.now().strftime("%d/%m/%Y"))
-    
-    # Template actuel
-    template_actuel = st.session_state.get('template_selectionne', 'COPA TRANSFORME')
-    st.sidebar.markdown(f"**Template actuel:** {template_actuel}")
-    
-    # Statut de l'API OpenAI
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("### 🔌 Statut API")
-    if test_result["status"] == "success":
-        st.sidebar.markdown("🟢 **OpenAI:** Connecté")
-        st.sidebar.markdown(f"*{test_result['details']}*")
-    elif test_result["status"] == "warning":
-        st.sidebar.markdown("🟡 **OpenAI:** Problème détecté")
-        st.sidebar.markdown(f"*{test_result['message']}*")
-    else:
-        st.sidebar.markdown("🔴 **OpenAI:** Déconnecté")
-        st.sidebar.markdown(f"*{test_result['message']}*")
-
 def handle_errors():
     """Gestion globale des erreurs"""
     try:
         main()
-        afficher_sidebar_info()
     except Exception as e:
         st.error("🚨 Une erreur inattendue s'est produite")
         st.error(f"Détails de l'erreur : {str(e)}")

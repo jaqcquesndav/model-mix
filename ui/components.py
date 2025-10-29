@@ -17,20 +17,26 @@ from utils.token_utils import (
 
 def afficher_statut_api_sidebar():
     """Affiche le statut de l'API OpenAI dans la sidebar"""
+    from services.ai.content_generation import tester_connexion_openai
+    
     st.sidebar.markdown("---")
     st.sidebar.markdown("### 🔌 Statut API")
     
-    api_key = os.getenv("API_KEY")
-    if api_key:
-        if api_key.startswith("sk-"):
-            st.sidebar.success("✅ API OpenAI configurée")
-            # Masquer partiellement la clé pour la sécurité
-            masked_key = f"{api_key[:8]}...{api_key[-4:]}"
-            st.sidebar.caption(f"Clé: {masked_key}")
+    try:
+        test_result = tester_connexion_openai()
+        
+        if test_result["status"] == "success":
+            st.sidebar.markdown("🟢 **OpenAI:** Connecté")
+            st.sidebar.markdown(f"*{test_result['details']}*")
+        elif test_result["status"] == "warning":
+            st.sidebar.markdown("🟡 **OpenAI:** Problème détecté")
+            st.sidebar.markdown(f"*{test_result['message']}*")
         else:
-            st.sidebar.warning("⚠️ Format de clé invalide")
-    else:
-        st.sidebar.error("❌ API non configurée")
+            st.sidebar.markdown("🔴 **OpenAI:** Déconnecté")
+            st.sidebar.markdown(f"*{test_result['message']}*")
+    except Exception as e:
+        st.sidebar.markdown("🔴 **OpenAI:** Erreur de test")
+        st.sidebar.markdown(f"*{str(e)}*")
         st.sidebar.caption("Définissez API_KEY dans .env")
 
 def configurer_sidebar_principal():
@@ -128,6 +134,9 @@ def configurer_sidebar_principal():
     if template_selectionne in descriptions:
         st.sidebar.info(descriptions[template_selectionne])
     
+    # Affichage de la progression
+    afficher_progression_sidebar()
+    
     # Affichage du compteur de tokens
     afficher_compteur_tokens()
 
@@ -144,12 +153,13 @@ def afficher_compteur_tokens():
     with st.sidebar.expander("⚙️ Configuration", expanded=False):
         
         # Modèle OpenAI
-        modele_actuel = st.session_state.get('token_usage', {}).get('model_used', 'gpt-4')
+        modele_actuel = st.session_state.get('modele_openai_sidebar', 'gpt-4')
         modele_selectionne = st.selectbox(
             "Modèle OpenAI",
-            ["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"],
-            index=["gpt-4", "gpt-4-turbo", "gpt-3.5-turbo"].index(modele_actuel),
-            key="modele_openai_sidebar"
+            ["gpt-4", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"],
+            index=["gpt-4", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"].index(modele_actuel) if modele_actuel in ["gpt-4", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"] else 0,
+            key="modele_openai_sidebar",
+            help="Sélectionnez le modèle OpenAI à utiliser pour la génération de contenu"
         )
         
         # Activer/désactiver la limite
@@ -509,4 +519,43 @@ def navigation_etapes():
         if etape_actuelle < len(etapes) - 1:
             if st.button("Suivant ➡️"):
                 st.session_state['etape_actuelle'] = etape_actuelle + 1
-                st.rerun()
+
+def afficher_progression_sidebar():
+    """Affiche la progression globale dans la sidebar"""
+    from datetime import datetime
+    
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 📈 Progression")
+    
+    # Calcul de la progression basé sur les données complétées
+    etapes_completees = []
+    
+    if st.session_state.get('persona_data'):
+        etapes_completees.append("Persona")
+    if st.session_state.get('analyse_marche'):
+        etapes_completees.append("Analyse Marché")
+    if st.session_state.get('business_model_precedent'):
+        etapes_completees.append("Business Model")
+    if st.session_state.get('export_data_investissements'):
+        etapes_completees.append("Données Financières")
+    
+    progression = len(etapes_completees) / 4  # 4 étapes principales
+    st.sidebar.progress(progression)
+    st.sidebar.markdown(f"{len(etapes_completees)}/4 sections complétées")
+    
+    # Affichage des étapes complétées
+    for etape in etapes_completees:
+        st.sidebar.markdown(f"✅ {etape}")
+    
+    # Version et informations
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### ℹ️ Informations")
+    st.sidebar.markdown("**Version:** 2.0 (Refactorisée)")
+    st.sidebar.markdown("**Dernière mise à jour:** " + datetime.now().strftime("%d/%m/%Y"))
+    
+    # Template actuel
+    template_actuel = st.session_state.get('template_selectionne', 'COPA TRANSFORME')
+    st.sidebar.markdown(f"**Template actuel:** {template_actuel}")
+    
+    # Statut de l'API OpenAI
+    afficher_statut_api_sidebar()

@@ -236,12 +236,16 @@ def generate_section(
     section_name: str = "Section",
     max_tokens: int = 5000,  # Utiliser 5000 comme dans Origin.txt
     temperature: float = 0.7,
-    model: str = "gpt-4o"  # Utiliser gpt-4o comme dans Origin.txt
+    model: str = None  # Sera défini automatiquement depuis la sidebar
 ) -> str:
     """
     Génère du contenu pour une section spécifique du business model
     Version adaptée d'Origin.txt avec gestion d'erreurs améliorée
     """
+    # Utiliser le modèle sélectionné dans la sidebar ou valeur par défaut
+    if model is None:
+        model = st.session_state.get('modele_openai_sidebar', 'gpt-4')
+    
     try:
         client = initialiser_openai()
         if not client:
@@ -263,7 +267,7 @@ def generate_section(
         ]
         
         # Vérification des tokens avant l'appel
-        total_tokens = count_tokens_messages(messages, model=model)
+        total_tokens = count_tokens_messages(messages, model_name=model)
         if not check_token_limits(total_tokens + max_tokens):
             st.warning("⚠️ Limite de tokens atteinte. Requête simplifiée.")
             return ""
@@ -286,8 +290,7 @@ def generate_section(
             # Mise à jour des statistiques de tokens
             usage = response.usage
             if usage:
-                cost = calculate_cost(usage.total_tokens, model)
-                update_token_usage(usage.prompt_tokens, usage.completion_tokens, cost)
+                update_token_usage(usage.prompt_tokens, usage.completion_tokens, model)
             
             return content
             
@@ -309,8 +312,7 @@ def generate_section(
                 # Mise à jour des tokens pour le modèle alternatif
                 usage = response.usage
                 if usage:
-                    cost = calculate_cost(usage.total_tokens, "gpt-3.5-turbo")
-                    update_token_usage(usage.prompt_tokens, usage.completion_tokens, cost)
+                    update_token_usage(usage.prompt_tokens, usage.completion_tokens, "gpt-3.5-turbo")
                 
                 return content
             else:
