@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration de l'API OpenAI avec test de connectivité
-from services.ai.content_generation import initialiser_openai, tester_connexion_openai
+from services.ai.content_generation import initialiser_openai, tester_connexion_openai, cleanup_resources
 
 # Initialiser OpenAI et tester la connectivité
 client_openai = initialiser_openai()
@@ -57,6 +57,12 @@ except ImportError as e:
 
 def main():
     """Fonction principale de l'application"""
+    
+    # Nettoyage périodique des ressources en début de session
+    try:
+        cleanup_resources()
+    except Exception:
+        pass  # Nettoyage silencieux
     
     # Initialisation du session state
     init_session_state()

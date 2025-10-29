@@ -890,6 +890,7 @@ def add_table_with_borders_cyclique(doc, table_data):
 
 def process_uploaded_pdf(uploaded_file):
     """Traite un fichier PDF uploadé (comme dans Origin.txt)"""
+    tmp_file_path = None
     try:
         # Sauvegarder temporairement le fichier
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
@@ -900,16 +901,17 @@ def process_uploaded_pdf(uploaded_file):
         from services.ai.content_generation import load_and_split_documents
         documents = load_and_split_documents(tmp_file_path)
         
-        # Nettoyer le fichier temporaire
-        os.unlink(tmp_file_path)
-        
         return documents
         
     except Exception as e:
         st.error(f"Erreur lors du traitement du PDF : {str(e)}")
         return []
+    
+    finally:
+        # Nettoyer le fichier temporaire même en cas d'erreur
+        if tmp_file_path and os.path.exists(tmp_file_path):
+            try:
+                os.unlink(tmp_file_path)
+            except OSError:
+                pass  # Ignorer les erreurs de suppression
 
-def process_uploaded_pdf(uploaded_file):
-    """Traite un fichier PDF uploadé"""
-    # À implémenter si nécessaire
-    return []

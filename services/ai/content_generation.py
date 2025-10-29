@@ -12,11 +12,47 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
 import os
 import tempfile
+import gc
+import threading
 from openai import OpenAI
 from utils.token_utils import (
     count_tokens, count_tokens_messages, update_token_usage, 
     check_token_limits, init_token_counter, calculate_cost
 )
+import time
+
+def cleanup_resources():
+    """
+    Nettoie les ressources système pour éviter l'accumulation de fichiers ouverts
+    """
+    try:
+        # Forcer le garbage collection
+        gc.collect()
+        
+        # Nettoyer les fichiers temporaires orphelins
+        temp_dir = tempfile.gettempdir()
+        for filename in os.listdir(temp_dir):
+            if filename.startswith('tmp') and filename.endswith('.pdf'):
+                try:
+                    file_path = os.path.join(temp_dir, filename)
+                    # Vérifier si le fichier n'est pas utilisé (plus ancien que 1 heure)
+                    if os.path.getmtime(file_path) < (time.time() - 3600):
+                        os.unlink(file_path)
+                except (OSError, IOError):
+                    pass  # Ignorer les erreurs de nettoyage
+                    
+    except Exception:
+        pass  # Nettoyage silencieux
+
+def create_openai_client() -> Optional[OpenAI]:
+    """
+    Crée un nouveau client OpenAI avec gestion des ressources
+    """
+    try:
+        client = initialiser_openai()
+        return client
+    except Exception:
+        return None
 
 # Configuration OpenAI
 def initialiser_openai():
@@ -133,6 +169,7 @@ def load_and_split_documents(file_path: str) -> List[Document]:
     Returns:
         List[Document]: Liste des documents segmentés
     """
+    loader = None
     try:
         loader = PyPDFLoader(file_path)
         documents = loader.load()
@@ -149,6 +186,15 @@ def load_and_split_documents(file_path: str) -> List[Document]:
     except Exception as e:
         st.error(f"Erreur lors du chargement du document : {e}")
         return []
+    
+    finally:
+        # Nettoyage explicite des ressources
+        if loader:
+            try:
+                del loader
+            except:
+                pass
+        cleanup_resources()
 
 def create_vector_store(documents: List[Document]) -> Optional[FAISS]:
     """
@@ -199,35 +245,42 @@ def upload_and_process_pdf():
     uploaded_file = st.file_uploader("Télécharger un document PDF", type="pdf")
     
     if uploaded_file is not None:
-        # Sauvegarder temporairement le fichier
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
-            tmp_file.write(uploaded_file.getvalue())
-            tmp_file_path = tmp_file.name
-        
-        # Traiter le document
-        with st.spinner("Traitement du document..."):
-            documents = load_and_split_documents(tmp_file_path)
+        tmp_file_path = None
+        try:
+            # Sauvegarder temporairement le fichier
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmp_file:
+                tmp_file.write(uploaded_file.getvalue())
+                tmp_file_path = tmp_file.name
             
-            if documents:
-                vector_store = create_vector_store(documents)
+            # Traiter le document
+            with st.spinner("Traitement du document..."):
+                documents = load_and_split_documents(tmp_file_path)
                 
-                if vector_store:
-                    st.session_state['vector_store'] = vector_store
-                    st.success(f"Document traité avec succès ! {len(documents)} segments créés.")
+                if documents:
+                    vector_store = create_vector_store(documents)
                     
-                    # Interface de recherche
-                    query = st.text_input("Rechercher dans le document:")
-                    if query:
-                        results = search_similar_content(vector_store, query)
-                        if results:
-                            st.write("**Résultats trouvés:**")
-                            for i, result in enumerate(results, 1):
-                                st.write(f"**Résultat {i}:**")
-                                st.write(result[:500] + "..." if len(result) > 500 else result)
-                                st.write("---")
+                    if vector_store:
+                        st.session_state['vector_store'] = vector_store
+                        st.success(f"Document traité avec succès ! {len(documents)} segments créés.")
+                        
+                        # Interface de recherche
+                        query = st.text_input("Rechercher dans le document:")
+                        if query:
+                            results = search_similar_content(vector_store, query)
+                            if results:
+                                st.write("**Résultats trouvés:**")
+                                for i, result in enumerate(results, 1):
+                                    st.write(f"**Résultat {i}:**")
+                                    st.write(result[:500] + "..." if len(result) > 500 else result)
+                                    st.write("---")
         
-        # Nettoyer le fichier temporaire
-        os.unlink(tmp_file_path)
+        finally:
+            # Nettoyer le fichier temporaire même en cas d'erreur
+            if tmp_file_path and os.path.exists(tmp_file_path):
+                try:
+                    os.unlink(tmp_file_path)
+                except OSError:
+                    pass  # Ignorer les erreurs de suppression
 
 def generate_section(
     system_message: str, 
@@ -347,6 +400,13 @@ def generate_section(
             st.warning("⏱️ Limite de taux atteinte. Veuillez patienter.")
         
         return ""
+    
+    finally:
+        # Nettoyer les ressources après la génération
+        try:
+            cleanup_resources()
+        except Exception:
+            pass  # Nettoyage silencieux
 
 def get_available_models() -> Dict[str, Dict[str, Any]]:
     """
