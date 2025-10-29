@@ -17,7 +17,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration de l'API OpenAI avec test de connectivité
-from services.ai.content_generation import initialiser_openai, tester_connexion_openai, render_model_selector_sidebar
+from services.ai.content_generation import initialiser_openai, tester_connexion_openai
 
 # Initialiser OpenAI et tester la connectivité
 client_openai = initialiser_openai()
@@ -63,9 +63,6 @@ def main():
     
     # Configuration de la sidebar principale
     configurer_sidebar_principal()
-    
-    # Configuration du sidebar de sélection de modèle OpenAI
-    render_model_selector_sidebar()
     
     # Affichage du titre principal avec le template sélectionné
     template_actuel = st.session_state.get('template_selectionne', 'COPA TRANSFORME')

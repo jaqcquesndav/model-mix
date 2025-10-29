@@ -152,15 +152,52 @@ def afficher_compteur_tokens():
     # Configuration de la limite
     with st.sidebar.expander("⚙️ Configuration", expanded=False):
         
-        # Modèle OpenAI
-        modele_actuel = st.session_state.get('modele_openai_sidebar', 'gpt-4')
-        modele_selectionne = st.selectbox(
+        # Modèle OpenAI - Gamme complète 2024-2025
+        modeles_disponibles = [
+            "gpt-4o",           # Recommandé - Meilleur rapport qualité/prix
+            "gpt-4-turbo",      # Très performant
+            "gpt-4",            # Stable et fiable
+            "gpt-4o-mini",      # Économique
+            "o1-preview",       # Raisonnement complexe
+            "o1-mini"           # Raisonnement économique
+        ]
+        
+        # Informations de coût pour affichage
+        couts_modeles = {
+            "gpt-4o": "$0.005/$0.015 per 1K tokens",
+            "gpt-4-turbo": "$0.010/$0.030 per 1K tokens", 
+            "gpt-4": "$0.030/$0.060 per 1K tokens",
+            "gpt-4o-mini": "$0.00015/$0.0006 per 1K tokens",
+            "o1-preview": "$0.015/$0.060 per 1K tokens",
+            "o1-mini": "$0.003/$0.012 per 1K tokens"
+        }
+        
+        modele_actuel = st.session_state.get('modele_openai_sidebar', 'gpt-4o')
+        
+        # Options d'affichage avec coûts
+        options_affichage = []
+        for modele in modeles_disponibles:
+            cout = couts_modeles.get(modele, "Coût N/A")
+            if modele == "gpt-4o":
+                options_affichage.append(f"{modele} (Recommandé) - {cout}")
+            elif modele == "gpt-4o-mini":
+                options_affichage.append(f"{modele} (Économique) - {cout}")
+            elif modele in ["o1-preview", "o1-mini"]:
+                options_affichage.append(f"{modele} (Raisonnement) - {cout}")
+            else:
+                options_affichage.append(f"{modele} - {cout}")
+        
+        option_selectionnee = st.selectbox(
             "Modèle OpenAI",
-            ["gpt-4", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"],
-            index=["gpt-4", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"].index(modele_actuel) if modele_actuel in ["gpt-4", "gpt-4o", "gpt-4-turbo", "gpt-3.5-turbo"] else 0,
-            key="modele_openai_sidebar",
-            help="Sélectionnez le modèle OpenAI à utiliser pour la génération de contenu"
+            options_affichage,
+            index=modeles_disponibles.index(modele_actuel) if modele_actuel in modeles_disponibles else 0,
+            key="modele_openai_selectbox",
+            help="Sélectionnez le modèle OpenAI à utiliser pour la génération de contenu. gpt-4o offre le meilleur équilibre qualité/prix."
         )
+        
+        # Extraire le nom du modèle réel de l'option sélectionnée
+        modele_selectionne = option_selectionnee.split(" ")[0]
+        st.session_state['modele_openai_sidebar'] = modele_selectionne
         
         # Activer/désactiver la limite
         limite_activee = st.checkbox(
