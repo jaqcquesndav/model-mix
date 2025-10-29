@@ -5,11 +5,11 @@ Service de génération de contenu par Intelligence Artificielle
 import openai
 import streamlit as st
 from typing import List, Dict, Any, Optional
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter  # Import correct
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.document_loaders import PyPDFLoader
-from langchain.schema import Document
+from langchain_core.documents import Document
 import os
 import tempfile
 from openai import OpenAI
@@ -31,6 +31,72 @@ def initialiser_openai():
         client = OpenAI(api_key=api_key)
         return client
     return None
+
+def tester_connexion_openai() -> Dict[str, Any]:
+    """
+    Teste la connexion à l'API OpenAI et retourne le statut
+    Fonction inspirée des tests de Origin.txt
+    """
+    try:
+        client = initialiser_openai()
+        if not client:
+            return {
+                "status": "error",
+                "message": "Clé API OpenAI non configurée",
+                "details": "Variable d'environnement API_KEY manquante"
+            }
+        
+        # Test simple avec un message court (comme dans Origin.txt)
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "Tu es un assistant de test."},
+                {"role": "user", "content": "Réponds juste 'OK' pour confirmer la connexion."},
+            ],
+            max_tokens=10,
+            temperature=0.1
+        )
+        
+        if response.choices[0].message.content:
+            return {
+                "status": "success",
+                "message": "Connexion OpenAI active",
+                "details": f"Modèle: gpt-3.5-turbo | Tokens: {response.usage.total_tokens if response.usage else 'N/A'}",
+                "model_used": "gpt-3.5-turbo"
+            }
+        else:
+            return {
+                "status": "warning",
+                "message": "Réponse API vide",
+                "details": "La connexion fonctionne mais la réponse est vide"
+            }
+            
+    except Exception as e:
+        error_message = str(e)
+        if "API key" in error_message:
+            return {
+                "status": "error",
+                "message": "Erreur de clé API",
+                "details": f"Vérifiez votre clé API_KEY: {error_message}"
+            }
+        elif "quota" in error_message.lower():
+            return {
+                "status": "error",
+                "message": "Quota API dépassé",
+                "details": f"Limite de quota atteinte: {error_message}"
+            }
+        elif "rate limit" in error_message.lower():
+            return {
+                "status": "warning",
+                "message": "Limite de taux atteinte",
+                "details": f"Trop de requêtes: {error_message}"
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "Erreur de connexion",
+                "details": f"Erreur technique: {error_message}"
+            }
 
 def load_and_split_documents(file_path: str) -> List[Document]:
     """
@@ -143,19 +209,21 @@ def generate_section(
     user_query: str, 
     additional_context: str = "", 
     section_name: str = "Section",
-    max_tokens: int = 800,
-    temperature: float = 0.7
+    max_tokens: int = 5000,  # Utiliser 5000 comme dans Origin.txt
+    temperature: float = 0.7,
+    model: str = "gpt-4o"  # Utiliser gpt-4o comme dans Origin.txt
 ) -> str:
     """
     Génère du contenu pour une section spécifique du business model
+    Version adaptée d'Origin.txt avec gestion d'erreurs améliorée
     """
     try:
         client = initialiser_openai()
         if not client:
-            st.error("Configuration OpenAI non disponible")
+            st.error("❌ Configuration OpenAI non disponible")
             return ""
         
-        # Construire le contexte complet
+        # Construire le contexte complet (comme dans Origin.txt)
         full_context = ""
         if additional_context:
             full_context = f"\n\nContexte additionnel:\n{additional_context}"
@@ -163,43 +231,78 @@ def generate_section(
         # Construire le prompt final
         full_prompt = f"{user_query}{full_context}"
         
-        # Messages pour l'API
+        # Messages pour l'API (format exact d'Origin.txt)
         messages = [
-            {"role": "system", "content": system_message},
+            {"role": "system", "content": "Tu es un assistant expert en génération de business et business plan."},  # Message exact d'Origin.txt
             {"role": "user", "content": full_prompt}
         ]
         
         # Vérification des tokens avant l'appel
-        total_tokens = count_tokens_messages(messages, model="gpt-3.5-turbo")
+        total_tokens = count_tokens_messages(messages, model=model)
         if not check_token_limits(total_tokens + max_tokens):
-            st.warning("Limite de tokens atteinte. Requête simplifiée.")
+            st.warning("⚠️ Limite de tokens atteinte. Requête simplifiée.")
             return ""
         
         # Initialiser le compteur de tokens si nécessaire
         init_token_counter()
         
-        # Appel à l'API OpenAI
-        response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=messages,
-            max_tokens=max_tokens,
-            temperature=temperature
-        )
-        
-        # Extraire le contenu
-        content = response.choices[0].message.content
-        
-        # Mise à jour des statistiques de tokens
-        usage = response.usage
-        if usage:
-            cost = calculate_cost(usage.total_tokens, "gpt-3.5-turbo")
-            update_token_usage(usage.prompt_tokens, usage.completion_tokens, cost)
-        
-        return content
+        # Appel à l'API OpenAI (format adapté d'Origin.txt)
+        try:
+            response = client.chat.completions.create(
+                model=model,  # gpt-4o par défaut comme dans Origin.txt
+                messages=messages,
+                max_tokens=max_tokens,
+                temperature=temperature
+            )
+            
+            # Extraire le contenu (comme dans Origin.txt)
+            content = response.choices[0].message.content.strip()
+            
+            # Mise à jour des statistiques de tokens
+            usage = response.usage
+            if usage:
+                cost = calculate_cost(usage.total_tokens, model)
+                update_token_usage(usage.prompt_tokens, usage.completion_tokens, cost)
+            
+            return content
+            
+        except Exception as api_error:
+            error_str = str(api_error)
+            
+            # Gestion spécifique des erreurs comme dans Origin.txt
+            if "model" in error_str.lower() and "gpt-4o" in error_str:
+                st.warning(f"⚠️ GPT-4o non disponible, fallback vers GPT-3.5-turbo pour {section_name}")
+                # Retry avec GPT-3.5-turbo
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=messages,
+                    max_tokens=min(max_tokens, 4096),  # Limite pour GPT-3.5
+                    temperature=temperature
+                )
+                content = response.choices[0].message.content.strip()
+                
+                # Mise à jour des tokens pour le modèle alternatif
+                usage = response.usage
+                if usage:
+                    cost = calculate_cost(usage.total_tokens, "gpt-3.5-turbo")
+                    update_token_usage(usage.prompt_tokens, usage.completion_tokens, cost)
+                
+                return content
+            else:
+                raise api_error
         
     except Exception as e:
         error_msg = f"Erreur génération {section_name}: {str(e)}"
         st.error(error_msg)
+        
+        # Log détaillé pour debugging (comme dans Origin.txt)
+        if "API key" in str(e):
+            st.error("🔑 Problème de clé API. Vérifiez votre configuration.")
+        elif "quota" in str(e).lower():
+            st.error("💳 Quota API dépassé. Vérifiez votre compte OpenAI.")
+        elif "rate limit" in str(e).lower():
+            st.warning("⏱️ Limite de taux atteinte. Veuillez patienter.")
+        
         return ""
 
 def generer_business_model_canvas(donnees: Dict[str, Any], template_nom: str = "COPA TRANSFORME") -> Dict[str, str]:

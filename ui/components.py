@@ -3,6 +3,7 @@ Configuration et widgets communs pour l'interface utilisateur
 """
 
 import streamlit as st
+import os
 from typing import Dict, List, Any, Optional
 from templates import get_templates_list, get_secteurs
 from utils.token_utils import (
@@ -13,6 +14,24 @@ from utils.token_utils import (
     formater_nombre_tokens,
     obtenir_pourcentage_utilisation
 )
+
+def afficher_statut_api_sidebar():
+    """Affiche le statut de l'API OpenAI dans la sidebar"""
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🔌 Statut API")
+    
+    api_key = os.getenv("API_KEY")
+    if api_key:
+        if api_key.startswith("sk-"):
+            st.sidebar.success("✅ API OpenAI configurée")
+            # Masquer partiellement la clé pour la sécurité
+            masked_key = f"{api_key[:8]}...{api_key[-4:]}"
+            st.sidebar.caption(f"Clé: {masked_key}")
+        else:
+            st.sidebar.warning("⚠️ Format de clé invalide")
+    else:
+        st.sidebar.error("❌ API non configurée")
+        st.sidebar.caption("Définissez API_KEY dans .env")
 
 def configurer_sidebar_principal():
     """Configure la sidebar principale avec les paramètres globaux"""
@@ -48,6 +67,9 @@ def configurer_sidebar_principal():
     # Secteur d'activité basé sur le template sélectionné et le type d'entreprise
     secteurs = get_secteurs(template_selectionne, type_entreprise)
     secteur_actuel = st.session_state.get('secteur_activite', secteurs[0] if secteurs else '')
+    
+    # Afficher le statut de l'API
+    afficher_statut_api_sidebar()
     
     # Si on change de type d'entreprise, réinitialiser le secteur
     if st.session_state.get('previous_type_entreprise') != type_entreprise:

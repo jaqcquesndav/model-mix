@@ -10,6 +10,20 @@ from datetime import datetime, date
 import pandas as pd
 import numpy as np
 from io import BytesIO
+import openai
+from dotenv import load_dotenv
+
+# Charger les variables d'environnement
+load_dotenv()
+
+# Configuration de l'API OpenAI (comme dans Origin.txt)
+api_key = os.getenv("API_KEY")
+if api_key:
+    openai.api_key = api_key
+    # Afficher un message de statut dans la sidebar plus tard
+    os.environ["OPENAI_API_KEY"] = api_key
+else:
+    st.warning("⚠️ Clé API OpenAI non configurée. Veuillez définir la variable d'environnement API_KEY.")
 
 # Configuration de la page Streamlit
 st.set_page_config(

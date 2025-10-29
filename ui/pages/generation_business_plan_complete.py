@@ -5,7 +5,7 @@ Version cyclique adaptée d'Origin.txt avec système de templates
 
 import streamlit as st
 from typing import Dict, Any, List
-from services.ai.content_generation import generate_section
+from services.ai.content_generation import generate_section, tester_connexion_openai
 from services.financial.calculations import calculer_tableaux_financiers_5_ans
 from services.document.generation import format_table_to_markdown
 from templates import get_metaprompt, get_system_messages
@@ -16,6 +16,24 @@ import os
 def page_generation_business_plan_integree():
     """Page de génération du business plan avec tableaux financiers intégrés - Version cyclique"""
     st.title("🎯 Générateur de Business Plan Complet")
+    
+    # Test de connectivité OpenAI au début (comme dans Origin.txt)
+    st.markdown("### 🔌 Statut de la connexion IA")
+    with st.expander("Vérifier la connexion OpenAI", expanded=False):
+        if st.button("🧪 Tester la connexion API"):
+            with st.spinner("Test de connexion en cours..."):
+                status = tester_connexion_openai()
+                
+                if status["status"] == "success":
+                    st.success(f"✅ {status['message']}")
+                    st.info(f"📊 {status['details']}")
+                elif status["status"] == "warning":
+                    st.warning(f"⚠️ {status['message']}")
+                    st.info(f"📋 {status['details']}")
+                else:
+                    st.error(f"❌ {status['message']}")
+                    st.error(f"📋 {status['details']}")
+                    st.stop()  # Arrêter l'exécution si l'API ne fonctionne pas
     
     # Récupération du template sélectionné
     template_actuel = st.session_state.get('template_selectionne', 'COPA TRANSFORME')
