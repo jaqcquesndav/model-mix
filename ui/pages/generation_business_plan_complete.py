@@ -15,6 +15,18 @@ from templates.business_plan_prompts import (
     get_business_plan_user_queries
 )
 from templates import get_metaprompt, get_system_messages  # Ancien système pour compatibilité
+
+def generate_section_origin(system_message, query, documents, combined_content, tableau_financier, business_model):
+    """
+    Fonction de génération EXACTE copiée d'Origin.txt
+    """
+    return generate_section(
+        system_message=system_message,
+        user_query=query,
+        additional_context=combined_content + "\n\n" + tableau_financier + "\n\n" + str(business_model),
+        section_name="",
+        documents=documents
+    )
 import pandas as pd
 import tempfile
 import os
@@ -110,9 +122,9 @@ def page_generation_business_plan_integree():
 
 def generate_complete_business_plan_cyclique(uploaded_file=None, user_text_input="", template_nom="COPA TRANSFORME", 
                                            use_workflow_data=True, show_progress=True, split_generation=True):
-    """Génère un business plan complet avec stratégie cyclique adaptée d'Origin.txt"""
+    """Génère un business plan complet avec stratégie EXACTE d'Origin.txt"""
     
-    # 1. Préparation des documents et contexte
+    # 1. Préparation des documents et contexte (comme Origin.txt)
     documents = []
     combined_content = user_text_input if user_text_input else ""
     
@@ -121,122 +133,125 @@ def generate_complete_business_plan_cyclique(uploaded_file=None, user_text_input
         if documents:
             st.success(f"✅ {len(documents)} documents PDF traités")
     
-    # 2. Récupération des données selon les options
+    # 2. Récupération des données selon les options (comme Origin.txt)
     business_data = {}
-    financial_tables_text = ""
+    final_text = ""  # Équivalent des tableaux financiers dans Origin.txt
     
     if use_workflow_data:
         business_data = collect_all_business_data()
         financial_tables = generate_all_financial_tables()
-        financial_tables_text = financial_tables.get('formatted_text', '')
+        final_text = financial_tables.get('formatted_text', '')
         
         if business_data:
             st.success("✅ Données du workflow récupérées")
     
-    # 3. Configuration des sections selon le template
-    sections_config = get_business_plan_sections_by_template(template_nom)
+    # 3. Configuration des sections selon le template (VERSION ORIGIN)
+    sections_config = get_sections_configuration(template_nom)
     
-    # 4. Génération cyclique avec stratégie d'Origin.txt
-    results = {}
-    placeholders = {}
+    # 4. Extraire system_messages et queries comme dans Origin.txt
+    system_messages = {}
+    queries = {}
+    
+    for section_name, config in sections_config.items():
+        system_messages[section_name] = config["system_message"]
+        queries[section_name] = config["user_query"]
+    
+    # 5. Créer les placeholders pour affichage temps réel (comme Origin.txt)
+    results_first_part = {}
+    results_second_part = {}
     
     if show_progress:
-        # Créer des espaces réservés pour chaque section
-        placeholders = {name: st.empty() for name in sections_config.keys()}
+        placeholders = {name: st.empty() for name in system_messages.keys()}
+    else:
+        placeholders = {}
     
-    # 5. Logique de génération en deux phases (comme Origin.txt)
+    # 6. Définir l'ordre des sections et la division (comme Origin.txt)
+    section_order = list(system_messages.keys())
+    
     if split_generation:
-        # Définir le point de séparation 
-        section_order = list(sections_config.keys())
-        split_section = "Présentation de votre entreprise"
-        
-        # Séparer les sections en deux groupes
-        first_part = []
+        # Point de séparation (comme dans Origin.txt)
+        split_point = "Présentation de votre entreprise"
+        try:
+            split_index = section_order.index(split_point)
+            first_part = section_order[:split_index+1]
+            second_part = section_order[split_index+1:]
+        except ValueError:
+            first_part = section_order[:4]  # Fallback
+            second_part = section_order[4:]
+    else:
+        first_part = section_order
         second_part = []
-        for section in section_order:
-            if section == split_section:
-                first_part.append(section)
-                second_part = section_order[section_order.index(section)+1:]
-                break
-            else:
-                first_part.append(section)
-        
-        # Génération première partie
-        st.markdown("### 🔄 **Phase 1 : Sections fondamentales**")
-        progress_bar_1 = st.progress(0)
-        
-        for i, section_name in enumerate(first_part):
-            if show_progress:
-                with st.spinner(f"🎯 Génération de {section_name}..."):
-                    generate_section_cyclique(
-                        section_name, sections_config[section_name], documents,
-                        combined_content, financial_tables_text, business_data,
-                        results, placeholders, template_nom
+    
+    # 7. GÉNÉRATION PREMIÈRE PARTIE (EXACTEMENT comme Origin.txt)
+    st.markdown("### 🔄 **Phase 1 : Sections fondamentales**")
+    progress_bar_1 = st.progress(0)
+    
+    for i, section_name in enumerate(first_part):
+        with st.spinner(f"Génération de {section_name}..."):
+            system_message = system_messages[section_name]
+            query = queries[section_name]
+            
+            try:
+                # LOGIQUE EXACTE D'ORIGIN.TXT
+                if section_name in ["Couverture", "Sommaire"]:
+                    results_first_part[section_name] = generate_section_origin(
+                        system_message, query, documents, combined_content, "", business_model=""
                     )
-                    combined_content += " " + results[section_name]
-            else:
-                generate_section_cyclique(
-                    section_name, sections_config[section_name], documents,
-                    combined_content, financial_tables_text, business_data,
-                    results, placeholders, template_nom
-                )
-                combined_content += " " + results[section_name]
+                else:
+                    results_first_part[section_name] = generate_section_origin(
+                        system_message, query, documents, combined_content, final_text, 
+                        business_model=st.session_state.get('business_model_precedent', '')
+                    )
+            except ValueError as e:
+                results_first_part[section_name] = f"Erreur: {str(e)}"
+            
+            # ACCUMULATION DU CONTENU comme dans Origin.txt
+            combined_content += " " + results_first_part[section_name]
+            
+            # Affichage temps réel
+            if placeholders and section_name in placeholders:
+                placeholders[section_name].markdown(f"\n\n### {section_name}\n{results_first_part[section_name]}")
             
             progress_bar_1.progress((i + 1) / len(first_part))
-        
-        st.success("✅ Phase 1 terminée")
-        
-        # Génération seconde partie
+    
+    st.success("✅ Phase 1 terminée")
+    
+    # 8. GÉNÉRATION SECONDE PARTIE (si nécessaire)
+    if second_part:
         st.markdown("### 🔄 **Phase 2 : Sections avancées**")
         progress_bar_2 = st.progress(0)
         
         for i, section_name in enumerate(second_part):
-            if show_progress:
-                with st.spinner(f"🎯 Génération de {section_name}..."):
-                    generate_section_cyclique(
-                        section_name, sections_config[section_name], documents,
-                        combined_content, financial_tables_text, business_data,
-                        results, placeholders, template_nom
+            with st.spinner(f"Génération de {section_name}..."):
+                system_message = system_messages[section_name]
+                query = queries[section_name]
+                
+                try:
+                    results_second_part[section_name] = generate_section_origin(
+                        system_message, query, documents, combined_content, final_text,
+                        business_model=st.session_state.get('business_model_precedent', '')
                     )
-                    combined_content += " " + results[section_name]
-            else:
-                generate_section_cyclique(
-                    section_name, sections_config[section_name], documents,
-                    combined_content, financial_tables_text, business_data,
-                    results, placeholders, template_nom
-                )
-                combined_content += " " + results[section_name]
-            
-            progress_bar_2.progress((i + 1) / len(second_part))
+                except ValueError as e:
+                    results_second_part[section_name] = f"Erreur: {str(e)}"
+                
+                combined_content += " " + results_second_part[section_name]
+                
+                if placeholders and section_name in placeholders:
+                    placeholders[section_name].markdown(f"\n\n### {section_name}\n{results_second_part[section_name]}")
+                
+                progress_bar_2.progress((i + 1) / len(second_part))
         
         st.success("✅ Phase 2 terminée")
-        
-    else:
-        # Génération continue
-        progress_bar = st.progress(0)
-        section_list = list(sections_config.keys())
-        
-        for i, section_name in enumerate(section_list):
-            if show_progress:
-                with st.spinner(f"🎯 Génération de {section_name}..."):
-                    generate_section_cyclique(
-                        section_name, sections_config[section_name], documents,
-                        combined_content, financial_tables_text, business_data,
-                        results, placeholders, template_nom
-                    )
-                    combined_content += " " + results[section_name]
-            else:
-                generate_section_cyclique(
-                    section_name, sections_config[section_name], documents,
-                    combined_content, financial_tables_text, business_data,
-                    results, placeholders, template_nom
-                )
-                combined_content += " " + results[section_name]
-            
-            progress_bar.progress((i + 1) / len(section_list))
     
-    # 6. Génération des fichiers de sortie
-    create_export_files_cyclique(results, business_data, template_nom)
+    # 9. Combiner tous les résultats
+    all_results = {**results_first_part, **results_second_part}
+    
+    # 10. Génération des fichiers de sortie (comme Origin.txt)
+    create_export_files_cyclique(all_results, business_data, template_nom)
+
+def create_export_files_origin_style(results: Dict[str, str], business_data: Dict[str, Any], template_nom: str):
+    """Fonction d'export dans le style Origin.txt"""
+    return create_export_files_cyclique(results, business_data, template_nom)
 
 def generate_section_cyclique(section_name, section_config, documents, combined_content, 
                             financial_tables_text, business_data, results, placeholders, template_nom):
