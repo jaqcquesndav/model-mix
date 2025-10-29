@@ -132,7 +132,7 @@ def afficher_tableau_investissements(data: Dict[str, Any]):
     # Afficher le tableau
     if tableau_data:
         df = pd.DataFrame(tableau_data)
-        st.dataframe(df, use_container_width=True, hide_index=True)
+        st.dataframe(df, width='stretch', hide_index=True)
         
         # Graphique de répartition
         if total_general > 0:
@@ -256,7 +256,7 @@ def afficher_tableau_financements(data: Dict[str, Any]):
     # Affichage
     if tableau_fin:
         df_fin = pd.DataFrame(tableau_fin)
-        st.dataframe(df_fin, use_container_width=True, hide_index=True)
+        st.dataframe(df_fin, width='stretch', hide_index=True)
         
         # Équilibre besoins/financements
         st.divider()

@@ -186,7 +186,7 @@ def afficher_analyse_concurrence():
     # Affichage du tableau avec style
     st.dataframe(
         df,
-        use_container_width=True,
+        width='stretch',
         hide_index=True
     )
     
@@ -269,7 +269,7 @@ def afficher_resume_graphique(tableau_data, criteres):
                     title="Profil concurrentiel de votre entreprise"
                 )
                 
-                st.plotly_chart(fig, use_container_width=True)
+                st.plotly_chart(fig, width='stretch')
             
         except (ImportError, ModuleNotFoundError):
             # Fallback si plotly n'est pas disponible

@@ -294,4 +294,4 @@ def afficher_tableau_recapitulatif_financier(data: Dict[str, Any]):
         for col in annees:
             df_recap[col] = df_recap[col].apply(lambda x: f"{x:,.0f}")
         
-        st.dataframe(df_recap, use_container_width=True)
+        st.dataframe(df_recap, width='stretch')

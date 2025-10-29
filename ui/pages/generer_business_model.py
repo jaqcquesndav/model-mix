@@ -85,7 +85,7 @@ def page_generer_business_model():
         )
         
         # Bouton de génération principal
-        if st.button("🎯 **Générer mon Business Model**", type="primary", use_container_width=True):
+        if st.button("🎯 **Générer mon Business Model**", type="primary", width='stretch'):
             with st.spinner("⏳ Génération en cours..."):
                 try:
                     business_model_genere = obtenir_business_model(

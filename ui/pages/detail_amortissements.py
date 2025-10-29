@@ -109,7 +109,7 @@ def afficher_plan_amortissement_detaille(data: Dict[str, Any]):
         
         # Créer le DataFrame
         df_recap = create_dataframe_amortissements(amort_par_annee)
-        st.dataframe(df_recap, use_container_width=True)
+        st.dataframe(df_recap, width='stretch')
         
         # Graphique évolution
         afficher_graphique_amortissements(amort_par_annee)
@@ -159,7 +159,7 @@ def afficher_impact_amortissements(data: Dict[str, Any]):
                 })
             
             df_impact = pd.DataFrame(impact_data)
-            st.dataframe(df_impact, use_container_width=True, hide_index=True)
+            st.dataframe(df_impact, width='stretch', hide_index=True)
             
             # Métriques clés
             col1, col2, col3 = st.columns(3)

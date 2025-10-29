@@ -881,7 +881,7 @@ def page_chiffre_affaires():
             chiffre_affaires_dict[key_ca] = ca_mensuel
             
             with col4:
-                st.metric("", f"{ca_mensuel:,.2f}")
+                st.metric("CA Mensuel (USD)", f"{ca_mensuel:,.2f}")
             
             data_ca.append({
                 "mois": mois_nom,
@@ -1132,7 +1132,7 @@ def page_tresorerie():
         tresorerie_debut = result['tresorerie_cumulative']
     
     df = pd.DataFrame(tableau_data)
-    st.dataframe(df, use_container_width=True)
+    st.dataframe(df, width='stretch')
     
     # Analyse et conseils
     st.subheader("💡 Analyse de Trésorerie")
@@ -1563,7 +1563,7 @@ def page_generation_business_plan():
             
             include_charts = st.checkbox("Inclure les graphiques financiers", value=True)
             
-            if st.button("📄 **Générer Business Plan**", type="primary", use_container_width=True):
+            if st.button("📄 **Générer Business Plan**", type="primary", width='stretch'):
                 with st.spinner("⏳ Génération en cours..."):
                     
                     # Génération du contenu
