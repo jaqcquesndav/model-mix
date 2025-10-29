@@ -8,13 +8,11 @@ from typing import Dict, Any, List
 from services.ai.content_generation import generate_section, tester_connexion_openai
 from services.financial.calculations import calculer_tableaux_financiers_5_ans
 from services.document.generation import format_table_to_markdown
-from templates.business_plan_prompts import (
+from business_plan_prompts_origin_exact import (
     get_system_messages_origin_style,
-    get_queries_origin_style,
-    get_sections_configuration_origin_style,
-    get_template_context
+    get_queries_origin_style
 )
-from templates import get_metaprompt, get_system_messages  # Ancien système pour compatibilité
+
 
 def generate_section_origin(system_message, query, documents, combined_content, tableau_financier, business_model):
     """
@@ -653,45 +651,24 @@ def get_business_plan_sections_by_template(template_nom="COPA TRANSFORME") -> Di
     Utilise le nouveau système business_plan_prompts.py
     """
     try:
-        # Utiliser le nouveau système professionnel
-        sections_config = get_sections_configuration(template_nom)
+        # Utiliser le nouveau système Origin.txt EXACT
+        system_messages = get_system_messages_origin_style(template_nom)
+        queries = get_queries_origin_style()
+        
+        # Construire la configuration dans le format attendu
+        sections_config = {}
+        for section_name in system_messages.keys():
+            sections_config[section_name] = {
+                "system_message": system_messages[section_name],
+                "user_query": queries[section_name]
+            }
+        
         return sections_config
         
     except Exception as e:
-        st.warning(f"Erreur lors du chargement de la configuration du template {template_nom}: {str(e)}")
-        
-        # Fallback vers l'ancien système
-        return get_fallback_sections_configuration(template_nom)
-
-def get_fallback_sections_configuration(template_nom: str) -> Dict[str, Dict[str, str]]:
-    """
-    Configuration de fallback utilisant l'ancien système template_manager
-    """
-    # Récupérer les messages système de l'ancien template
-    old_system_messages = get_system_messages(template_nom)
-    
-    # Structure de base des sections
-    base_sections = {
-        "Couverture": {
-            "system_message": f"Générer une couverture professionnelle pour le template {template_nom}",
-            "user_query": "Créer une page de couverture professionnelle"
-        },
-        "Sommaire": {
-            "system_message": f"Générer un sommaire structuré pour le template {template_nom}",
-            "user_query": "Afficher le sommaire du business plan"
-        },
-        "Résumé Exécutif": {
-            "system_message": old_system_messages.get("business_plan", f"Générer un résumé exécutif pour {template_nom}"),
-            "user_query": "Décrire brièvement le projet et son potentiel"
-        },
-        "Présentation de votre entreprise": {
-            "system_message": old_system_messages.get("business_plan", f"Présenter l'entreprise selon {template_nom}"),
-            "user_query": "Présenter l'entreprise de façon complète"
-        }
-    }
-    
-    return base_sections
-
+        st.error(f"Erreur lors du chargement de la configuration Origin.txt pour {template_nom}: {str(e)}")
+        # Fallback simple - retourner une configuration vide plutôt que d'utiliser l'ancien système
+        return {}
 
 def create_export_files_cyclique(results: Dict[str, str], business_data: Dict[str, Any], template_nom: str):
     """Crée les fichiers d'export avec style cyclique Origin.txt - VERSION CORRIGÉE"""

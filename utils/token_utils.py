@@ -7,12 +7,20 @@ import tiktoken
 from typing import Dict, Any, Optional, Tuple
 from datetime import datetime
 
-# Modèles et leurs coûts (USD par 1000 tokens)
+# Modèles et leurs coûts (USD par 1000 tokens) - Mis à jour 2025
 TOKEN_COSTS = {
-    "gpt-4": {"input": 0.03, "output": 0.06},
-    "gpt-4o": {"input": 0.005, "output": 0.015},  # Tarifs actuels gpt-4o
-    "gpt-4-turbo": {"input": 0.01, "output": 0.03}, 
-    "gpt-3.5-turbo": {"input": 0.001, "output": 0.002}
+    # Modèles GPT-4 famille (les plus performants)
+    "gpt-4o": {"input": 0.005, "output": 0.015},        # Le plus performant et récent
+    "gpt-4-turbo": {"input": 0.01, "output": 0.03},     # Excellent rapport qualité/prix
+    "gpt-4": {"input": 0.03, "output": 0.06},           # Stable et fiable
+    "gpt-4o-mini": {"input": 0.000150, "output": 0.000600},  # Très économique
+    
+    # Modèles O1 (pour raisonnement complexe)
+    "o1-preview": {"input": 0.015, "output": 0.060},    # Raisonnement avancé
+    "o1-mini": {"input": 0.003, "output": 0.012},       # Version allégée d'o1
+    
+    # Modèles legacy (pour compatibilité)
+    "gpt-3.5-turbo": {"input": 0.001, "output": 0.002} # Ancien modèle
 }
 
 def get_encoding_for_model(model_name: str = "gpt-4"):

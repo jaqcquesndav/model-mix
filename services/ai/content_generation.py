@@ -71,9 +71,9 @@ def tester_connexion_openai() -> Dict[str, Any]:
                 "details": f"Clé trouvée dans: {source_cle}"
             }
         
-        # Test simple avec un message court (comme dans Origin.txt)
+        # Test simple avec un message court et modèle moderne
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",  # Utiliser le modèle le plus économique pour les tests
             messages=[
                 {"role": "system", "content": "Tu es un assistant de test."},
                 {"role": "user", "content": "Réponds juste 'OK' pour confirmer la connexion."},
@@ -86,8 +86,8 @@ def tester_connexion_openai() -> Dict[str, Any]:
             return {
                 "status": "success",
                 "message": "Connexion OpenAI active",
-                "details": f"Source: {source_cle} | Modèle: gpt-3.5-turbo | Tokens: {response.usage.total_tokens if response.usage else 'N/A'}",
-                "model_used": "gpt-3.5-turbo"
+                "details": f"Source: {source_cle} | Modèle: gpt-4o-mini | Tokens: {response.usage.total_tokens if response.usage else 'N/A'}",
+                "model_used": "gpt-4o-mini"
             }
         else:
             return {
@@ -240,11 +240,21 @@ def generate_section(
 ) -> str:
     """
     Génère du contenu pour une section spécifique du business model
-    Version adaptée d'Origin.txt avec gestion d'erreurs améliorée
+    Version adaptée d'Origin.txt avec gestion d'erreurs améliorée et modèles modernes
     """
-    # Utiliser le modèle sélectionné dans la sidebar ou valeur par défaut
+    # Modèles OpenAI modernes disponibles (2024-2025)
+    MODELS_HIERARCHY = [
+        "gpt-4o",           # Le plus performant pour business plans
+        "gpt-4-turbo",      # Très bon rapport qualité/prix
+        "gpt-4",            # Stable et fiable
+        "gpt-4o-mini",      # Plus rapide et économique
+        "o1-preview",       # Pour raisonnement complexe
+        "o1-mini"           # Version allégée d'o1
+    ]
+    
+    # Utiliser le modèle sélectionné dans la sidebar ou premier de la hiérarchie
     if model is None:
-        model = st.session_state.get('modele_openai_sidebar', 'gpt-4')
+        model = st.session_state.get('modele_openai_sidebar', 'gpt-4o')
     
     try:
         client = initialiser_openai()
@@ -275,48 +285,54 @@ def generate_section(
         # Initialiser le compteur de tokens si nécessaire
         init_token_counter()
         
-        # Appel à l'API OpenAI (format adapté d'Origin.txt)
-        try:
-            response = client.chat.completions.create(
-                model=model,  # gpt-4o par défaut comme dans Origin.txt
-                messages=messages,
-                max_tokens=max_tokens,
-                temperature=temperature
-            )
+        # Appel à l'API OpenAI avec fallback intelligent
+        for attempt, fallback_model in enumerate(MODELS_HIERARCHY):
+            if attempt == 0:
+                current_model = model
+            else:
+                current_model = fallback_model
+                if current_model == model:  # Éviter de réessayer le même modèle
+                    continue
             
-            # Extraire le contenu (comme dans Origin.txt)
-            content = response.choices[0].message.content.strip()
-            
-            # Mise à jour des statistiques de tokens
-            usage = response.usage
-            if usage:
-                update_token_usage(usage.prompt_tokens, usage.completion_tokens, model)
-            
-            return content
-            
-        except Exception as api_error:
-            error_str = str(api_error)
-            
-            # Gestion spécifique des erreurs comme dans Origin.txt
-            if "model" in error_str.lower() and "gpt-4o" in error_str:
-                st.warning(f"⚠️ GPT-4o non disponible, fallback vers GPT-3.5-turbo pour {section_name}")
-                # Retry avec GPT-3.5-turbo
+            try:
+                # Ajuster max_tokens selon le modèle
+                adjusted_max_tokens = get_model_max_tokens(current_model, max_tokens)
+                
                 response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",
+                    model=current_model,
                     messages=messages,
-                    max_tokens=min(max_tokens, 4096),  # Limite pour GPT-3.5
+                    max_tokens=adjusted_max_tokens,
                     temperature=temperature
                 )
+                
+                # Extraire le contenu (comme dans Origin.txt)
                 content = response.choices[0].message.content.strip()
                 
-                # Mise à jour des tokens pour le modèle alternatif
+                # Mise à jour des statistiques de tokens avec le modèle réellement utilisé
                 usage = response.usage
                 if usage:
-                    update_token_usage(usage.prompt_tokens, usage.completion_tokens, "gpt-3.5-turbo")
+                    update_token_usage(usage.prompt_tokens, usage.completion_tokens, current_model)
+                
+                # Informer si fallback utilisé
+                if attempt > 0:
+                    st.info(f"✅ Contenu généré avec {current_model} (fallback)")
                 
                 return content
-            else:
-                raise api_error
+                
+            except Exception as api_error:
+                error_str = str(api_error)
+                
+                # Si c'est le dernier modèle de la liste, lever l'erreur
+                if attempt == len(MODELS_HIERARCHY) - 1:
+                    raise api_error
+                
+                # Sinon, informer du fallback et continuer
+                if "model" in error_str.lower() or "not available" in error_str.lower():
+                    st.warning(f"⚠️ {current_model} non disponible, tentative avec {MODELS_HIERARCHY[attempt + 1]}...")
+                    continue
+                else:
+                    # Pour les autres erreurs, arrêter immédiatement
+                    raise api_error
         
     except Exception as e:
         error_msg = f"Erreur génération {section_name}: {str(e)}"
@@ -331,6 +347,184 @@ def generate_section(
             st.warning("⏱️ Limite de taux atteinte. Veuillez patienter.")
         
         return ""
+
+def get_available_models() -> Dict[str, Dict[str, Any]]:
+    """
+    Retourne la liste des modèles OpenAI disponibles avec leurs caractéristiques
+    """
+    return {
+        "gpt-4o": {
+            "name": "GPT-4o (Recommandé)",
+            "description": "Le plus performant pour business plans, excellent équilibre qualité/prix",
+            "context_window": 128000,
+            "max_output": 4096,
+            "cost_per_1k_input": 0.005,
+            "cost_per_1k_output": 0.015,
+            "use_case": "Business plans professionnels, contenu marketing, analyses complexes"
+        },
+        "gpt-4-turbo": {
+            "name": "GPT-4 Turbo",
+            "description": "Très performant, bon pour contenu détaillé",
+            "context_window": 128000,
+            "max_output": 4096,
+            "cost_per_1k_input": 0.01,
+            "cost_per_1k_output": 0.03,
+            "use_case": "Documents longs, analyses sectorielles, stratégies détaillées"
+        },
+        "gpt-4": {
+            "name": "GPT-4 Standard",
+            "description": "Modèle stable et fiable pour contenu professionnel",
+            "context_window": 8192,
+            "max_output": 4096,
+            "cost_per_1k_input": 0.03,
+            "cost_per_1k_output": 0.06,
+            "use_case": "Contenu professionnel standard, résumés exécutifs"
+        },
+        "gpt-4o-mini": {
+            "name": "GPT-4o Mini (Économique)",
+            "description": "Rapide et économique, idéal pour tests et brouillons",
+            "context_window": 128000,
+            "max_output": 16384,
+            "cost_per_1k_input": 0.000150,
+            "cost_per_1k_output": 0.000600,
+            "use_case": "Brouillons rapides, tests, génération en volume"
+        },
+        "o1-preview": {
+            "name": "O1 Preview (Raisonnement)",
+            "description": "Excellente capacité de raisonnement pour analyses complexes",
+            "context_window": 128000,
+            "max_output": 32768,
+            "cost_per_1k_input": 0.015,
+            "cost_per_1k_output": 0.060,
+            "use_case": "Analyses financières complexes, études de marché approfondies"
+        },
+        "o1-mini": {
+            "name": "O1 Mini",
+            "description": "Raisonnement intelligent à prix accessible",
+            "context_window": 128000,
+            "max_output": 65536,
+            "cost_per_1k_input": 0.003,
+            "cost_per_1k_output": 0.012,
+            "use_case": "Analyses logiques, comparaisons, évaluations de projets"
+        }
+    }
+
+def get_model_max_tokens(model_name: str, requested_tokens: int) -> int:
+    """
+    Retourne le nombre maximum de tokens autorisé pour un modèle donné
+    """
+    MODEL_LIMITS = {
+        "gpt-4o": 4096,          # 128k contexte, 4k output recommandé
+        "gpt-4-turbo": 4096,     # 128k contexte, 4k output
+        "gpt-4": 4096,           # 8k contexte, 4k output max
+        "gpt-4o-mini": 16384,    # 128k contexte, 16k output
+        "o1-preview": 32768,     # 128k contexte, 32k output
+        "o1-mini": 65536,        # 128k contexte, 65k output
+        "gpt-3.5-turbo": 4096    # Gardé pour compatibilité legacy
+    }
+    
+    max_allowed = MODEL_LIMITS.get(model_name, 4096)
+    return min(requested_tokens, max_allowed)
+
+def render_model_selector_sidebar():
+    """
+    Affiche un sidebar pour sélectionner le modèle OpenAI avec informations détaillées
+    """
+    st.sidebar.markdown("## 🤖 Configuration IA")
+    
+    # Récupérer les modèles disponibles
+    models = get_available_models()
+    
+    # Options pour le selectbox
+    model_options = []
+    model_mapping = {}
+    
+    for model_id, info in models.items():
+        display_name = f"{info['name']} (${info['cost_per_1k_input']:.3f}k/${info['cost_per_1k_output']:.3f}k)"
+        model_options.append(display_name)
+        model_mapping[display_name] = model_id
+    
+    # Sélection du modèle
+    selected_display = st.sidebar.selectbox(
+        "🎯 Modèle OpenAI",
+        options=model_options,
+        index=0,  # gpt-4o par défaut
+        help="Sélectionnez le modèle selon vos besoins de qualité et budget"
+    )
+    
+    selected_model_id = model_mapping[selected_display]
+    
+    # Stocker dans session_state
+    st.session_state['modele_openai_sidebar'] = selected_model_id
+    
+    # Afficher les détails du modèle sélectionné
+    model_info = models[selected_model_id]
+    
+    with st.sidebar.expander("📊 Détails du modèle", expanded=False):
+        st.markdown(f"**{model_info['name']}**")
+        st.markdown(f"📝 {model_info['description']}")
+        st.markdown(f"**💰 Tarification:**")
+        st.markdown(f"• Entrée: ${model_info['cost_per_1k_input']:.6f}/1K tokens")
+        st.markdown(f"• Sortie: ${model_info['cost_per_1k_output']:.6f}/1K tokens")
+        st.markdown(f"**📏 Limites:**")
+        st.markdown(f"• Contexte: {model_info['context_window']:,} tokens")
+        st.markdown(f"• Sortie max: {model_info['max_output']:,} tokens")
+        st.markdown(f"**🎯 Usage recommandé:**")
+        st.markdown(f"{model_info['use_case']}")
+    
+    # Estimation des coûts
+    with st.sidebar.expander("💰 Estimateur de coûts", expanded=False):
+        st.markdown("**Estimation pour business plan complet:**")
+        
+        # Estimation moyenne pour un business plan complet
+        avg_input_tokens = 8000   # Context + prompts
+        avg_output_tokens = 15000 # Contenu généré (11 sections)
+        
+        input_cost = (avg_input_tokens / 1000) * model_info['cost_per_1k_input']
+        output_cost = (avg_output_tokens / 1000) * model_info['cost_per_1k_output']
+        total_cost = input_cost + output_cost
+        
+        st.markdown(f"• ~{avg_input_tokens:,} tokens d'entrée: ${input_cost:.3f}")
+        st.markdown(f"• ~{avg_output_tokens:,} tokens de sortie: ${output_cost:.3f}")
+        st.markdown(f"**Total estimé: ${total_cost:.3f}**")
+        
+        if model_info['cost_per_1k_input'] < 0.002:  # Si très économique
+            st.success("💚 Modèle très économique")
+        elif model_info['cost_per_1k_input'] < 0.01:  # Si économique
+            st.info("💙 Bon rapport qualité/prix")
+        else:  # Si premium
+            st.warning("💛 Modèle premium - qualité maximale")
+    
+    # Afficher les statistiques de tokens si disponibles
+    if 'token_usage' in st.session_state:
+        with st.sidebar.expander("📈 Usage actuel", expanded=False):
+            usage = st.session_state['token_usage']
+            total_tokens = usage.get('total_input_tokens', 0) + usage.get('total_output_tokens', 0)
+            total_cost = usage.get('total_cost_usd', 0.0)
+            
+            st.markdown(f"**Session actuelle:**")
+            st.markdown(f"• Tokens: {total_tokens:,}")
+            st.markdown(f"• Coût: ${total_cost:.4f}")
+            st.markdown(f"• Requêtes: {usage.get('requests_count', 0)}")
+    
+    # Test de connexion
+    st.sidebar.markdown("---")
+    if st.sidebar.button("🔧 Tester la connexion OpenAI"):
+        with st.sidebar:
+            with st.spinner("Test en cours..."):
+                result = tester_connexion_openai()
+                
+                if result['status'] == 'success':
+                    st.success(f"✅ {result['message']}")
+                    st.info(result['details'])
+                elif result['status'] == 'warning':
+                    st.warning(f"⚠️ {result['message']}")
+                    st.info(result['details'])
+                else:
+                    st.error(f"❌ {result['message']}")
+                    st.error(result['details'])
+    
+    return selected_model_id
 
 def generer_business_model_canvas(donnees: Dict[str, Any], template_nom: str = "COPA TRANSFORME") -> Dict[str, str]:
     """
