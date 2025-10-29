@@ -24,8 +24,7 @@ def generate_section_origin(system_message, query, documents, combined_content, 
         system_message=system_message,
         user_query=query,
         additional_context=combined_content + "\n\n" + tableau_financier + "\n\n" + str(business_model),
-        section_name="",
-        documents=documents
+        section_name=""
     )
 import pandas as pd
 import tempfile

@@ -260,9 +260,9 @@ def generate_section(
         # Construire le prompt final
         full_prompt = f"{user_query}{full_context}"
         
-        # Messages pour l'API (format exact d'Origin.txt)
+        # Messages pour l'API (format EXACT d'Origin.txt)
         messages = [
-            {"role": "system", "content": "Tu es un assistant expert en génération de business et business plan."},  # Message exact d'Origin.txt
+            {"role": "system", "content": system_message},  # UTILISER LE SYSTEM_MESSAGE COMME DANS ORIGIN.TXT
             {"role": "user", "content": full_prompt}
         ]
         
