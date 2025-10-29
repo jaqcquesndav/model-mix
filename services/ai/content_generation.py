@@ -22,7 +22,14 @@ from utils.token_utils import (
 def initialiser_openai():
     """Initialise la configuration OpenAI selon Origin.txt"""
     # Configuration exacte comme dans Origin.txt
-    api_key = os.getenv("API_KEY")
+    api_key = None
+    
+    # Essayer d'abord les secrets Streamlit (production)
+    try:
+        api_key = st.secrets["API_KEY"]
+    except (KeyError, FileNotFoundError):
+        # Fallback vers les variables d'environnement (développement)
+        api_key = os.getenv("API_KEY")
     
     if api_key:
         # Configuration OpenAI legacy (comme dans Origin.txt)
@@ -37,13 +44,31 @@ def tester_connexion_openai() -> Dict[str, Any]:
     Teste la connexion à l'API OpenAI et retourne le statut
     Fonction inspirée des tests de Origin.txt
     """
+    # Vérifier d'abord la disponibilité de la clé API
+    api_key = None
+    source_cle = ""
+    
+    try:
+        api_key = st.secrets["API_KEY"]
+        source_cle = "Streamlit Secrets"
+    except (KeyError, FileNotFoundError):
+        api_key = os.getenv("API_KEY")
+        source_cle = "Variable d'environnement"
+    
+    if not api_key:
+        return {
+            "status": "error",
+            "message": "Clé API OpenAI non configurée",
+            "details": "Ni dans Streamlit secrets ni dans les variables d'environnement"
+        }
+    
     try:
         client = initialiser_openai()
         if not client:
             return {
                 "status": "error",
-                "message": "Clé API OpenAI non configurée",
-                "details": "Variable d'environnement API_KEY manquante"
+                "message": "Échec d'initialisation du client OpenAI",
+                "details": f"Clé trouvée dans: {source_cle}"
             }
         
         # Test simple avec un message court (comme dans Origin.txt)
@@ -61,7 +86,7 @@ def tester_connexion_openai() -> Dict[str, Any]:
             return {
                 "status": "success",
                 "message": "Connexion OpenAI active",
-                "details": f"Modèle: gpt-3.5-turbo | Tokens: {response.usage.total_tokens if response.usage else 'N/A'}",
+                "details": f"Source: {source_cle} | Modèle: gpt-3.5-turbo | Tokens: {response.usage.total_tokens if response.usage else 'N/A'}",
                 "model_used": "gpt-3.5-turbo"
             }
         else:

@@ -16,14 +16,12 @@ from dotenv import load_dotenv
 # Charger les variables d'environnement
 load_dotenv()
 
-# Configuration de l'API OpenAI (comme dans Origin.txt)
-api_key = os.getenv("API_KEY")
-if api_key:
-    openai.api_key = api_key
-    # Afficher un message de statut dans la sidebar plus tard
-    os.environ["OPENAI_API_KEY"] = api_key
-else:
-    st.warning("⚠️ Clé API OpenAI non configurée. Veuillez définir la variable d'environnement API_KEY.")
+# Configuration de l'API OpenAI avec test de connectivité
+from services.ai.content_generation import initialiser_openai, tester_connexion_openai
+
+# Initialiser OpenAI et tester la connectivité
+client_openai = initialiser_openai()
+test_result = tester_connexion_openai()
 
 # Configuration de la page Streamlit
 st.set_page_config(
@@ -256,6 +254,19 @@ def afficher_sidebar_info():
     # Template actuel
     template_actuel = st.session_state.get('template_selectionne', 'COPA TRANSFORME')
     st.sidebar.markdown(f"**Template actuel:** {template_actuel}")
+    
+    # Statut de l'API OpenAI
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 🔌 Statut API")
+    if test_result["status"] == "success":
+        st.sidebar.markdown("🟢 **OpenAI:** Connecté")
+        st.sidebar.markdown(f"*{test_result['details']}*")
+    elif test_result["status"] == "warning":
+        st.sidebar.markdown("🟡 **OpenAI:** Problème détecté")
+        st.sidebar.markdown(f"*{test_result['message']}*")
+    else:
+        st.sidebar.markdown("🔴 **OpenAI:** Déconnecté")
+        st.sidebar.markdown(f"*{test_result['message']}*")
 
 def handle_errors():
     """Gestion globale des erreurs"""
