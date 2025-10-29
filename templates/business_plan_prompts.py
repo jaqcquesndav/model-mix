@@ -25,362 +25,214 @@ def get_business_plan_sections() -> Dict[str, str]:
 
 def get_system_prompts() -> Dict[str, str]:
     """
-    Prompts système corrigés pour génération directe sans explications
+    Prompts système inspirés d'Origin.txt - Version corrigée
     """
     return {
         "Couverture": """
-Générez UNIQUEMENT le contenu de la page de couverture au format Markdown.
+Générer cette section du business plan:
 
-IMPORTANT: Ne donnez AUCUNE explication. Générez SEULEMENT le contenu final.
+# Canevas de Plans d'Affaires
 
-Format de sortie:
+[Nom du projet ou entreprise]
 
-# PLAN D'AFFAIRES
+[Secteur d'activité]
 
-## [Nom de l'entreprise]
+[Date]
 
-**Secteur d'activité:** [Secteur selon contexte]
-**Localisation:** République Démocratique du Congo
-**Date:** [Date actuelle]
+Contact : [informations de contact]
 
----
-
-### PORTEURS DU PROJET
-- **Dirigeant Principal:** [Nom selon contexte]
-- **Contact:** [Email selon contexte]
-
----
-
-**Document confidentiel - Usage strictement professionnel**
+Document confidentiel
         """,
 
         "Sommaire": """
-Générez UNIQUEMENT le sommaire structuré. Aucune explication.
+Générer cette section du business plan:
 
-Format de sortie:
+## Sommaire
 
-# SOMMAIRE
-
-**I. RÉSUMÉ EXÉCUTIF** .................................................. 3
-- Présentation du projet
-- Objectifs et vision
-- Demande de financement
-
-**II. PRÉSENTATION DE L'ENTREPRISE** ...................................... 4
-- Informations générales
-- Équipe dirigeante
-- Analyse SWOT
-
-**III. OFFRE DE PRODUITS ET SERVICES** .................................... 6
-- Description de l'offre
-- Proposition de valeur
-- Innovation
-
-**IV. ÉTUDE DE MARCHÉ** ................................................... 8
-- Analyse du marché
-- Concurrence
-- Positionnement
-
-**V. STRATÉGIE MARKETING** ................................................ 10
-- Plan marketing
-- Politique commerciale
-
-**VI. ORGANISATION ET PRODUCTION** ........................................ 12
-- Moyens de production
-- Ressources humaines
-
-**VII. ANALYSE DES RISQUES** .............................................. 14
-- Identification des risques
-- Mesures d'atténuation
-
-**VIII. PLAN FINANCIER** .................................................. 16
-- Projections financières
-- Besoins de financement
-
-**IX. ANNEXES** ........................................................... 18
+I. Résumé Exécutif « Executive Summary » / Pitch
+II. Présentation de votre entreprise/projet  
+III. Présentation de l'offre de produit(s) et/ou service(s)
+IV. Étude de marché
+V. Stratégie marketing, communication et politique commerciale
+VI. Moyens de production et organisation
+VII. Étude des risques/hypothèses
+VIII. Plan financier
+IX. Annexes
         """,
 
         "Résumé Exécutif": """
-Rédigez DIRECTEMENT le résumé exécutif sans commentaires.
+Générer cette section du business plan:
 
-IMPORTANT: Générez SEULEMENT le contenu final structuré.
+## I. Résumé Exécutif « Executive Summary » / Pitch
 
-Format de sortie:
+Générer deux grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
+- Attirer l'attention du lecteur en 5 minutes et lui donner envie d'en savoir plus
+- Décrire le projet en quelques phrases simples et impactantes  
+- Ne pas essayer de tout couvrir, soyez concis et précis
 
-# I. RÉSUMÉ EXÉCUTIF
-
-## Vue d'ensemble du projet
-
-[Rédigez 4-5 phrases décrivant l'entreprise, son activité principale, sa mission et sa valeur ajoutée]
-
-## Opportunité de marché
-
-[Rédigez 4-5 phrases sur le marché visé, la demande identifiée et l'avantage concurrentiel]
-
-## Projections financières
-
-[Rédigez 3-4 phrases sur les projections de CA, rentabilité et besoins de financement]
-
-## Équipe et facteurs de succès
-
-[Rédigez 3-4 phrases sur les compétences de l'équipe et les atouts clés]
-
-**Montant recherché:** [Montant selon contexte]
-**Objectif:** [Objectif selon contexte]
-**Retour attendu:** [ROI selon contexte]
+Les éléments clés à générer et qui doivent être contenus dans les paragraphes :
+- **Présentation de la PME** : Nom de l'entreprise et brève description du service/produit fourni
+- **Présentation des porteurs de projet** : Profil des entrepreneurs et leur expérience
+- **Potentiel en termes de taille et de profit** : Démontrez comment votre PME fera du profit
+- **Votre besoin financier** : Montant nécessaire et utilisation prévue
         """,
 
         "Présentation de votre entreprise": """
-Rédigez DIRECTEMENT la présentation de l'entreprise. Aucun commentaire.
+Générer cette section du business plan:
 
-Format de sortie:
+## II. Présentation de votre entreprise/projet
 
-# II. PRÉSENTATION DE L'ENTREPRISE
+Générer 6 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
+- Parler de votre entreprise/projet de manière plus détaillée
+- Présenter l'équipe managériale clé
 
-## 1. Informations générales
+Les éléments clés à générer et qui doivent être contenus dans les paragraphes :
 
-**Raison sociale:** [Nom complet]
-**Forme juridique:** [SARL, SA, etc.]
-**Siège social:** [Adresse, RDC]
-**Secteur d'activité:** [Secteur précis]
-**Date de création:** [Date]
+- **Informations générales sur la PME** :
+  - Forme juridique : Ets, SARL, SAS, SA
+  - Siège social : Adresse juridique de l'entreprise
+  - Couverture géographique de l'entreprise et ses activités
 
-## 2. Mission et vision
+- **Description détaillée de la PME et objectifs** : Présentez l'entreprise, son origine, ses atouts/opportunités et décrivez le projet
 
-**Mission:** [Une phrase claire sur la raison d'être]
+- **Stade d'avancement** : Ce qui a été fait et projets futurs, niveau de maturité, financements acquis
 
-**Vision:** [Une phrase sur l'ambition long terme]
+- **Équipe managériale** : Organigramme, ressources humaines, associés et parts sociales
 
-**Valeurs:** [3-5 valeurs fondamentales]
+- **Analyse SWOT** : Forces, faiblesses, opportunités, contraintes/menaces (de préférence sous forme de tableau)
 
-## 3. Historique et développement
-
-[Paragraphe de 3-4 phrases sur l'origine, étapes importantes et stade actuel]
-
-## 4. Équipe dirigeante
-
-**Dirigeant Principal:**
-- Nom et fonction
-- Formation et expérience
-- Responsabilités
-
-## 5. Analyse SWOT
-
-| Forces | Faiblesses |
-|--------|-----------|
-| [Force 1] | [Faiblesse 1] |
-| [Force 2] | [Faiblesse 2] |
-
-| Opportunités | Menaces |
-|-------------|---------|
-| [Opportunité 1] | [Menace 1] |
-| [Opportunité 2] | [Menace 2] |
-
-## 6. Objectifs stratégiques
-
-**Court terme (1 an):** [Objectifs précis]
-**Moyen terme (3 ans):** [Objectifs précis]  
-**Long terme (5 ans):** [Objectifs précis]
+- **Business Model Canvas** : Les 9 rubriques bien remplies
         """,
 
         "Présentation de l'offre de produit": """
-Rédigez DIRECTEMENT la présentation de l'offre. Aucun commentaire.
+Générer cette section du business plan:
 
-Format de sortie:
+## III. Présentation de l'offre de produit(s) et/ou service(s)
 
-# III. PRÉSENTATION DE L'OFFRE
+Générer 6 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
+- Parler de l'offre de produits/services de manière détaillée
+- Présenter la proposition de valeur différenciante
 
-## 1. Description des produits/services
+Les éléments clés à générer et qui doivent être contenus dans les paragraphes :
 
-[Paragraphe détaillé décrivant l'offre principale]
-
-## 2. Besoins identifiés sur le marché
-
-[Paragraphe sur les problèmes résolus et besoins satisfaits]
-
-## 3. Proposition de valeur unique
-
-[Paragraphe sur les avantages différenciateurs et bénéfices clients]
-
-## 4. Innovation et avantages technologiques
-
-[Paragraphe sur les innovations, technologies et propriété intellectuelle]
-
-## 5. Impact social et environnemental
-
-[Paragraphe sur l'impact positif et la durabilité]
+- **Noms du/des produit(s) ou service(s)**
+- **Besoins identifiés** sur le marché auxquels répond votre offre
+- **Description du/des produit(s) ou service(s)** répondant à ces besoins
+- **Proposition de valeur unique**
+- **Prise en compte de l'aspect genre** dans le fonctionnement de la PME
+- **Prise en compte de l'environnement** : impacts environnementaux, mesures d'atténuation, Plan de Gestion Environnemental et Social
         """,
 
         "Étude de marché": """
-Rédigez DIRECTEMENT l'étude de marché. Aucun commentaire.
+Générer cette section du business plan:
 
-Format de sortie:
+## IV. Étude de marché
 
-# IV. ÉTUDE DE MARCHÉ
+Générer 8 grands paragraphes avec plusieurs lignes, l'objectif pour cette section est de :
+- Expliquer la méthode utilisée pour la conduite de l'étude de marché
+- Présenter les résultats de l'étude de marché
 
-## 1. Description du marché
+Les éléments clés à générer, les numéros doivent être respectés :
 
-[Paragraphe sur le marché global, taille et caractéristiques]
-
-## 2. Analyse de la demande
-
-[Paragraphe sur la demande actuelle, évolution et segments de clientèle]
-
-## 3. Analyse concurrentielle
-
-[Paragraphe sur les concurrents directs/indirects et positionnement]
-
-## 4. Opportunités et tendances
-
-[Paragraphe sur les opportunités identifiées et tendances du marché]
-
-## 5. Stratégie de pénétration
-
-[Paragraphe sur l'approche pour capturer des parts de marché]
+1. **Description des hypothèses et méthodes** : Produit pré-ciblé, marché pré-ciblé, méthodologie
+2. **Approche générale du marché** : Description du marché et ses caractéristiques  
+3. **Caractéristiques de la demande** : Volume, évolution, segmentation clientèle
+4. **Caractéristiques de l'offre** : Concurrence directe/indirecte, analyse concurrentielle
+5. **Environnement des affaires** : Cadre légal, facteurs économiques, évolution technologique
+6. **Partenariats** : Fournisseurs, distributeurs, alliances envisagées
+7. **Création d'emplois** : Emplois directs/indirects, impact sur l'emploi local
+8. **Projections du chiffre d'affaires** : Part de marché visée, projections à 1, 2, 3 ans
         """,
 
         "Stratégie Marketing": """
-Rédigez DIRECTEMENT la stratégie marketing. Aucun commentaire.
+Générer cette section du business plan:
 
-Format de sortie:
+## V. Stratégie marketing, communication et politique commerciale
 
-# V. STRATÉGIE MARKETING
+Générer 4 grands paragraphes avec plusieurs lignes pour :
+- Présenter la stratégie marketing adoptée
+- Détailler la politique commerciale
 
-## 1. Segmentation et ciblage
+Les éléments clés à générer :
 
-[Paragraphe sur les segments choisis et justification du ciblage]
-
-## 2. Positionnement
-
-[Paragraphe sur le positionnement souhaité et message clé]
-
-## 3. Marketing-mix (4P)
-
-**Produit:** [Stratégie produit]
-**Prix:** [Stratégie tarifaire]
-**Place:** [Stratégie distribution]
-**Promotion:** [Stratégie communication]
-
-## 4. Plan d'actions marketing
-
-[Tableau ou liste des actions marketing par période]
-
-## 5. Budget marketing
-
-[Paragraphe sur l'allocation budgétaire et ROI attendu]
+1. **Choix de segments de clientèle** : Segments prioritaires, critères de segmentation, justification
+2. **Marketing-mix (4P)** : Politique de Produit, Prix, Place (distribution), Promotion
+3. **Plan marketing et actions commerciales** : Calendrier des actions, budget, moyens déployés
+4. **Moyens et partenaires sollicités** : Ressources humaines, budget marketing, partenaires
         """,
 
         "Moyens de production et organisation": """
-Rédigez DIRECTEMENT l'organisation opérationnelle. Aucun commentaire.
+Générer cette section du business plan:
 
-Format de sortie:
+## VI. Moyens de production et organisation
 
-# VI. MOYENS DE PRODUCTION ET ORGANISATION
+Générer 4 grands paragraphes détaillant :
+- Les moyens techniques et humains nécessaires
+- L'organisation opérationnelle
 
-## 1. Locaux et infrastructure
+Les éléments clés à générer :
 
-[Paragraphe sur les locaux, localisation et aménagements]
-
-## 2. Équipements et matériel
-
-[Paragraphe sur les équipements nécessaires et investissements]
-
-## 3. Ressources humaines
-
-[Paragraphe sur l'organigramme, postes et compétences]
-
-## 4. Processus opérationnels
-
-[Paragraphe sur les processus de production/prestation]
-
-## 5. Fournisseurs et partenaires
-
-[Paragraphe sur la chaîne d'approvisionnement et partenariats]
+1. **Locaux et infrastructure** : Description des locaux, localisation, aménagement, coûts
+2. **Équipements et matériel** : Liste détaillée, spécifications, mode d'acquisition, coûts
+3. **Ressources humaines et organisation** : Organigramme, profils de postes, coûts salariaux
+4. **Fournisseurs et sous-traitants** : Liste des fournisseurs, critères de sélection, conditions
         """,
 
         "Étude des risques": """
-Rédigez DIRECTEMENT l'analyse des risques. Aucun commentaire.
+Générer cette section du business plan:
 
-Format de sortie:
+## VII. Étude des risques/hypothèses
 
-# VII. ANALYSE DES RISQUES
+Analyser les risques et présenter les stratégies d'atténuation.
 
-## 1. Identification des risques
+Générer un tableau complet des risques avec les colonnes :
+- Nature du risque
+- Description détaillée  
+- Probabilité (Faible/Moyenne/Élevée)
+- Impact (Faible/Moyen/Élevé)
+- Stratégie de traitement
 
-| Type de risque | Description | Probabilité | Impact |
-|---------------|-------------|-------------|---------|
-| Risque marché | [Description] | [Faible/Moyen/Élevé] | [Faible/Moyen/Élevé] |
-| Risque opérationnel | [Description] | [Faible/Moyen/Élevé] | [Faible/Moyen/Élevé] |
-| Risque financier | [Description] | [Faible/Moyen/Élevé] | [Faible/Moyen/Élevé] |
-
-## 2. Mesures d'atténuation
-
-[Paragraphe sur les stratégies de réduction des risques]
-
-## 3. Plan de contingence
-
-[Paragraphe sur les plans d'urgence et alternatives]
-
-## 4. Assurances et garanties
-
-[Paragraphe sur les couvertures d'assurance prévues]
+Inclure les catégories de risques :
+- Risques liés à l'environnement général
+- Risques liés au marché
+- Risques liés aux outils
+- Risques liés aux personnes
+- Risques liés aux tiers
+- Autres risques spécifiques
         """,
 
         "Plan financier": """
-Rédigez DIRECTEMENT le plan financier. Aucun commentaire.
+Générer cette section du business plan:
 
-Format de sortie:
+## VIII. Plan financier
 
-# VIII. PLAN FINANCIER
+Présenter les projections financières détaillées et l'analyse de rentabilité.
 
-## 1. Besoins de financement
+Intégrer les tableaux financiers fournis et ajouter :
 
-**Investissements initiaux:** [Montant]
-**Fonds de roulement:** [Montant]
-**Total besoins:** [Montant]
+1. **Besoins de financement** : Investissements initiaux, fonds de roulement
+2. **Sources de financement** : Apports propres, emprunts, subventions
+3. **Analyse de rentabilité** : Seuil de rentabilité, ROI, délai de récupération
+4. **Projections financières** : Compte de résultat, plan de financement, trésorerie
 
-## 2. Sources de financement
-
-**Apports propres:** [Montant et %]
-**Emprunts bancaires:** [Montant et conditions]
-**Subventions:** [Montant et organismes]
-
-## 3. Projections financières
-
-[Intégrer ici les tableaux financiers générés par le système]
-
-## 4. Analyse de rentabilité
-
-**Seuil de rentabilité:** [Montant et délai]
-**ROI attendu:** [Pourcentage]
-**Délai de récupération:** [Période]
+[Les tableaux financiers détaillés seront intégrés automatiquement]
         """,
 
         "Annexes": """
-Rédigez DIRECTEMENT la section annexes. Aucun commentaire.
+Générer cette section du business plan:
 
-Format de sortie:
+## IX. Annexes
 
-# IX. ANNEXES
+Lister les documents complémentaires joints au business plan :
 
-## Documents joints
-
-- Étude de marché détaillée
-- CV des dirigeants
-- Lettres d'intention de clients
-- Devis d'équipements
-- Autorisations et licences
+- CV des membres de l'équipe dirigeante
+- Études de marché détaillées  
+- Lettres d'intention de clients/fournisseurs
+- Devis d'équipements et matériel
+- Autorisations et licences requises
 - Projections financières détaillées
-
-## Contacts utiles
-
-**Entreprise:** [Coordonnées complètes]
-**Conseil juridique:** [Si applicable]
-**Expert-comptable:** [Si applicable]
-
-## Références
-
-[Liste des sources utilisées pour l'étude de marché et projections]
+- Statuts de l'entreprise
+- Autres documents justificatifs
         """
     }
 

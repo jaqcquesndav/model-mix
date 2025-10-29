@@ -240,61 +240,52 @@ def generate_complete_business_plan_cyclique(uploaded_file=None, user_text_input
 
 def generate_section_cyclique(section_name, section_config, documents, combined_content, 
                             financial_tables_text, business_data, results, placeholders, template_nom):
-    """Génère une section individuelle avec la logique cyclique et le nouveau système de templates"""
+    """Génère une section individuelle avec la logique cyclique inspirée d'Origin.txt"""
     
     try:
-        # Utiliser la nouvelle configuration si disponible
+        # Utiliser la nouvelle configuration
         if "system_message" in section_config and "user_query" in section_config:
             system_message = section_config["system_message"]
             query = section_config["user_query"]
         else:
-            # Fallback vers l'ancienne structure
+            # Fallback
             system_message = section_config.get("system_message", "")
             query = section_config.get("query", section_config.get("user_query", ""))
         
-        # Éviter les doublons en préparant un contexte limité et ciblé
+        # Logique inspirée d'Origin.txt : contexte différent selon la section
         if section_name in ["Couverture", "Sommaire"]:
-            # Sections simples - contexte minimal pour éviter confusion
-            context_info = f"Entreprise: {business_data.get('informations_generales', {}).get('nom_entreprise', 'Non spécifiée')}"
-            context_info += f"\nSecteur: {business_data.get('informations_generales', {}).get('secteur_activite', 'Non spécifié')}"
-            
+            # Sections simples comme dans Origin.txt
             content = generate_section(
                 system_message=system_message,
                 user_query=query,
-                additional_context=context_info,
+                additional_context="",  # Pas de contexte pour éviter la confusion
                 section_name=section_name
             )
         else:
-            # Sections détaillées - contexte plus riche mais contrôlé
-            business_model = str(business_data.get('business_model', ''))[:500]  # Limiter la taille
+            # Sections avec contexte business comme dans Origin.txt
+            business_model = st.session_state.get('business_model_precedent', '')
             
-            # Préparer un contexte structuré sans redondance
-            full_context = f"""
-INFORMATIONS ENTREPRISE:
-- Nom: {business_data.get('informations_generales', {}).get('nom_entreprise', 'Non spécifiée')}
-- Secteur: {business_data.get('informations_generales', {}).get('secteur_activite', 'Non spécifié')}
-- Template: {template_nom}
-
-DONNÉES BUSINESS:
-{business_model}
-
-DONNÉES FINANCIÈRES:
-{financial_tables_text[:800] if financial_tables_text else 'Aucune donnée financière disponible'}
-"""
+            # Construire le contexte comme dans Origin.txt
+            context_info = f"""Dans ces données où vous allez récupérer les informations générales de l'entreprise {financial_tables_text} utiliser les données financières pour enrichir les arguments aussi sachez que le nom du projet correspond au nom de l'entreprise. Voici les autres informations à considérer c'est les informations du business model et ça doit être tenu compte lors de la génération: {business_model}"""
+            
+            # Ajouter un contexte limité pour éviter les doublons
+            limited_context = combined_content[-500:] if combined_content else ""  # Seulement les 500 derniers caractères
+            
+            full_content = limited_context + " " + query + " " + context_info
             
             content = generate_section(
                 system_message=system_message,
-                user_query=query,
-                additional_context=full_context,
+                user_query=full_content,
+                additional_context="",
                 section_name=section_name
             )
         
-        # Nettoyer le contenu généré pour éviter les doublons internes
-        content = clean_generated_content(content, section_name)
+        # Nettoyer le contenu généré
+        content = clean_generated_content_origin_style(content, section_name)
         
         results[section_name] = content
         
-        # Affichage en temps réel si demandé
+        # Affichage en temps réel
         if placeholders and section_name in placeholders:
             placeholders[section_name].markdown(f"### {section_name}\n{content}")
             
@@ -307,53 +298,77 @@ DONNÉES FINANCIÈRES:
         if placeholders and section_name in placeholders:
             placeholders[section_name].error(error_msg)
 
-def clean_generated_content(content: str, section_name: str) -> str:
-    """Nettoie le contenu généré pour éviter les doublons et améliorer le formatage"""
+def clean_generated_content_origin_style(content: str, section_name: str) -> str:
+    """Nettoie le contenu dans le style d'Origin.txt - Supprime les explications"""
     
-    # Supprimer les phrases explicatives communes de l'IA
-    phrases_to_remove = [
-        "Voici un exemple",
-        "Créer une page de couverture professionnelle est essentiel",
-        "Assurez-vous de personnaliser",
-        "Ce document est un business plan",
-        "Voici une structure",
-        "Pour analyser le marché",
+    # Supprimer les phrases d'introduction de l'IA
+    intro_phrases = [
+        "Voici une",
+        "Voici un",
+        "Créer une page de couverture",
+        "Pour créer",
         "Il est important de",
+        "Assurez-vous de",
+        "N'oubliez pas de",
+        "Ce document",
+        "Cette section",
+        "Voici comment",
         "Dans le cadre de",
-        "Voici comment"
+        "Pour analyser",
+        "En résumé",
+        "Pour conclure"
     ]
     
-    for phrase in phrases_to_remove:
-        if phrase in content:
-            # Supprimer le paragraphe entier qui contient cette phrase explicative
-            lines = content.split('\n')
-            cleaned_lines = []
+    lines = content.split('\n')
+    cleaned_lines = []
+    skip_paragraph = False
+    
+    for line in lines:
+        line_stripped = line.strip()
+        
+        # Détecter les phrases d'introduction à supprimer
+        should_skip = any(phrase in line for phrase in intro_phrases)
+        
+        if should_skip:
+            skip_paragraph = True
+            continue
+            
+        # Arrêter de skipper quand on trouve une nouvelle section ou un contenu utile
+        if skip_paragraph and (line_stripped.startswith('#') or line_stripped.startswith('**') or line_stripped.startswith('|')):
             skip_paragraph = False
-            
-            for line in lines:
-                if phrase in line:
-                    skip_paragraph = True
-                    continue
-                if skip_paragraph and line.strip() == "":
-                    skip_paragraph = False
-                    continue
-                if not skip_paragraph:
-                    cleaned_lines.append(line)
-            
-            content = '\n'.join(cleaned_lines)
+        
+        if not skip_paragraph:
+            cleaned_lines.append(line)
     
-    # Supprimer les répétitions de sections entières
-    if section_name in content:
-        # Si le nom de la section apparaît plusieurs fois, garder seulement la première occurrence
-        parts = content.split(f"## {section_name}")
-        if len(parts) > 2:
-            content = parts[0] + "## " + section_name + parts[1]
+    content = '\n'.join(cleaned_lines)
     
-    # Nettoyer les espaces multiples et retours à la ligne excessifs
-    content = '\n'.join(line.rstrip() for line in content.split('\n'))
-    content = '\n'.join(line for line in content.split('\n') if line.strip() or content.split('\n').index(line) == 0)
+    # Supprimer les doublons de sections
+    content = remove_section_duplicates(content)
     
     return content.strip()
+
+def remove_section_duplicates(content: str) -> str:
+    """Supprime les doublons de sections dans le contenu"""
+    
+    lines = content.split('\n')
+    seen_headers = set()
+    result_lines = []
+    
+    for line in lines:
+        # Identifier les en-têtes de section
+        if line.startswith('#') or line.startswith('**') and line.endswith('**'):
+            header_clean = line.strip('#').strip('*').strip()
+            
+            if header_clean not in seen_headers:
+                seen_headers.add(header_clean)
+                result_lines.append(line)
+            else:
+                # Dupliquer trouvé, on ne l'ajoute pas
+                continue
+        else:
+            result_lines.append(line)
+    
+    return '\n'.join(result_lines)
 
 def collect_all_business_data() -> Dict[str, Any]:
     """Collecte toutes les données business de l'application avec logique cyclique"""
@@ -661,7 +676,7 @@ def create_export_files_cyclique(results: Dict[str, str], business_data: Dict[st
     for section_name in sections_order:
         if section_name in results and results[section_name]:
             # Nettoyer le contenu avant ajout
-            clean_content = clean_generated_content(results[section_name], section_name)
+            clean_content = clean_generated_content_origin_style(results[section_name], section_name)
             complete_content += f"\n\n{clean_content}\n\n---\n"
     
     # Options d'export en colonnes
@@ -703,7 +718,7 @@ def create_export_files_cyclique(results: Dict[str, str], business_data: Dict[st
                     "template": template_nom,
                     "timestamp": pd.Timestamp.now().isoformat(),
                     "business_data": business_data,
-                    "sections": {k: clean_generated_content(v, k) for k, v in results.items()},
+                    "sections": {k: clean_generated_content_origin_style(v, k) for k, v in results.items()},
                     "metadata": {
                         "total_sections": len(results),
                         "enterprise_name": business_data.get('informations_generales', {}).get('nom_entreprise', 'Non spécifiée')
